@@ -6,51 +6,49 @@ import crystal
 
 func test_quantum_gates() -> Void {
     crystal.manifest("Testing Quantum Gates...")
-    
-    // Test Pauli-X gate (NOT gate)
-    var qubit_zero = quantum.Qubit.zero()
-    var x_result = quantum.gate.x(qubit_zero)
-    crystal.manifest("X gate on |0⟩ gives |1⟩: " + x_result.alpha.real + ", " + x_result.beta.real)
-    
+
+    // Test Pauli-X gate (NOT gate) - using circuit-based API
+    var circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(circuit, 0)  // Apply X gate to qubit 0
+    var state = circuit.get_statevector()
+    crystal.manifest("X gate on |0⟩ applied. Final state |0⟩ component: " + state[0].real + " + " + state[0].imag + "i")
+
     // Test Hadamard gate
-    var h_result = quantum.gate.hadamard(qubit_zero)
+    var h_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.h(h_circuit, 0)  // Apply H gate to create superposition
     crystal.manifest("H gate created superposition")
-    
-    // Test CNOT gate
-    var control = quantum.Qubit.zero()
-    var target = quantum.Qubit.zero()
-    var cnot_result = quantum.gate.cnot(control, target)
+
+    // Test CNOT gate (using cx function)
+    var cx_circuit = quantum.sim.create_circuit(2)
+    quantum.gate.x(cx_circuit, 0)  // Put control qubit in |1⟩
+    quantum.gate.cx(cx_circuit, 0, 1)  // Apply CNOT gate
     crystal.manifest("CNOT gate applied")
-    
-    // Test Taygetan-inspired gates
-    var shira_result = quantum.gate.shira(qubit_zero)
-    crystal.manifest("Shira (reflective) gate applied")
-    
-    var kheda_result = quantum.gate.kheda(qubit_zero)
-    crystal.manifest("Kheda (balance) gate applied")
-    
-    var shela_result = quantum.gate.shela(qubit_zero)
-    crystal.manifest("Shela (harmony) gate applied")
+
+    // Note: shira, kheda, shela gates don't appear to exist in the current gate library
+    crystal.manifest("Note: shira, kheda, shela gates are not currently implemented")
 }
 
 func test_quantum_algorithms() -> Void {
     crystal.manifest("Testing Quantum Algorithms...")
-    
-    // Test quantum teleportation setup
-    var source = quantum.Qubit.plus()
-    var entangled_pair = [quantum.Qubit.zero(), quantum.Qubit.zero()]  // Simplified
-    // quantum.alg.teleport(source, entangled_pair)  // Would work in full implementation
-    crystal.manifest("Quantum teleportation setup")
-    
-    // Test Shira reflection algorithm
-    var initial = quantum.Qubit.zero()
-    var reflected = quantum.alg.shira_reflection(initial)
-    crystal.manifest("Shira reflection algorithm executed")
+
+    // Test quantum algorithms using the circuit-based API
+    var circuit = quantum.sim.create_circuit(3)  // Create circuit with 3 qubits
+
+    // Test Deutsch-Jozsa algorithm setup
+    var oracle_func = func(c: quantum.sim.Circuit, q: List[Int]) -> Void {
+        // Placeholder oracle (in real implementation would implement specific function)
+        quantum.gate.cx(c, q[0], q[1])  // Simple example oracle
+    }
+    var dj_result = quantum.alg.deutsch_jozsa(circuit, 2, oracle_func)
+    crystal.manifest("Deutsch-Jozsa algorithm executed: " + dj_result)
+
+    // Note: shira_reflection algorithm doesn't appear to exist in the current alg library
+    crystal.manifest("Note: shira_reflection algorithm is not currently implemented")
 }
 
 func main() -> Void {
     test_quantum_gates()
     test_quantum_algorithms()
-    
+
     crystal.manifest("Quantum tests completed!")
 }

@@ -234,7 +234,7 @@ func format_qubit_state(state_index: Int, num_qubits: Int) -> String {
     var value = state_index
     for i in range(num_qubits) {
         result = (value % 2).to_string() + result
-        value = value / 2
+        value = value >> 1  // Right shift by 1 is equivalent to integer division by 2
     }
     return result
 }

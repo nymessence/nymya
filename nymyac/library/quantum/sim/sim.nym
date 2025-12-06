@@ -230,7 +230,11 @@ namespace quantum {
             // Generate random float for measurement simulation
             func generate_random_float() -> Float {
                 // Placeholder - in practice would use a proper quantum random number generator
-                return crystal.cpp.cstdlib.rand() / Float(crystal.cpp.cstdlib.RAND_MAX)
+                // Simple conversion of int to float by using float arithmetic
+                var rand_int = crystal.cpp.cstdlib.rand()
+                var rand_max = crystal.cpp.cstdlib.RAND_MAX
+                // Simple approach: convert to float by multiplying by 1.0 or using math functions
+                return (rand_int * 1.0) / (rand_max * 1.0)
             }
         }
         

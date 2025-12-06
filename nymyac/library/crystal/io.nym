@@ -32,12 +32,12 @@ namespace crystal {
                 var file: cpp.fstream.std.ifstream = cpp.fstream.std.ifstream(path)
                 var content: String = ""
                 var line: String
-                
+
                 while !file.eof() {
-                    cpp.std.getline(file, line)
+                    cpp.fstream.std.getline(file, line)
                     content = content + line + "\n"
                 }
-                
+
                 file.close()
                 return content
             }
