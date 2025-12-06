@@ -2,6 +2,7 @@
 // Provides BigInt, complex numbers, vectors, matrices, and other mathematical constructs
 
 import math.hypercalc
+import math.functions
 
 namespace math
 
