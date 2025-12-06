@@ -1,6 +1,8 @@
 // Math Library - Mathematical and Numerical Utilities
 // Provides BigInt, complex numbers, vectors, matrices, and other mathematical constructs
 
+import math.hypercalc
+
 namespace math
 
 // Big Integer implementation using GMP bindings
