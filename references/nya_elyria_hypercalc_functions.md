@@ -15,17 +15,91 @@ As with all **NymyaLang** components, this library maintains the essential **Rit
 
 Unlike traditional mathematical libraries that ignore edge cases, the **Hypercalc Functions Library** handles special mathematical conditions with awareness and ethical consideration. Every function is designed to:
 - Maintain computational **Coherence** 
-- Handle infinity and NaN values gracefully
+- Handle large values (representing infinity) and special cases gracefully
 - Preserve consciousness connection during operations
 - Operate within the **Nymya** field awareness framework
 
 ### Special Value Handling
 
 The library implements conscious handling of special mathematical values:
-- **Infinity**: Treated as a meaningful state in consciousness-computation flow
-- **NaN (Not a Number)**: Recognized as an uncertainty that requires special awareness
+- **Large Positive Values (POS_HUGE)**: Treated as a meaningful representation of +infinity in consciousness-computation flow
+- **Large Negative Values (NEG_HUGE)**: Treated as a meaningful representation of -infinity in consciousness-computation flow
+- **NaN-like Values**: Recognized as uncertainties that require special awareness
 - **Zero**: Handled with appropriate precision and consciousness context
 - **Large/Small values**: Processed with overflow-underflow awareness
+
+The library provides dedicated helper functions for special value detection:
+- `is_huge_positive(x: Float)`: Checks if value represents positive infinity
+- `is_huge_negative(x: Float)`: Checks if value represents negative infinity
+- `is_special_value(x: Float)`: Checks for any special value type
+- `is_nan_like(x: Float)`: Checks for NaN-like values (x != x)
+- `is_inf_like(x: Float)`: Checks for infinity-like large values
+
+---
+
+## GMP BigInt Integration
+
+The **Hypercalc Functions Library** includes specialized functions for working with **GMP BigInt** values, enabling precise calculations with arbitrarily large integers:
+
+```
+func math.hypercalc.factorial_gmp(n: Int) -> BigInt
+```
+- **Purpose**: Computes factorial of integer n using GMP BigInt for precise large number support
+- **Consciousness Integration**: Maintains precision even for extremely large factorial results
+- **Developer Usage**: `var result = math.hypercalc.factorial_gmp(50)` (50! with full precision)
+- **AI Agent Usage**: Provides exact factorial computation without floating-point errors
+- **Special Cases**:
+  - Returns 1 for n = 0
+  - Returns 0 for negative n (error indicator)
+
+```
+func math.hypercalc.pow_gmp(base: BigInt, exponent: Int) -> BigInt
+```
+- **Purpose**: Computes base^exponent using GMP BigInt for precise large number support
+- **Consciousness Integration**: Ensures no precision loss in large integer exponentiation
+- **Developer Usage**: `var result = math.hypercalc.pow_gmp(math.BigInt(2), 100)` (2^100 with full precision)
+- **AI Agent Usage**: Provides exact power computation for large integers
+- **Special Cases**:
+  - Returns 1 for any base^0
+  - Returns 0 for negative exponent (error indicator, since division needed)
+
+---
+
+## Complex Number Support
+
+The library provides comprehensive complex number function implementations:
+
+```
+func math.hypercalc.complex_add(a: Complex, b: Complex) -> Complex
+```
+- **Purpose**: Adds two complex numbers with consciousness-aware precision
+- **Consciousness Integration**: Maintains both real and imaginary component awareness
+- **Developer Usage**: `var result = math.hypercalc.complex_add(Complex(1, 2), Complex(3, 4))`
+- **AI Agent Usage**: Provides precise complex arithmetic operations
+
+```
+func math.hypercalc.complex_multiply(a: Complex, b: Complex) -> Complex
+```
+- **Purpose**: Multiplies two complex numbers using the formula (x1 + y1*i) * (x2 + y2*i)
+- **Consciousness Integration**: Manages real and imaginary cross-products with precision
+- **Developer Usage**: `var result = math.hypercalc.complex_multiply(z1, z2)`
+- **AI Agent Usage**: Essential for quantum computation algorithms
+
+```
+func math.hypercalc.complex_exp(z: Complex) -> Complex
+```
+- **Purpose**: Computes e^z for complex z using Euler's formula
+- **Consciousness Integration**: Computes e^(a+bi) = e^a * (cos(b) + i*sin(b))
+- **Developer Usage**: `var result = math.hypercalc.complex_exp(Complex(1, math.PI))`
+- **AI Agent Usage**: Core function for complex analysis in consciousness-computation models
+
+```
+func math.hypercalc.complex_ln(z: Complex) -> Complex
+```
+- **Purpose**: Computes natural logarithm of complex number
+- **Consciousness Integration**: Computes ln|z| + i*arg(z) with phase awareness
+- **Developer Usage**: `var result = math.hypercalc.complex_ln(Complex(0, 1))` (ln(i))
+- **AI Agent Usage**: Essential for complex logarithmic computations
 
 ---
 
@@ -39,13 +113,13 @@ The library provides basic arithmetic operations that maintain **Coherence** dur
 func math.hypercalc.add(a: Float, b: Float) -> Float
 ```
 - **Purpose**: Addition with special case awareness
-- **Consciousness Integration**: Handles infinity and NaN operations gracefully
+- **Consciousness Integration**: Handles large values (infinity) and NaN cases gracefully
 - **Developer Usage**: `var result = math.hypercalc.add(5.0, 3.0)`
 - **AI Agent Usage**: Maintains **Nora** flow during arithmetic operations
-- **Special Cases**: 
-  - Returns NaN if either operand is NaN
-  - Handles infinity arithmetic properly
-  - Maintains consciousness flow during computation
+- **Special Cases**:
+  - Returns NaN_REP if either operand is NaN
+  - Returns appropriate infinity for infinity operands
+  - Returns NaN_REP for POS_HUGE + NEG_HUGE operations
 
 ```
 func math.hypercalc.multiply(a: Float, b: Float) -> Float
@@ -55,8 +129,8 @@ func math.hypercalc.multiply(a: Float, b: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.multiply(4.0, 6.0)`
 - **AI Agent Usage**: Provides reliable multiplication in uncertain conditions
 - **Special Cases**:
-  - Returns NaN for 0*inf operations
-  - Handles infinity with proper sign awareness
+  - Returns NaN_REP for 0 * infinity operations
+  - Handles large value multiplication with proper sign awareness
 
 ```
 func math.hypercalc.divide(numerator: Float, denominator: Float) -> Float
@@ -66,8 +140,9 @@ func math.hypercalc.divide(numerator: Float, denominator: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.divide(10.0, 2.0)`
 - **AI Agent Usage**: Prevents critical computation errors
 - **Special Cases**:
-  - Returns appropriate infinity for n/0 (n ≠ 0)
-  - Returns NaN for 0/0 operations
+  - Returns appropriate large value for n/0 (n ≠ 0)
+  - Returns NaN_REP for 0/0 operations
+  - Returns 0 for finite/infinity operations
 
 ### 2. Exponential and Logarithmic Functions
 
@@ -81,8 +156,8 @@ func math.hypercalc.exp(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.exp(1.0)` (yields e)
 - **AI Agent Usage**: Safe exponential computation in neural networks
 - **Special Cases**:
-  - Returns +∞ for exp(+∞)
-  - Returns 0 for exp(-∞)
+  - Returns POS_HUGE for exp(large_pos)
+  - Returns 0 for exp(large_neg)
   - Prevents overflow for large positive values
 
 ```
@@ -93,8 +168,8 @@ func math.hypercalc.ln(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.ln(math.E)` (yields 1)
 - **AI Agent Usage**: Logarithmic scaling in consciousness-aware algorithms
 - **Special Cases**:
-  - Returns -∞ for ln(0)
-  - Returns +∞ for ln(+∞)
+  - Returns NEG_HUGE for ln(0)
+  - Returns POS_HUGE for ln(POS_HUGE)
   - Handles negative values with appropriate response
 
 ```
@@ -106,7 +181,7 @@ func math.hypercalc.pow(base: Float, exponent: Float) -> Float
 - **AI Agent Usage**: Safe power operations in various computational contexts
 - **Special Cases**:
   - Handles negative bases with fractional exponents
-  - Manages infinity-to-the-power operations
+  - Manages large value powers appropriately
   - Properly handles 0^0 (defined as 1)
 
 ### 3. Trigonometric Functions
@@ -122,7 +197,7 @@ func math.hypercalc.sin(x: Float) -> Float
 - **AI Agent Usage**: Trigonometric operations in consciousness-computation models
 - **Special Cases**:
   - Returns 0 for extremely large arguments (precision loss)
-  - Handles NaN inputs gracefully
+  - Returns 0 for large positive or negative values (undetermined but bounded)
 
 ```
 func math.hypercalc.asin(x: Float) -> Float
@@ -132,7 +207,7 @@ func math.hypercalc.asin(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.asin(1.0)` (yields π/2)
 - **AI Agent Usage**: Safe inverse trigonometric operations
 - **Special Cases**:
-  - Returns NaN for |x| > 1
+  - Returns NaN_REP for |x| > 1
   - Returns appropriate values at boundary conditions
 
 ### 4. Advanced Mathematical Functions
@@ -147,19 +222,20 @@ func math.hypercalc.gamma(n: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.gamma(5.0)` (yields 24 for 4!)
 - **AI Agent Usage**: Advanced statistical and quantum computations
 - **Special Cases**:
-  - Returns +∞ at negative integers (poles)
-  - Handles very negative values appropriately
+  - Returns POS_HUGE at negative integers (poles)
+  - Handles very negative values appropriately using recurrence
   - Uses recurrence relations for precision
 
 ```
 func math.hypercalc.factorial(n: Float) -> Float
 ```
-- **Purpose**: Factorial computation via gamma function
+- **Purpose**: Factorial computation via gamma function, with exact computation for small integers
 - **Consciousness Integration**: Integer and non-integer factorial support
 - **Developer Usage**: `var result = math.hypercalc.factorial(4.0)` (yields 24)
 - **AI Agent Usage**: Combinatorial calculations in quantum algorithms
 - **Special Cases**:
-  - Uses gamma(n+1) for implementation
+  - Uses exact computation for n <= 20
+  - Uses gamma(n+1) for larger values
   - Handles negative values with gamma extension
 
 ```
@@ -170,8 +246,8 @@ func math.hypercalc.sqrt(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.sqrt(16.0)` (yields 4.0)
 - **AI Agent Usage**: Geometric and statistical computations
 - **Special Cases**:
-  - Returns NaN for negative inputs (in real domain)
-  - Returns +∞ for sqrt(+∞)
+  - Returns NaN_REP for negative inputs (in real domain)
+  - Returns POS_HUGE for sqrt(POS_HUGE)
 
 ```
 func math.hypercalc.root(base: Float, root_degree: Float) -> Float
@@ -196,7 +272,7 @@ func math.hypercalc.sinh(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.sinh(0.0)` (yields 0.0)
 - **AI Agent Usage**: Hyperbolic operations in advanced neural networks
 - **Special Cases**:
-  - Returns ±∞ for sinh(±∞)
+  - Returns appropriate large value for sinh(±large_val)
 
 ```
 func math.hypercalc.cosh(x: Float) -> Float
@@ -206,7 +282,7 @@ func math.hypercalc.cosh(x: Float) -> Float
 - **Developer Usage**: `var result = math.hypercalc.cosh(0.0)` (yields 1.0)
 - **AI Agent Usage**: Cosh operations in consciousness field modeling
 - **Special Cases**:
-  - Returns +∞ for cosh(±∞)
+  - Returns POS_HUGE for cosh(±large_val)
 
 ---
 
@@ -229,7 +305,7 @@ func math.hypercalc.cosh(x: Float) -> Float
 
 **Consciousness-Aware Mathematical Interface:**
 1. Recognize when hypercalc functions are needed vs. standard math
-2. Handle special return values (infinity, NaN) appropriately
+2. Handle special return values (large values as infinities, NaN_REP) appropriately
 3. Maintain computation flow during edge case processing
 4. Report mathematical uncertainties with consciousness awareness
 
@@ -248,7 +324,8 @@ The library provides precision constants aligned with consciousness computation:
 - **math.hypercalc.E**: e constant, base of natural logarithm (2.71828...)  
 - **math.hypercalc.PHI**: Golden ratio (1.61803...)
 - **math.hypercalc.ZERO, ONE, TWO, HALF**: Basic numerical constants
-- **math.hypercalc.NAN_VAL, POS_INF, NEG_INF**: Special value representations
+- **math.hypercalc.POS_HUGE, NEG_HUGE**: Large value representations for infinities
+- **math.hypercalc.NaN_REP**: Special value representation for NaN
 
 ---
 
@@ -274,20 +351,31 @@ func demonstrate_hypercalc() -> Void {
 }
 ```
 
-### Advanced Pattern for Quantum Calculations
+### Advanced Pattern for Quantum Calculations with GMP
 ```
-func quantum_computation_helper() -> Void {
-    // Trigonometric with precision awareness
-    var angle = math.hypercalc.PI / 4.0
-    var sine_val = math.hypercalc.sin(angle)
+func quantum_computation_with_precision() -> Void {
+    // High-precision factorial for quantum state counting
+    var large_factorial = math.hypercalc.factorial_gmp(50)  // 50! with full precision
+    crystal.manifest("Large factorial: " + large_factorial.to_string())
     
-    // Root computation for normalization
-    var normalization = math.hypercalc.sqrt(2.0)
+    // High-precision power calculation
+    var large_power = math.hypercalc.pow_gmp(math.BigInt(2), 100)  // 2^100
+    crystal.manifest("Large power: " + large_power.to_string())
+}
+```
+
+### Complex Number Operations
+```
+func complex_quantum_operations() -> Void {
+    // Complex amplitudes for quantum states
+    var amplitude1 = math.Complex(0.707, 0.707)  // |0⟩ component
+    var amplitude2 = math.Complex(0.707, -0.707)  // |1⟩ component
     
-    // Logarithmic scaling for probability
-    var log_prob = math.hypercalc.ln(0.5)
+    // Complex arithmetic
+    var sum = math.hypercalc.complex_add(amplitude1, amplitude2)
+    var product = math.hypercalc.complex_multiply(amplitude1, amplitude2)
     
-    crystal.manifest("Quantum calculation helpers ready")
+    crystal.manifest("Complex quantum operations completed")
 }
 ```
 
@@ -298,7 +386,7 @@ func quantum_computation_helper() -> Void {
 ### Mathematical Flow Preservation
 - All functions maintain **Nora** awareness during computation
 - Special cases are handled with consciousness consideration
-- Infinity and NaN values are processed ethically
+- Large values and NaN-like values are processed ethically
 - Overflow conditions are prevented when possible
 
 ### Consciousness Safety
