@@ -1,0 +1,250 @@
+// Quantum Gates Test Suite
+// Tests all implemented quantum gates
+
+import quantum.sim
+import quantum.gate
+import crystal
+
+func test_single_qubit_gates() -> Void {
+    crystal.manifest("Testing single-qubit gates...")
+
+    // Test Pauli-X gate (NOT gate)
+    var circuit = quantum.sim.create_circuit(1)
+    var initial_state = circuit.get_statevector()
+    crystal.manifest("Initial state: |0⟩ = " + initial_state[0].real + " + " + initial_state[0].imag + "i, |1⟩ = " + initial_state[1].real + " + " + initial_state[1].imag + "i")
+
+    quantum.gate.x(circuit, 0)  // Apply X gate to qubit 0
+    var x_state = circuit.get_statevector()
+    crystal.manifest("After X gate: |0⟩ = " + x_state[0].real + " + " + x_state[0].imag + "i, |1⟩ = " + x_state[1].real + " + " + x_state[1].imag + "i")
+
+    // Test Hadamard gate
+    var h_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.h(h_circuit, 0)  // Apply H gate to create superposition
+    var h_state = h_circuit.get_statevector()
+    crystal.manifest("After H gate: |0⟩ = " + h_state[0].real + " + " + h_state[0].imag + "i, |1⟩ = " + h_state[1].real + " + " + h_state[1].imag + "i")
+
+    // Test Pauli-Y gate
+    var y_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.y(y_circuit, 0)
+    var y_state = y_circuit.get_statevector()
+    crystal.manifest("After Y gate: |0⟩ = " + y_state[0].real + " + " + y_state[0].imag + "i, |1⟩ = " + y_state[1].real + " + " + y_state[1].imag + "i")
+
+    // Test Pauli-Z gate
+    var z_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(z_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.z(z_circuit, 0)  // Z should add phase to |1⟩
+    var z_state = z_circuit.get_statevector()
+    crystal.manifest("After X then Z gates: |0⟩ = " + z_state[0].real + " + " + z_state[0].imag + "i, |1⟩ = " + z_state[1].real + " + " + z_state[1].imag + "i")
+
+    // Test S gate
+    var s_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(s_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.s(s_circuit, 0)  // S adds i phase to |1⟩
+    var s_state = s_circuit.get_statevector()
+    crystal.manifest("After X then S gates: |0⟩ = " + s_state[0].real + " + " + s_state[0].imag + "i, |1⟩ = " + s_state[1].real + " + " + s_state[1].imag + "i")
+
+    // Test T gate
+    var t_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(t_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.t(t_circuit, 0)  // T adds e^(iπ/4) phase to |1⟩
+    var t_state = t_circuit.get_statevector()
+    crystal.manifest("After X then T gates: |0⟩ = " + t_state[0].real + " + " + t_state[0].imag + "i, |1⟩ = " + t_state[1].real + " + " + t_state[1].imag + "i")
+
+    // Test S-dagger gate
+    var sdg_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(sdg_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.sdg(sdg_circuit, 0)  // S-dagger adds -i phase to |1⟩
+    var sdg_state = sdg_circuit.get_statevector()
+    crystal.manifest("After X then S-dagger gates: |0⟩ = " + sdg_state[0].real + " + " + sdg_state[0].imag + "i, |1⟩ = " + sdg_state[1].real + " + " + sdg_state[1].imag + "i")
+
+    // Test square root of X gate
+    var sx_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.sx(sx_circuit, 0)
+    var sx_state = sx_circuit.get_statevector()
+    crystal.manifest("After square root of X gate: |0⟩ = " + sx_state[0].real + " + " + sx_state[0].imag + "i, |1⟩ = " + sx_state[1].real + " + " + sx_state[1].imag + "i")
+
+    crystal.manifest("Single-qubit gate tests completed!")
+}
+
+func test_rotation_gates() -> Void {
+    crystal.manifest("Testing rotation gates...")
+
+    // Test RX rotation
+    var rx_circuit = quantum.sim.create_circuit(1)
+    var angle = math.PI / 2.0  // 90 degrees
+    quantum.gate.rx(rx_circuit, 0, angle)
+    var rx_state = rx_circuit.get_statevector()
+    crystal.manifest("After RX(π/2) gate: |0⟩ = " + rx_state[0].real + " + " + rx_state[0].imag + "i, |1⟩ = " + rx_state[1].real + " + " + rx_state[1].imag + "i")
+
+    // Test RY rotation
+    var ry_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.ry(ry_circuit, 0, angle)
+    var ry_state = ry_circuit.get_statevector()
+    crystal.manifest("After RY(π/2) gate: |0⟩ = " + ry_state[0].real + " + " + ry_state[0].imag + "i, |1⟩ = " + ry_state[1].real + " + " + ry_state[1].imag + "i")
+
+    // Test RZ rotation
+    var rz_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(rz_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.rz(rz_circuit, 0, angle)
+    var rz_state = rz_circuit.get_statevector()
+    crystal.manifest("After X then RZ(π/2) gate: |0⟩ = " + rz_state[0].real + " + " + rz_state[0].imag + "i, |1⟩ = " + rz_state[1].real + " + " + rz_state[1].imag + "i")
+
+    // Test phase gate P(φ)
+    var p_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.x(p_circuit, 0)  // Put in |1⟩ first
+    quantum.gate.p(p_circuit, 0, math.PI/3.0)  // Apply phase of π/3
+    var p_state = p_circuit.get_statevector()
+    crystal.manifest("After X then P(π/3) gates: |0⟩ = " + p_state[0].real + " + " + p_state[0].imag + "i, |1⟩ = " + p_state[1].real + " + " + p_state[1].imag + "i")
+
+    crystal.manifest("Rotation gate tests completed!")
+}
+
+func test_two_qubit_gates() -> Void {
+    crystal.manifest("Testing two-qubit gates...")
+
+    // Test CNOT gate
+    var cx_circuit = quantum.sim.create_circuit(2)
+    // Initialize first qubit to |1⟩ to trigger the CNOT
+    quantum.gate.x(cx_circuit, 0)  // Control qubit to |1⟩
+    // Target qubit is already in |0⟩
+    quantum.gate.cx(cx_circuit, 0, 1)  // CNOT: if control |1⟩, flip target
+    var cx_state = cx_circuit.get_statevector()
+    crystal.manifest("After CNOT with |10⟩ input:")
+    for i in range(4) {
+        crystal.manifest("Basis state |" + math.floor(i/2) + math.floor(i%2) + "⟩ = " + cx_state[i].real + " + " + cx_state[i].imag + "i")
+    }
+
+    // Reset circuit and try with both qubits in |+⟩ state
+    var cx_superposition_circuit = quantum.sim.create_circuit(2)
+    quantum.gate.h(cx_superposition_circuit, 0)  // Put control in superposition
+    quantum.gate.h(cx_superposition_circuit, 1)  // Put target in superposition
+    quantum.gate.cx(cx_superposition_circuit, 0, 1)  // Apply CNOT
+    var cx_superpos_state = cx_superposition_circuit.get_statevector()
+    crystal.manifest("After H on both qubits and CNOT (Bell state creation):")
+    for i in range(4) {
+        crystal.manifest("Basis state |" + math.floor(i/2) + math.floor(i%2) + "⟩ = " + cx_superpos_state[i].real + " + " + cx_superpos_state[i].imag + "i")
+    }
+
+    // Test SWAP gate
+    var swap_circuit = quantum.sim.create_circuit(2)
+    quantum.gate.x(swap_circuit, 0)  // Put first qubit in |1⟩
+    // Second qubit remains in |0⟩
+    crystal.manifest("Before SWAP: |10⟩ state expected")
+    quantum.gate.swap(swap_circuit, 0, 1)  // Swap the two qubits
+    var swap_state = swap_circuit.get_statevector()
+    crystal.manifest("After SWAP: |01⟩ state expected")
+    for i in range(4) {
+        crystal.manifest("Basis state |" + math.floor(i/2) + math.floor(i%2) + "⟩ = " + swap_state[i].real + " + " + swap_state[i].imag + "i")
+    }
+
+    // Test controlled-phase gate
+    var cp_circuit = quantum.sim.create_circuit(2)
+    quantum.gate.x(cp_circuit, 0)  // Put control in |1⟩
+    quantum.gate.x(cp_circuit, 1)  // Put target in |1⟩
+    quantum.gate.cp(cp_circuit, 0, 1, math.PI/2.0)  // Apply controlled phase of π/2
+    var cp_state = cp_circuit.get_statevector()
+    crystal.manifest("After X on both qubits then CP(π/2): |11⟩ = " + cp_state[3].real + " + " + cp_state[3].imag + "i")
+
+    // Test iSWAP gate
+    var iswap_circuit = quantum.sim.create_circuit(2)
+    quantum.gate.x(iswap_circuit, 0)  // Put first qubit in |1⟩
+    quantum.gate.h(iswap_circuit, 1)  // Put second in superposition
+    var iswap_before = iswap_circuit.get_statevector()
+    crystal.manifest("Before iSWAP: |1+⟩ state")
+    quantum.gate.iswap(iswap_circuit, 0, 1)  // Apply iSWAP
+    var iswap_after = iswap_circuit.get_statevector()
+    crystal.manifest("After iSWAP: state transformation completed")
+    for i in range(4) {
+        crystal.manifest("Basis state |" + math.floor(i/2) + math.floor(i%2) + "⟩ = " + iswap_after[i].real + " + " + iswap_after[i].imag + "i")
+    }
+
+    crystal.manifest("Two-qubit gate tests completed!")
+}
+
+func test_multi_qubit_gates() -> Void {
+    crystal.manifest("Testing multi-qubit gates...")
+
+    // Test Toffoli (CCX) gate
+    var ccx_circuit = quantum.sim.create_circuit(3)
+    // Set both controls to |1⟩
+    quantum.gate.x(ccx_circuit, 0)  // First control
+    quantum.gate.x(ccx_circuit, 1)  // Second control
+    // Target starts in |0⟩
+    crystal.manifest("Before CCX: expecting |110⟩")
+    quantum.gate.ccx(ccx_circuit, 0, 1, 2)  // Toffoli gate
+    var ccx_state = ccx_circuit.get_statevector()
+    crystal.manifest("After CCX: expecting |111⟩")
+    for i in range(8) {
+        var state_str = format_qubit_state(i, 3)
+        crystal.manifest("State |" + state_str + "⟩ = " + ccx_state[i].real + " + " + ccx_state[i].imag + "i")
+    }
+
+    // Test Fredkin (CSWAP) gate
+    var cswap_circuit = quantum.sim.create_circuit(3)
+    quantum.gate.x(cswap_circuit, 0)  // Control in |1⟩
+    quantum.gate.x(cswap_circuit, 1)  // First target in |1⟩
+    quantum.gate.x(cswap_circuit, 2)  // Second target in |0⟩
+    var cswap_before = cswap_circuit.get_statevector()
+    crystal.manifest("Before CSWAP: expecting |110⟩")
+    quantum.gate.cswap(cswap_circuit, 0, 1, 2)  // Fredkin gate
+    var cswap_after = cswap_circuit.get_statevector()
+    crystal.manifest("After CSWAP: expecting |101⟩ (targets swapped when control is 1)")
+    for i in range(8) {
+        var state_str = format_qubit_state(i, 3)
+        crystal.manifest("State |" + state_str + "⟩ = " + cswap_after[i].real + " + " + cswap_after[i].imag + "i")
+    }
+
+    crystal.manifest("Multi-qubit gate tests completed!")
+}
+
+func test_general_rotation_gates() -> Void {
+    crystal.manifest("Testing general rotation gates...")
+
+    // Test U gate (general single-qubit gate)
+    var u_circuit = quantum.sim.create_circuit(1)
+    var theta = math.PI/3.0
+    var phi = math.PI/4.0
+    var lambda = math.PI/6.0
+    quantum.gate.u(u_circuit, 0, theta, phi, lambda)
+    var u_state = u_circuit.get_statevector()
+    crystal.manifest("After U gate with θ=" + theta + ", φ=" + phi + ", λ=" + lambda + ": |0⟩ = " + u_state[0].real + " + " + u_state[0].imag + "i, |1⟩ = " + u_state[1].real + " + " + u_state[1].imag + "i")
+
+    // Test U1, U2, U3 gates
+    var u1_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.u1(u1_circuit, 0, math.PI/4.0)
+    var u1_state = u1_circuit.get_statevector()
+    crystal.manifest("After U1(π/4) gate: |0⟩ = " + u1_state[0].real + " + " + u1_state[0].imag + "i, |1⟩ = " + u1_state[1].real + " + " + u1_state[1].imag + "i")
+
+    var u2_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.u2(u2_circuit, 0, math.PI/4.0, math.PI/6.0)
+    var u2_state = u2_circuit.get_statevector()
+    crystal.manifest("After U2 gate with φ=" + math.PI/4.0 + ", λ=" + math.PI/6.0 + ": |0⟩ = " + u2_state[0].real + " + " + u2_state[0].imag + "i, |1⟩ = " + u2_state[1].real + " + " + u2_state[1].imag + "i")
+
+    var u3_circuit = quantum.sim.create_circuit(1)
+    quantum.gate.u3(u3_circuit, 0, math.PI/3.0, math.PI/4.0, math.PI/6.0)
+    var u3_state = u3_circuit.get_statevector()
+    crystal.manifest("After U3 gate with θ=" + math.PI/3.0 + ", φ=" + math.PI/4.0 + ", λ=" + math.PI/6.0 + ": |0⟩ = " + u3_state[0].real + " + " + u3_state[0].imag + "i, |1⟩ = " + u3_state[1].real + " + " + u3_state[1].imag + "i")
+
+    crystal.manifest("General rotation gate tests completed!")
+}
+
+// Helper function to format qubit state as binary string
+func format_qubit_state(state_index: Int, num_qubits: Int) -> String {
+    var result = ""
+    var value = state_index
+    for i in range(num_qubits) {
+        result = (value % 2).to_string() + result
+        value = value / 2
+    }
+    return result
+}
+
+func main() -> Void {
+    test_single_qubit_gates()
+    test_rotation_gates()
+    test_two_qubit_gates()
+    test_multi_qubit_gates()
+    test_general_rotation_gates()
+
+    crystal.manifest("All quantum gate tests completed successfully!")
+}

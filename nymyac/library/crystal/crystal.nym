@@ -1,0 +1,312 @@
+// Crystal Library - Bridge to C/C++
+// This library provides access to C/C++ functionality from NymyaLang
+
+namespace crystal
+
+// Basic I/O functions
+func manifest(msg: String) -> Void {
+    cpp.iostream.std.cout << msg << cpp.iostream.std.endl
+}
+
+// C++ I/O functions with Taygetan-inspired names
+namespace io {
+    // Stream operations
+    func shira_orin(input_stream: cpp.iostream.std.InputStream) -> String {
+        // "shira_orin" = love food (nourishment), inspired by "input"
+        var result: String
+        cpp.iostream.std.cin >> result
+        return result
+    }
+
+    func sela_manifest(output_stream: cpp.iostream.std.OutputStream, msg: String) -> Void {
+        // "sela_manifest" = peace manifest, inspired by "output"
+        cpp.iostream.std.cout << msg << cpp.iostream.std.endl
+    }
+
+    func lora_orin(output_stream: cpp.iostream.std.OutputStream, msg: String) -> Void {
+        // "lora_orin" = exist food (nourish existence), for regular output
+        cpp.iostream.std.cout << msg
+    }
+
+    func faya_orin(output_stream: cpp.iostream.std.OutputStream, msg: String) -> Void {
+        // "faya_orin" = experience joy food, for flush operations
+        cpp.iostream.std.cout << msg << cpp.iostream.std.flush
+    }
+
+    func nora_orin(output_stream: cpp.iostream.std.OutputStream, msg: String) -> Void {
+        // "nora_orin" = drink water food, for error output
+        cpp.iostream.std.cerr << msg
+    }
+}
+
+// File stream operations with Taygetan names
+namespace file {
+    // File input operations
+    func dalan_shira(path: String) -> cpp.fstream.std.ifstream {
+        // "dalan_shira" = home love (where love flows in)
+        return cpp.fstream.std.ifstream(path)
+    }
+
+    func dalan_lora(path: String) -> cpp.fstream.std.ofstream {
+        // "dalan_lora" = home exist (where existence flows out)
+        return cpp.fstream.std.ofstream(path)
+    }
+
+    // File operations
+    func dalan_aya(path: String) -> Bool {
+        // "dalan_aya" = home see (check if home exists)
+        var file = dalan_shira(path)
+        var exists = not file.fail()
+        file.close()
+        return exists
+    }
+
+    func dalan_orin(path: String, content: String) -> Bool {
+        // "dalan_orin" = home food (nourish home with content)
+        var file = dalan_lora(path)
+        if not file.fail() {
+            file << content
+            file.close()
+            return true
+        }
+        return false
+    }
+
+    func dalan_karma(path: String) -> String {
+        // "dalan_karma" = home work (do work of reading home)
+        var file = dalan_shira(path)
+        var content: String = ""
+        var line: String
+        while not file.eof() {
+            cpp.std.getline(file, line)
+            content = content + line + "\n"
+        }
+        file.close()
+        return content
+    }
+
+    func dalan_mena(path: String) -> List[String] {
+        // "dalan_mena" = home think (think about lines in home)
+        var file = dalan_shira(path)
+        var lines: List[String] = []
+        var line: String
+        while not file.eof() {
+            cpp.std.getline(file, line)
+            lines.append(line)
+        }
+        file.close()
+        return lines
+    }
+}
+
+// C++ namespace bindings for standard library functions
+namespace cpp {
+    // C standard library functions (from C headers)
+    namespace cstdlib {
+        extern func malloc(size: Int) -> Pointer
+        extern func calloc(num: Int, size: Int) -> Pointer
+        extern func realloc(ptr: Pointer, size: Int) -> Pointer
+        extern func free(ptr: Pointer) -> Void
+        extern func rand() -> Int
+        extern func srand(seed: Int) -> Void
+        extern func abort() -> Void
+        extern func exit(status: Int) -> Void
+        extern func getenv(name: String) -> String
+        extern func system(command: String) -> Int
+    }
+
+    namespace cstdio {
+        extern func printf(format: String, ...) -> Int
+        extern func sprintf(str: String, format: String, ...) -> Int
+        extern func snprintf(str: String, size: Int, format: String, ...) -> Int
+        extern func scanf(format: String, ...) -> Int
+        extern func fscanf(stream: Pointer, format: String, ...) -> Int
+        extern func sscanf(str: String, format: String, ...) -> Int
+        extern func fopen(filename: String, mode: String) -> Pointer
+        extern func freopen(filename: String, mode: String, stream: Pointer) -> Pointer
+        extern func fclose(stream: Pointer) -> Int
+        extern func fflush(stream: Pointer) -> Int
+        extern func fopen_s(filename: String, mode: String) -> Pointer  // Windows-specific
+    }
+
+    namespace cstring {
+        extern func strlen(str: String) -> Int
+        extern func strcpy(dest: String, src: String) -> String
+        extern func strncpy(dest: String, src: String, count: Int) -> String
+        extern func strcat(dest: String, src: String) -> String
+        extern func strncat(dest: String, src: String, count: Int) -> String
+        extern func strcmp(str1: String, str2: String) -> Int
+        extern func strncmp(str1: String, str2: String, count: Int) -> Int
+        extern func strchr(str: String, ch: Char) -> Pointer
+        extern func strstr(str: String, substr: String) -> Pointer
+        extern func memset(ptr: Pointer, value: Int, num: Int) -> Pointer
+        extern func memcpy(dest: Pointer, src: Pointer, num: Int) -> Pointer
+        extern func memmove(dest: Pointer, src: Pointer, num: Int) -> Pointer
+    }
+
+    namespace ctime {
+        extern func time(timer: Pointer) -> Int
+        extern func difftime(time_end: Int, time_beg: Int) -> Float
+        extern func clock() -> Int
+    }
+
+    namespace cmath {
+        extern func abs(x: Int) -> Int
+        extern func fabs(x: Float) -> Float
+        extern func fmod(numerator: Float, denominator: Float) -> Float
+        extern func remainder(numerator: Float, denominator: Float) -> Float
+        extern func fma(x: Float, y: Float, z: Float) -> Float
+        extern func fmax(x: Float, y: Float) -> Float
+        extern func fmin(x: Float, y: Float) -> Float
+        extern func fdim(x: Float, y: Float) -> Float
+        extern func nan(tagp: String) -> Float
+        extern func exp(x: Float) -> Float
+        extern func exp2(x: Float) -> Float
+        extern func expm1(x: Float) -> Float
+        extern func log(x: Float) -> Float
+        extern func log10(x: Float) -> Float
+        extern func log2(x: Float) -> Float
+        extern func log1p(x: Float) -> Float
+        extern func pow(base: Float, exponent: Float) -> Float
+        extern func sqrt(x: Float) -> Float
+        extern func cbrt(x: Float) -> Float
+        extern func hypot(x: Float, y: Float) -> Float
+        extern func sin(x: Float) -> Float
+        extern func cos(x: Float) -> Float
+        extern func tan(x: Float) -> Float
+        extern func asin(x: Float) -> Float
+        extern func acos(x: Float) -> Float
+        extern func atan(x: Float) -> Float
+        extern func atan2(y: Float, x: Float) -> Float
+        extern func sinh(x: Float) -> Float
+        extern func cosh(x: Float) -> Float
+        extern func tanh(x: Float) -> Float
+        extern func asinh(x: Float) -> Float
+        extern func acosh(x: Float) -> Float
+        extern func atanh(x: Float) -> Float
+        extern func erf(x: Float) -> Float
+        extern func erfc(x: Float) -> Float
+        extern func lgamma(x: Float) -> Float
+        extern func tgamma(x: Float) -> Float
+        extern func ceil(x: Float) -> Float
+        extern func floor(x: Float) -> Float
+        extern func trunc(x: Float) -> Float
+        extern func round(x: Float) -> Float
+        extern func nearbyint(x: Float) -> Float
+        extern func rint(x: Float) -> Float
+        extern func lrint(x: Float) -> Int
+        extern func llrint(x: Float) -> Int
+        extern func modf(x: Float, intpart: Pointer) -> Float
+        extern func scalbn(x: Float, exp: Int) -> Float
+        extern func ilogb(x: Float) -> Int
+        extern func logb(x: Float) -> Float
+        extern func nextafter(from: Float, to: Float) -> Float
+        extern func copysign(x: Float, y: Float) -> Float
+    }
+
+    // C++ standard library functions
+    namespace iostream {
+        namespace std {
+            extern var cout: OutputStream
+            extern var cin: InputStream
+            extern var cerr: OutputStream
+            extern var endl: String
+            extern var flush: String
+        }
+    }
+
+    namespace fstream {
+        namespace std {
+            extern func ifstream(filename: String) -> cpp.fstream.std.ifstream
+            extern func ofstream(filename: String) -> cpp.fstream.std.ofstream
+            extern func getline(stream: cpp.fstream.std.ifstream, line: String) -> Void
+        }
+    }
+
+    namespace std {
+        extern func getline(stream: cpp.fstream.std.ifstream, line: String) -> Void
+    }
+
+    namespace string {
+        extern func strlen(str: String) -> Int
+        extern func strcpy(dest: String, src: String) -> String
+    }
+
+    // STL containers and algorithms (simplified representations)
+    namespace algorithm {
+        extern func sort(first: Pointer, last: Pointer) -> Void
+        extern func find(first: Pointer, last: Pointer, value: Any) -> Pointer
+        extern func reverse(first: Pointer, last: Pointer) -> Void
+        extern func swap(a: Any, b: Any) -> Void
+    }
+
+    // Memory management
+    namespace memory {
+        extern func malloc(size: Int) -> Pointer
+        extern func free(ptr: Pointer) -> Void
+    }
+
+    // File system operations
+    namespace filesystem {
+        extern func exists(path: String) -> Bool
+        extern func create_directory(path: String) -> Bool
+        extern func remove_file(path: String) -> Bool
+        extern func file_size(path: String) -> Int
+    }
+}
+
+// C standard library constants
+namespace cconstants {
+    val EOF: Int = -1
+    val NULL: Pointer = Pointer(0)
+    val RAND_MAX: Int = 32767
+}
+
+// Basic data types
+struct Pointer {
+    val address: Int
+
+    init(addr: Int) {
+        this.address = addr
+    }
+
+    func add(offset: Int) -> Pointer {
+        return Pointer(this.address + offset)
+    }
+
+    func sub(offset: Int) -> Pointer {
+        return Pointer(this.address - offset)
+    }
+
+    static func null() -> Pointer {
+        return Pointer(0)
+    }
+
+    func is_null() -> Bool {
+        return this.address == 0
+    }
+}
+
+struct OutputStream {
+    val handle: Int
+}
+
+struct InputStream {
+    val handle: Int
+}
+
+// Platform abstraction
+namespace platform {
+    extern func get_system_info() -> String
+    extern func sleep(milliseconds: Int) -> Void
+    extern func get_time() -> Int
+    extern func get_current_process_id() -> Int
+    extern func get_environment_variable(name: String) -> String
+    extern func set_environment_variable(name: String, value: String) -> Bool
+}
+
+// External function interface
+macro extern(func_name: String, return_type: Type, params: List[Type]) {
+    // This would generate the appropriate extern declaration
+    // based on the target platform
+}

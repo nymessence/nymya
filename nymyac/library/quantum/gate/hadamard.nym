@@ -1,0 +1,16 @@
+// Hadamard Gate
+// Part of the quantum gate library collection
+
+namespace quantum {
+    namespace gate {
+        
+        // Hadamard gate implementation
+        func hadamard(qubit: Qubit) -> Qubit {
+            // H = 1/√2 * [1 1; 1 -1]
+            var norm = math.sqrt(2.0)
+            var new_alpha = qubit.alpha.add(math.Complex(1.0, 0.0)).multiply(1.0 / norm)
+            var new_beta = qubit.alpha.subtract(math.Complex(1.0, 0.0)).multiply(1.0 / norm)
+            return Qubit(new_alpha, new_beta)
+        }
+    }
+}

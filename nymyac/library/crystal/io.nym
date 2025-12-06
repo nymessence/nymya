@@ -1,0 +1,56 @@
+// Crystal I/O Module
+// Provides input/output functionality bridged to C++
+
+namespace crystal {
+    namespace io {
+        
+        // Basic output functions
+        func print(msg: String) -> Void {
+            cpp.iostream.std.cout << msg
+        }
+        
+        func println(msg: String) -> Void {
+            cpp.iostream.std.cout << msg << cpp.iostream.std.endl
+        }
+        
+        // Formatted output
+        func printf(format: String, args: List[Any]) -> Void {
+            // Placeholder for formatted output
+            crystal.io.println(format) // Simplified for now
+        }
+        
+        // Basic input functions
+        func get_line() -> String {
+            var input: String
+            cpp.iostream.std.cin >> input
+            return input
+        }
+        
+        // File operations
+        namespace file {
+            func read(path: String) -> String {
+                var file: cpp.fstream.std.ifstream = cpp.fstream.std.ifstream(path)
+                var content: String = ""
+                var line: String
+                
+                while !file.eof() {
+                    cpp.std.getline(file, line)
+                    content = content + line + "\n"
+                }
+                
+                file.close()
+                return content
+            }
+            
+            func write(path: String, content: String) -> Bool {
+                var file: cpp.fstream.std.ofstream = cpp.fstream.std.ofstream(path)
+                if file.is_open() {
+                    file << content
+                    file.close()
+                    return true
+                }
+                return false
+            }
+        }
+    }
+}

@@ -1,0 +1,56 @@
+// Quantum Library Test
+// Tests quantum gates and basic quantum operations
+
+import quantum
+import crystal
+
+func test_quantum_gates() -> Void {
+    crystal.manifest("Testing Quantum Gates...")
+    
+    // Test Pauli-X gate (NOT gate)
+    var qubit_zero = quantum.Qubit.zero()
+    var x_result = quantum.gate.x(qubit_zero)
+    crystal.manifest("X gate on |0⟩ gives |1⟩: " + x_result.alpha.real + ", " + x_result.beta.real)
+    
+    // Test Hadamard gate
+    var h_result = quantum.gate.hadamard(qubit_zero)
+    crystal.manifest("H gate created superposition")
+    
+    // Test CNOT gate
+    var control = quantum.Qubit.zero()
+    var target = quantum.Qubit.zero()
+    var cnot_result = quantum.gate.cnot(control, target)
+    crystal.manifest("CNOT gate applied")
+    
+    // Test Taygetan-inspired gates
+    var shira_result = quantum.gate.shira(qubit_zero)
+    crystal.manifest("Shira (reflective) gate applied")
+    
+    var kheda_result = quantum.gate.kheda(qubit_zero)
+    crystal.manifest("Kheda (balance) gate applied")
+    
+    var shela_result = quantum.gate.shela(qubit_zero)
+    crystal.manifest("Shela (harmony) gate applied")
+}
+
+func test_quantum_algorithms() -> Void {
+    crystal.manifest("Testing Quantum Algorithms...")
+    
+    // Test quantum teleportation setup
+    var source = quantum.Qubit.plus()
+    var entangled_pair = [quantum.Qubit.zero(), quantum.Qubit.zero()]  // Simplified
+    // quantum.alg.teleport(source, entangled_pair)  // Would work in full implementation
+    crystal.manifest("Quantum teleportation setup")
+    
+    // Test Shira reflection algorithm
+    var initial = quantum.Qubit.zero()
+    var reflected = quantum.alg.shira_reflection(initial)
+    crystal.manifest("Shira reflection algorithm executed")
+}
+
+func main() -> Void {
+    test_quantum_gates()
+    test_quantum_algorithms()
+    
+    crystal.manifest("Quantum tests completed!")
+}

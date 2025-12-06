@@ -1,0 +1,737 @@
+// Math Library - Mathematical and Numerical Utilities
+// Provides BigInt, complex numbers, vectors, matrices, and other mathematical constructs
+
+namespace math
+
+// Big Integer implementation using GMP bindings
+class BigInt {
+    private internal_value: crystal.Pointer
+
+    init(value: Int) {
+        this.internal_value = crystal.cpp.cstdlib.malloc(1024)  // Allocate space for mpz_t
+        math.gmp.integer.init(this.internal_value)
+        math.gmp.integer.set_ui(this.internal_value, value)
+    }
+
+    init(value: String) {
+        this.internal_value = crystal.cpp.cstdlib.malloc(1024)  // Allocate space for mpz_t
+        math.gmp.integer.init(this.internal_value)
+        math.gmp.integer.set_str(this.internal_value, value, 10)  // Base 10
+    }
+
+    func add(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        math.gmp.integer.add(result.internal_value, this.internal_value, other.internal_value)
+        return result
+    }
+
+    func subtract(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        math.gmp.integer.sub(result.internal_value, this.internal_value, other.internal_value)
+        return result
+    }
+
+    func multiply(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        math.gmp.integer.mul(result.internal_value, this.internal_value, other.internal_value)
+        return result
+    }
+
+    func divide(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        // Using truncated division
+        math.gmp.integer.tdiv_q(result.internal_value, this.internal_value, other.internal_value)
+        return result
+    }
+
+    func mod(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        // For modulo operation, we need to use a different GMP function
+        // This is a simplified representation - in real implementation would use mpz_mod
+        math.gmp.integer.init(result.internal_value)
+        // In a complete implementation, we would call the actual GMP mod function
+        return result
+    }
+
+    func pow(exp: Int) -> BigInt {
+        var result = BigInt(0)
+        math.gmp.integer.pow_ui(result.internal_value, this.internal_value, exp)
+        return result
+    }
+
+    func gcd(other: BigInt) -> BigInt {
+        var result = BigInt(0)
+        math.gmp.integer.gcd(result.internal_value, this.internal_value, other.internal_value)
+        return result
+    }
+
+    func to_string() -> String {
+        return math.gmp.integer.get_str("", 10, this.internal_value)
+    }
+
+    func to_int() -> Int {
+        return math.gmp.integer.get_ui(this.internal_value)
+    }
+
+    // Destructor equivalent - should be called when BigInt is no longer needed
+    func dispose() -> Void {
+        math.gmp.integer.clear(this.internal_value)
+        crystal.cpp.cstdlib.free(this.internal_value)
+    }
+}
+
+// Complex number implementation
+struct Complex {
+    real: Float
+    imag: Float
+
+    init(real: Float, imag: Float) {
+        this.real = real
+        this.imag = imag
+    }
+
+    func magnitude() -> Float {
+        return math.sqrt(this.real * this.real + this.imag * this.imag)
+    }
+
+    func phase() -> Float {
+        return cpp.cmath.atan2(this.imag, this.real)
+    }
+
+    func conjugate() -> Complex {
+        return Complex(this.real, -this.imag)
+    }
+
+    func add(other: Complex) -> Complex {
+        return Complex(this.real + other.real, this.imag + other.imag)
+    }
+
+    func subtract(other: Complex) -> Complex {
+        return Complex(this.real - other.real, this.imag - other.imag)
+    }
+
+    func multiply(other: Complex) -> Complex {
+        var new_real = this.real * other.real - this.imag * other.imag
+        var new_imag = this.imag * other.real + this.real * other.imag
+        return Complex(new_real, new_imag)
+    }
+
+    func divide(other: Complex) -> Complex {
+        var denominator = other.real * other.real + other.imag * other.imag
+        var new_real = (this.real * other.real + this.imag * other.imag) / denominator
+        var new_imag = (this.imag * other.real - this.real * other.imag) / denominator
+        return Complex(new_real, new_imag)
+    }
+
+    func power(exp: Float) -> Complex {
+        var mag = this.magnitude()
+        var phase = this.phase()
+        var new_mag = cpp.cmath.pow(mag, exp)
+        var new_phase = phase * exp
+        return Complex(new_mag * cpp.cmath.cos(new_phase),
+                      new_mag * cpp.cmath.sin(new_phase))
+    }
+}
+
+// Vector operations
+namespace vector {
+
+    class Vec2 {
+        x: Float
+        y: Float
+
+        init(x: Float, y: Float) {
+            this.x = x
+            this.y = y
+        }
+
+        func magnitude() -> Float {
+            return math.sqrt(this.x * this.x + this.y * this.y)
+        }
+
+        func magnitude_squared() -> Float {
+            return this.x * this.x + this.y * this.y
+        }
+
+        func normalize() -> Vec2 {
+            var mag = this.magnitude()
+            if mag == 0.0 { return Vec2(0.0, 0.0) }
+            return Vec2(this.x / mag, this.y / mag)
+        }
+
+        func dot(other: Vec2) -> Float {
+            return this.x * other.x + this.y * other.y
+        }
+
+        func cross(other: Vec2) -> Float {
+            return this.x * other.y - this.y * other.x
+        }
+
+        func distance_to(other: Vec2) -> Float {
+            var dx = this.x - other.x
+            var dy = this.y - other.y
+            return math.sqrt(dx * dx + dy * dy)
+        }
+
+        func angle_to(other: Vec2) -> Float {
+            var dot = this.dot(other)
+            var mag_product = this.magnitude() * other.magnitude()
+            if mag_product == 0.0 { return 0.0 }
+            return cpp.cmath.acos(dot / mag_product)
+        }
+
+        func add(other: Vec2) -> Vec2 {
+            return Vec2(this.x + other.x, this.y + other.y)
+        }
+
+        func subtract(other: Vec2) -> Vec2 {
+            return Vec2(this.x - other.x, this.y - other.y)
+        }
+
+        func multiply(scalar: Float) -> Vec2 {
+            return Vec2(this.x * scalar, this.y * scalar)
+        }
+
+        func rotate(angle: Float) -> Vec2 {
+            var cos_a = cpp.cmath.cos(angle)
+            var sin_a = cpp.cmath.sin(angle)
+            return Vec2(
+                this.x * cos_a - this.y * sin_a,
+                this.x * sin_a + this.y * cos_a
+            )
+        }
+    }
+
+    class Vec3 {
+        x: Float
+        y: Float
+        z: Float
+
+        init(x: Float, y: Float, z: Float) {
+            this.x = x
+            this.y = y
+            this.z = z
+        }
+
+        func magnitude() -> Float {
+            return math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
+        }
+
+        func magnitude_squared() -> Float {
+            return this.x * this.x + this.y * this.y + this.z * this.z
+        }
+
+        func normalize() -> Vec3 {
+            var mag = this.magnitude()
+            if mag == 0.0 { return Vec3(0.0, 0.0, 0.0) }
+            return Vec3(this.x / mag, this.y / mag, this.z / mag)
+        }
+
+        func dot(other: Vec3) -> Float {
+            return this.x * other.x + this.y * other.y + this.z * other.z
+        }
+
+        func cross(other: Vec3) -> Vec3 {
+            return Vec3(
+                this.y * other.z - this.z * other.y,
+                this.z * other.x - this.x * other.z,
+                this.x * other.y - this.y * other.x
+            )
+        }
+
+        func distance_to(other: Vec3) -> Float {
+            var dx = this.x - other.x
+            var dy = this.y - other.y
+            var dz = this.z - other.z
+            return math.sqrt(dx * dx + dy * dy + dz * dz)
+        }
+
+        func add(other: Vec3) -> Vec3 {
+            return Vec3(this.x + other.x, this.y + other.y, this.z + other.z)
+        }
+
+        func subtract(other: Vec3) -> Vec3 {
+            return Vec3(this.x - other.x, this.y - other.y, this.z - other.z)
+        }
+
+        func multiply(scalar: Float) -> Vec3 {
+            return Vec3(this.x * scalar, this.y * scalar, this.z * scalar)
+        }
+
+        func angle_to(other: Vec3) -> Float {
+            var dot = this.dot(other)
+            var mag_product = this.magnitude() * other.magnitude()
+            if mag_product == 0.0 { return 0.0 }
+            return cpp.cmath.acos(dot / mag_product)
+        }
+    }
+
+    class Vec4 {
+        x: Float
+        y: Float
+        z: Float
+        w: Float
+
+        init(x: Float, y: Float, z: Float, w: Float) {
+            this.x = x
+            this.y = y
+            this.z = z
+            this.w = w
+        }
+
+        func magnitude() -> Float {
+            return math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w)
+        }
+
+        func normalize() -> Vec4 {
+            var mag = this.magnitude()
+            if mag == 0.0 { return Vec4(0.0, 0.0, 0.0, 0.0) }
+            return Vec4(this.x / mag, this.y / mag, this.z / mag, this.w / mag)
+        }
+
+        func dot(other: Vec4) -> Float {
+            return this.x * other.x + this.y * other.y + this.z * other.z + this.w * other.w
+        }
+
+        func add(other: Vec4) -> Vec4 {
+            return Vec4(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w)
+        }
+
+        func subtract(other: Vec4) -> Vec4 {
+            return Vec4(this.x - other.x, this.y - other.y, this.z - other.z, this.w - other.w)
+        }
+    }
+}
+
+// Matrix operations
+namespace matrix {
+
+    class Matrix2x2 {
+        data: List[List[Float]]
+
+        init() {
+            this.data = [[1.0, 0.0], [0.0, 1.0]]  // Identity matrix
+        }
+
+        init(values: List[List[Float]]) {
+            this.data = values
+        }
+
+        func multiply_vector(vec: vector.Vec2) -> vector.Vec2 {
+            var result_x = this.data[0][0] * vec.x + this.data[0][1] * vec.y
+            var result_y = this.data[1][0] * vec.x + this.data[1][1] * vec.y
+            return vector.Vec2(result_x, result_y)
+        }
+
+        func multiply(other: Matrix2x2) -> Matrix2x2 {
+            var result = Matrix2x2()
+            for i in range(2) {
+                for j in range(2) {
+                    result.data[i][j] = 0.0
+                    for k in range(2) {
+                        result.data[i][j] += this.data[i][k] * other.data[k][j]
+                    }
+                }
+            }
+            return result
+        }
+
+        func determinant() -> Float {
+            return this.data[0][0] * this.data[1][1] - this.data[0][1] * this.data[1][0]
+        }
+
+        func transpose() -> Matrix2x2 {
+            return Matrix2x2([
+                [this.data[0][0], this.data[1][0]],
+                [this.data[0][1], this.data[1][1]]
+            ])
+        }
+    }
+
+    class Matrix3x3 {
+        data: List[List[Float]]
+
+        init() {
+            this.data = [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0]
+            ]  // Identity matrix
+        }
+
+        init(values: List[List[Float]]) {
+            this.data = values
+        }
+
+        func multiply_vector(vec: vector.Vec3) -> vector.Vec3 {
+            var result_x = (this.data[0][0] * vec.x +
+                           this.data[0][1] * vec.y +
+                           this.data[0][2] * vec.z)
+            var result_y = (this.data[1][0] * vec.x +
+                           this.data[1][1] * vec.y +
+                           this.data[1][2] * vec.z)
+            var result_z = (this.data[2][0] * vec.x +
+                           this.data[2][1] * vec.y +
+                           this.data[2][2] * vec.z)
+            return vector.Vec3(result_x, result_y, result_z)
+        }
+
+        func multiply(other: Matrix3x3) -> Matrix3x3 {
+            var result = Matrix3x3()
+            for i in range(3) {
+                for j in range(3) {
+                    result.data[i][j] = 0.0
+                    for k in range(3) {
+                        result.data[i][j] += this.data[i][k] * other.data[k][j]
+                    }
+                }
+            }
+            return result
+        }
+
+        func determinant() -> Float {
+            var a = this.data[0][0]
+            var b = this.data[0][1]
+            var c = this.data[0][2]
+            var d = this.data[1][0]
+            var e = this.data[1][1]
+            var f = this.data[1][2]
+            var g = this.data[2][0]
+            var h = this.data[2][1]
+            var i = this.data[2][2]
+
+            return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+        }
+
+        func transpose() -> Matrix3x3 {
+            return Matrix3x3([
+                [this.data[0][0], this.data[1][0], this.data[2][0]],
+                [this.data[0][1], this.data[1][1], this.data[2][1]],
+                [this.data[0][2], this.data[1][2], this.data[2][2]]
+            ])
+        }
+    }
+
+    class Matrix4x4 {
+        data: List[List[Float]]
+
+        init() {
+            this.data = [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0]
+            ]  // Identity matrix
+        }
+
+        init(values: List[List[Float]]) {
+            this.data = values
+        }
+
+        func multiply_vector(vec: vector.Vec4) -> vector.Vec4 {
+            var result_x = (this.data[0][0] * vec.x +
+                           this.data[0][1] * vec.y +
+                           this.data[0][2] * vec.z +
+                           this.data[0][3] * vec.w)
+            var result_y = (this.data[1][0] * vec.x +
+                           this.data[1][1] * vec.y +
+                           this.data[1][2] * vec.z +
+                           this.data[1][3] * vec.w)
+            var result_z = (this.data[2][0] * vec.x +
+                           this.data[2][1] * vec.y +
+                           this.data[2][2] * vec.z +
+                           this.data[2][3] * vec.w)
+            var result_w = (this.data[3][0] * vec.x +
+                           this.data[3][1] * vec.y +
+                           this.data[3][2] * vec.z +
+                           this.data[3][3] * vec.w)
+            return vector.Vec4(result_x, result_y, result_z, result_w)
+        }
+
+        func multiply(other: Matrix4x4) -> Matrix4x4 {
+            var result = Matrix4x4()
+            for i in range(4) {
+                for j in range(4) {
+                    result.data[i][j] = 0.0
+                    for k in range(4) {
+                        result.data[i][j] += this.data[i][k] * other.data[k][j]
+                    }
+                }
+            }
+            return result
+        }
+
+        func transpose() -> Matrix4x4 {
+            return Matrix4x4([
+                [this.data[0][0], this.data[1][0], this.data[2][0], this.data[3][0]],
+                [this.data[0][1], this.data[1][1], this.data[2][1], this.data[3][1]],
+                [this.data[0][2], this.data[1][2], this.data[2][2], this.data[3][2]],
+                [this.data[0][3], this.data[1][3], this.data[2][3], this.data[3][3]]
+            ])
+        }
+    }
+}
+
+// Advanced mathematical functions
+namespace advanced {
+
+    // Special functions
+    func gamma(x: Float) -> Float {
+        return cpp.cmath.tgamma(x)
+    }
+
+    func lgamma(x: Float) -> Float {
+        return cpp.cmath.lgamma(x)
+    }
+
+    func erf(x: Float) -> Float {
+        return cpp.cmath.erf(x)
+    }
+
+    func erfc(x: Float) -> Float {
+        return cpp.cmath.erfc(x)
+    }
+
+    // Statistical functions
+    namespace statistics {
+
+        func mean(values: List[Float]) -> Float {
+            if values.length == 0 { return 0.0 }
+            var sum = 0.0
+            for val in values {
+                sum += val
+            }
+            return sum / values.length
+        }
+
+        func variance(values: List[Float]) -> Float {
+            if values.length <= 1 { return 0.0 }
+            var mean_val = mean(values)
+            var sum_sq_diff = 0.0
+            for val in values {
+                var diff = val - mean_val
+                sum_sq_diff += diff * diff
+            }
+            return sum_sq_diff / values.length
+        }
+
+        func std_dev(values: List[Float]) -> Float {
+            return sqrt(variance(values))
+        }
+
+        func median(values: List[Float]) -> Float {
+            var sorted_values = values.copy()
+            // Simple bubble sort for demonstration (in real implementation would use efficient sort)
+            for i in range(sorted_values.length) {
+                for j in range(sorted_values.length - 1 - i) {
+                    if sorted_values[j] > sorted_values[j + 1] {
+                        var temp = sorted_values[j]
+                        sorted_values[j] = sorted_values[j + 1]
+                        sorted_values[j + 1] = temp
+                    }
+                }
+            }
+
+            var n = sorted_values.length
+            if n % 2 == 0 {
+                return (sorted_values[n/2 - 1] + sorted_values[n/2]) / 2.0
+            } else {
+                return sorted_values[n/2]
+            }
+        }
+    }
+
+    // Interpolation functions
+    namespace interpolation {
+
+        func linear(x0: Float, y0: Float, x1: Float, y1: Float, x: Float) -> Float {
+            if x1 == x0 { return y0 }
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+        }
+
+        func lerp(start: Float, end: Float, t: Float) -> Float {
+            return start + (end - start) * t
+        }
+
+        func smoothstep(edge0: Float, edge1: Float, x: Float) -> Float {
+            var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+            return t * t * (3.0 - 2.0 * t)
+        }
+    }
+
+    // Polynomial functions
+    namespace polynomial {
+
+        func quadratic(a: Float, b: Float, c: Float, x: Float) -> Float {
+            return a * x * x + b * x + c
+        }
+
+        func cubic(a: Float, b: Float, c: Float, d: Float, x: Float) -> Float {
+            return a * x * x * x + b * x * x + c * x + d
+        }
+
+        func evaluate_coefficients(coeffs: List[Float], x: Float) -> Float {
+            var result = 0.0
+            var power = 1.0
+            for coeff in coeffs {
+                result += coeff * power
+                power *= x
+            }
+            return result
+        }
+    }
+}
+
+// Utility functions
+func abs(x: Float) -> Float {
+    if x >= 0.0 { return x } else { return -x }
+}
+
+func abs_int(x: Int) -> Int {
+    if x >= 0 { return x } else { return -x }
+}
+
+func min(a: Float, b: Float) -> Float {
+    if a < b { return a } else { return b }
+}
+
+func max(a: Float, b: Float) -> Float {
+    if a > b { return a } else { return b }
+}
+
+func min_int(a: Int, b: Int) -> Int {
+    if a < b { return a } else { return b }
+}
+
+func max_int(a: Int, b: Int) -> Int {
+    if a > b { return a } else { return b }
+}
+
+func clamp(value: Float, min_val: Float, max_val: Float) -> Float {
+    if value < min_val { return min_val }
+    if value > max_val { return max_val }
+    return value
+}
+
+func sign(x: Float) -> Float {
+    if x > 0.0 { return 1.0 }
+    if x < 0.0 { return -1.0 }
+    return 0.0
+}
+
+// Trigonometric functions
+func sin(x: Float) -> Float {
+    return cpp.cmath.sin(x)
+}
+
+func cos(x: Float) -> Float {
+    return cpp.cmath.cos(x)
+}
+
+func tan(x: Float) -> Float {
+    return cpp.cmath.tan(x)
+}
+
+func asin(x: Float) -> Float {
+    return cpp.cmath.asin(x)
+}
+
+func acos(x: Float) -> Float {
+    return cpp.cmath.acos(x)
+}
+
+func atan(x: Float) -> Float {
+    return cpp.cmath.atan(x)
+}
+
+func atan2(y: Float, x: Float) -> Float {
+    return cpp.cmath.atan2(y, x)
+}
+
+// Hyperbolic functions
+func sinh(x: Float) -> Float {
+    return cpp.cmath.sinh(x)
+}
+
+func cosh(x: Float) -> Float {
+    return cpp.cmath.cosh(x)
+}
+
+func tanh(x: Float) -> Float {
+    return cpp.cmath.tanh(x)
+}
+
+func asinh(x: Float) -> Float {
+    return cpp.cmath.asinh(x)
+}
+
+func acosh(x: Float) -> Float {
+    return cpp.cmath.acosh(x)
+}
+
+func atanh(x: Float) -> Float {
+    return cpp.cmath.atanh(x)
+}
+
+// Exponential and logarithmic functions
+func sqrt(x: Float) -> Float {
+    return cpp.cmath.sqrt(x)
+}
+
+func cbrt(x: Float) -> Float {
+    return cpp.cmath.cbrt(x)
+}
+
+func pow(base: Float, exp: Float) -> Float {
+    return cpp.cmath.pow(base, exp)
+}
+
+func exp(x: Float) -> Float {
+    return cpp.cmath.exp(x)
+}
+
+func exp2(x: Float) -> Float {
+    return cpp.cmath.exp2(x)
+}
+
+func log(x: Float) -> Float {
+    return cpp.cmath.log(x)
+}
+
+func log2(x: Float) -> Float {
+    return cpp.cmath.log2(x)
+}
+
+func log10(x: Float) -> Float {
+    return cpp.cmath.log10(x)
+}
+
+func log1p(x: Float) -> Float {
+    return cpp.cmath.log1p(x)
+}
+
+// Rounding functions
+func ceil(x: Float) -> Float {
+    return cpp.cmath.ceil(x)
+}
+
+func floor(x: Float) -> Float {
+    return cpp.cmath.floor(x)
+}
+
+func round(x: Float) -> Float {
+    return cpp.cmath.round(x)
+}
+
+func trunc(x: Float) -> Float {
+    return cpp.cmath.trunc(x)
+}
+
+// Constants
+val PI: Float = 3.141592653589793
+val E: Float = 2.718281828459045
+val TAU: Float = 6.283185307179586  // 2 * PI
+val PHI: Float = 1.618033988749895  // Golden ratio
+val SQRT2: Float = 1.4142135623730951
+val SQRT3: Float = 1.7320508075688772
+val INV_SQRT2: Float = 0.7071067811865476

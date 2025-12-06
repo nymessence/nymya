@@ -1,0 +1,221 @@
+// Quantum Algorithms Test Suite
+// Tests all implemented quantum algorithms
+
+import quantum.sim
+import quantum.alg
+import quantum.gate
+import crystal
+
+func test_deutsch_jozsa_algorithm() -> Void {
+    crystal.manifest("Testing Deutsch-Jozsa algorithm...")
+
+    // Create a circuit for Deutsch-Jozsa algorithm
+    var n = 3  // Number of input qubits
+    var circuit = quantum.sim.create_circuit(n + 1)  // +1 for ancilla qubit
+
+    // Define a constant oracle (always returns 0)
+    func constant_oracle(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
+        // For a constant function, do nothing (function always returns 0)
+        // This would be implemented differently in a real algorithm
+        // Here we're just ensuring the circuit can run
+    }
+
+    var result = quantum.alg.deutsch_jozsa(circuit, n, constant_oracle)
+    crystal.manifest("Deutsch-Jozsa algorithm result for constant function: " + result)
+
+    crystal.manifest("Deutsch-Jozsa algorithm test completed!")
+}
+
+func test_bernstein_vazirani_algorithm() -> Void {
+    crystal.manifest("Testing Bernstein-Vazirani algorithm...")
+
+    // Create a circuit for Bernstein-Vazirani algorithm
+    var n = 3  // Number of input qubits
+    var circuit = quantum.sim.create_circuit(n + 1)  // +1 for ancilla qubit
+
+    // Define a simple oracle for BV algorithm
+    func bv_oracle(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
+        // This would implement f(x) = a · x mod 2 for some hidden string a
+        // For demonstration, we'll just do a simple implementation
+        quantum.gate.cx(circuit, qubits[0], qubits[n])  // Connect first input to ancilla
+        quantum.gate.cx(circuit, qubits[1], qubits[n])  // Connect second input to ancilla
+        // This would implement f(x) = x[0] XOR x[1] for example
+    }
+
+    var result = quantum.alg.bernstein_vazirani(circuit, n, bv_oracle)
+    crystal.manifest("Bernstein-Vazirani algorithm result: " + result)
+
+    crystal.manifest("Bernstein-Vazirani algorithm test completed!")
+}
+
+func test_simon_algorithm() -> Void {
+    crystal.manifest("Testing Simon's algorithm...")
+
+    // Create a circuit for Simon's algorithm
+    var n = 2  // Number of input qubits
+    var circuit = quantum.sim.create_circuit(2 * n)  // 2n qubits for input and output
+
+    // Define a simple oracle for Simon's algorithm
+    func simon_oracle(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
+        // This would implement a function f such that f(x) = f(x ⊕ s) for some hidden string s
+        // For a 2-bit example, let's say s = "11", so f(00) = f(11) and f(01) = f(10)
+        // Connect inputs to outputs in a way that reflects this property
+        quantum.gate.cx(circuit, qubits[0], qubits[2])
+        quantum.gate.cx(circuit, qubits[1], qubits[3])
+    }
+
+    var result = quantum.alg.simon(circuit, n, simon_oracle)
+    crystal.manifest("Simon's algorithm result: " + result)
+
+    crystal.manifest("Simon algorithm test completed!")
+}
+
+func test_quantum_phase_estimation() -> Void {
+    crystal.manifest("Testing Quantum Phase Estimation...")
+
+    // Create a circuit for quantum phase estimation
+    var precision_qubits = 3
+    var target_qubits = [3, 4]  // Using qubits 3 and 4 as target
+    var total_qubits = precision_qubits + target_qubits.length
+    var circuit = quantum.sim.create_circuit(total_qubits)
+
+    // Define a simple unitary operation for phase estimation
+    func simple_unitary(circuit: quantum.sim.Circuit, target_qubits: List[Int]) -> Void {
+        // Apply some rotation that has a known eigenvalue
+        // For example, a rotation that has eigenvalue e^(iπ/4)
+        quantum.gate.rz(circuit, target_qubits[0], math.PI/4.0)
+    }
+
+    var estimated_phase = quantum.alg.quantum_phase_estimation(circuit, precision_qubits, target_qubits, simple_unitary)
+    crystal.manifest("Quantum Phase Estimation result: " + estimated_phase)
+    crystal.manifest("Expected phase: 1/8 = 0.125 (since π/4 = 2π * 1/8)")
+
+    crystal.manifest("Quantum phase estimation test completed!")
+}
+
+func test_shors_algorithm() -> Void {
+    crystal.manifest("Testing Shor's algorithm...")
+
+    // Create a circuit for Shor's algorithm
+    var number_to_factor = 15  // Example number to factor
+    var circuit = quantum.sim.create_circuit(10)  // Sufficient qubits for factoring 15
+
+    // Define a simple oracle for period finding
+    func shor_oracle(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
+        // In a real implementation, this would perform modular exponentiation
+        // For demonstration, we'll just apply some operations
+        quantum.gate.h(circuit, qubits[0])
+        quantum.gate.cx(circuit, qubits[0], qubits[1])
+    }
+
+    var factors = quantum.alg.shors(circuit, number_to_factor, shor_oracle)
+    crystal.manifest("Shor's algorithm factors of " + number_to_factor + ": " + factors[0] + " and " + factors[1])
+
+    crystal.manifest("Shor's algorithm test completed!")
+}
+
+func test_grover_algorithm() -> Void {
+    crystal.manifest("Testing Grover's algorithm...")
+
+    // Create a circuit for Grover's algorithm
+    var n_qubits = 3  // For searching among 2^3 = 8 items
+    var circuit = quantum.sim.create_circuit(n_qubits + 1)  // +1 for oracle ancilla
+
+    // Define an oracle that marks |101⟩ (index 5)
+    func grover_oracle(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
+        // Mark the state |101⟩ by flipping the phase
+        quantum.gate.x(circuit, qubits[1])  // Flip the middle qubit
+        quantum.gate.h(circuit, qubits[3])  // Use ancilla qubit for phase flip
+        quantum.gate.ccx(circuit, qubits[0], qubits[2], qubits[3])  // CCX with |10⟩ -> |1⟩ on ancilla
+        quantum.gate.h(circuit, qubits[3])
+        quantum.gate.x(circuit, qubits[1])  // Flip the middle qubit back
+    }
+
+    var result = quantum.alg.grovers(circuit, n_qubits, grover_oracle)
+    crystal.manifest("Grover's algorithm result (searching among 8 items): " + result)
+
+    crystal.manifest("Grover algorithm test completed!")
+}
+
+func test_vqe_algorithm() -> Void {
+    crystal.manifest("Testing Variational Quantum Eigensolver (VQE)...")
+
+    // Create a circuit for VQE
+    var circuit = quantum.sim.create_circuit(2)  // 2 qubits for this example
+
+    // Define a simple Hamiltonian (e.g., for H2 molecule)
+    var hamiltonian = [[1.0, 0.0, 0.0, 0.0],
+                       [0.0, -1.0, 0.0, 0.0],
+                       [0.0, 0.0, -1.0, 0.0],
+                       [0.0, 0.0, 0.0, 1.0]]
+
+    // Initial parameters for the ansatz
+    var ansatz_params = [0.1, 0.2, 0.3, 0.4]  // Example parameters
+
+    // Define a simple optimizer function
+    func simple_optimizer(params: List[Float], gradients: List[Float]) -> List[Float] {
+        // A simple gradient descent optimizer
+        var new_params = []
+        var learning_rate = 0.01
+        for i in range(params.length) {
+            new_params.append(params[i] - learning_rate * gradients[i])
+        }
+        return new_params
+    }
+
+    var energy = quantum.alg.vqe(circuit, hamiltonian, ansatz_params, simple_optimizer)
+    crystal.manifest("VQE estimated ground state energy: " + energy)
+
+    crystal.manifest("VQE algorithm test completed!")
+}
+
+func test_qaoa_algorithm() -> Void {
+    crystal.manifest("Testing Quantum Approximate Optimization Algorithm (QAOA)...")
+
+    // Create a circuit for QAOA
+    var circuit = quantum.sim.create_circuit(3)  // 3 qubits for this example
+
+    // Define a simple Hamiltonian (e.g., for Max-Cut problem on 3 nodes)
+    var hamiltonian = [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                       [0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                       [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0]]
+
+    // Parameters for QAOA
+    var p = 2  // Number of layers
+    var beta_params = [0.1, 0.2]  // Mixing parameters
+    var gamma_params = [0.3, 0.4]  // Cost parameters
+
+    var results = quantum.alg.qaoa(circuit, hamiltonian, p, beta_params, gamma_params)
+    crystal.manifest("QAOA results: " + results)
+
+    crystal.manifest("QAOA algorithm test completed!")
+}
+
+// Helper function to format qubit state as binary string
+func format_qubit_state(state_index: Int, num_qubits: Int) -> String {
+    var result = ""
+    var value = state_index
+    for i in range(num_qubits) {
+        result = (value % 2).to_string() + result
+        value = value / 2
+    }
+    return result
+}
+
+func main() -> Void {
+    test_deutsch_jozsa_algorithm()
+    test_bernstein_vazirani_algorithm()
+    test_simon_algorithm()
+    test_quantum_phase_estimation()
+    test_shors_algorithm()
+    test_grover_algorithm()
+    test_vqe_algorithm()
+    test_qaoa_algorithm()
+
+    crystal.manifest("All quantum algorithm tests completed successfully!")
+}

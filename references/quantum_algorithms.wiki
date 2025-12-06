@@ -1,0 +1,528 @@
+{{Short description|Algorithm to be run on quantum computers}}
+{{Use American English|date=January 2019}}
+{{Use dmy dates|date=December 2020}}
+In [[quantum computing]], a '''quantum algorithm''' is an [[algorithm]] that runs on a realistic model of [[quantum computation]], the most commonly used model being the [[quantum circuit]] model of computation.<ref>{{cite book|title=Quantum Computation and Quantum Information|last1=Nielsen|first1=Michael A.|last2=Chuang|first2=Isaac L.|publisher=[[Cambridge University Press]]|year=2000|isbn=978-0-521-63503-5|author-link=Michael Nielsen|author-link2=Isaac Chuang|title-link=Quantum Computation and Quantum Information}}</ref><ref>{{cite arXiv|eprint=0808.0369|class=quant-ph|first=M.|last=Mosca|author-link=Michele Mosca|title=Quantum Algorithms|date=2008}}</ref> A classical (or non-quantum) algorithm is a finite sequence of instructions, or a step-by-step procedure for solving a problem, where each step or instruction can be performed on a classical [[computer]]. Similarly, a quantum algorithm is a step-by-step procedure, where each of the steps can be performed on a [[quantum computer]]. Although all classical algorithms can also be performed on a quantum computer,<ref>{{Cite book|title = Quantum Computer Science|url = https://books.google.com/books?id=-wkJIuw0YRsC&q=quantum%2520computer%2520equivalent%2520classical%2520computer&pg=PA23|publisher = Morgan & Claypool Publishers|date = 2009-01-01|isbn = 978-1-59829-732-4|first1 = Marco|last1 = Lanzagorta|first2 = Jeffrey K.|last2 = Uhlmann}}</ref>{{rp|126}}  the term quantum algorithm is generally reserved for algorithms that seem inherently quantum, or use some essential feature of quantum computation such as [[quantum superposition]] or [[quantum entanglement]].
+
+Problems that are [[Undecidable problem|undecidable]] using classical computers remain undecidable using quantum computers.<ref name=nielchuan>{{cite book|title=Quantum Computation and Quantum Information|last1=Nielsen|first1=Michael A.|last2=Chuang|first2=Isaac L.|publisher=Cambridge University Press|year=2010|isbn=978-1-107-00217-3|edition=2nd|location=Cambridge|author-link=Michael A. Nielsen|author-link2=Isaac Chuang|url=https://books.google.com/books?id=-s4DEy7o-a0C}}</ref>{{rp|127}} What makes quantum algorithms interesting is that they might be able to solve some problems faster than classical algorithms because the quantum superposition and quantum entanglement that quantum algorithms exploit generally cannot be efficiently simulated on classical computers (see [[Quantum supremacy]]).
+
+The best-known algorithms are [[Shor's algorithm]] for factoring and [[Grover's algorithm]] for searching an unstructured database or an unordered list. Shor's algorithm would, if implemented, run much (almost exponentially) faster than the most efficient known classical algorithm for factoring, the [[general number field sieve]].<ref>{{Cite web|url=https://quantum-computing.ibm.com/docs/iqx/guide/shors-algorithm|title=Shor's algorithm|access-date=21 October 2020|archive-date=12 January 2023|archive-url=https://web.archive.org/web/20230112064753/https://quantum-computing.ibm.com/docs/iqx/guide/shors-algorithm}}</ref> Likewise, Grover's algorithm would run quadratically faster than the best possible classical algorithm for the same task,<ref>{{cite web |url=https://quantum-computing.ibm.com/composer/docs/iqx/guide/grovers-algorithm |title=IBM quantum composer user guide: Grover's algorithm |access-date=7 June 2022 |website=quantum-computing.ibm.com |archive-date=27 September 2022 |archive-url=https://web.archive.org/web/20220927192200/https://quantum-computing.ibm.com/composer/docs/iqx/guide/grovers-algorithm }}</ref> a [[linear search]].
+
+==Overview==
+Quantum algorithms are usually described, in the commonly used circuit model of quantum computation, by a [[quantum circuit]] that acts on some input [[qubit]]s and terminates with a [[measurement]]. A quantum circuit consists of simple [[quantum gate]]s, each of which acts on some finite number of qubits. Quantum algorithms may also be stated in other models of quantum computation, such as the [[Hamiltonian oracle model]].<ref name=Hamiltonian_NAND_Tree>{{cite journal
+ | last1 = Farhi | first1 = Edward
+ | last2 = Goldstone |first2=Jeffrey
+ | last3 = Gutmann |first3=Sam
+ | date = 2008
+ | title = A Quantum Algorithm for the Hamiltonian NAND Tree
+ | journal=Theory of Computing
+ | volume=4
+ | pages=169–190
+ | arxiv = quant-ph/0702144
+ | doi=10.4086/toc.2008.v004a008 | doi-access=free}}</ref>
+
+Quantum algorithms can be categorized by the main techniques involved in the algorithm. Some commonly used techniques/ideas in quantum algorithms include [[phase kick-back]], [[quantum phase estimation algorithm|phase estimation]], the [[quantum Fourier transform]], [[quantum walk]]s, [[amplitude amplification]] and [[topological quantum field theory]]. Quantum algorithms may also be grouped by the type of problem solved; see, e.g., the survey on quantum algorithms for algebraic problems.<ref>{{cite journal|last1=Childs|first1=Andrew M.|author-link=Andrew Childs|last2=van Dam|first2=W.|year=2010|title=Quantum algorithms for algebraic problems|journal=[[Reviews of Modern Physics]]|volume=82|issue=1|pages=1–52|arxiv=0812.0380|bibcode=2010RvMP...82....1C|doi=10.1103/RevModPhys.82.1|s2cid=119261679}}</ref>
+
+==Algorithms based on the quantum Fourier transform==
+The [[quantum Fourier transform]] is the quantum analogue of the [[discrete Fourier transform]], and is used in several quantum algorithms. The [[Hadamard transform]] is also an example of a quantum Fourier transform over an n-dimensional vector space over the field [[GF(2)|'''F'''<sub>2</sub>]]. The quantum Fourier transform can be efficiently implemented on a quantum computer using only a polynomial number of [[Quantum logic gate#Hadamard transform|quantum gate]]s.{{citation needed|date=February 2018}}
+
+===Deutsch–Jozsa algorithm===
+{{main|Deutsch–Jozsa algorithm}}
+
+[[File:Deutsch-Jozsa-algorithm-quantum-circuit.png|thumb|Deutsch-Jozsa algorithm]]
+The Deutsch–Jozsa algorithm solves a [[black-box]] problem that requires exponentially many queries to the black box for any deterministic classical computer, but can be done with a single query by a quantum computer. However, when comparing bounded-error classical and quantum algorithms, there is no speedup, since a classical probabilistic algorithm can solve the problem with a constant number of queries with small probability of error. The algorithm determines whether a function ''f'' is either constant (0 on all inputs or 1 on all inputs) or balanced (returns 1 for half of the input domain and 0 for the other half).
+
+===Bernstein–Vazirani algorithm===
+{{main|Bernstein–Vazirani algorithm}}
+
+The Bernstein–Vazirani algorithm is the first quantum algorithm that solves a problem more efficiently than the best known classical algorithm. It was designed to create an [[oracle separation]] between [[BQP]] and [[BPP (complexity)|BPP]].
+
+===Simon's algorithm===
+{{main|Simon's algorithm}}
+
+Simon's algorithm solves a black-box problem exponentially faster than any classical algorithm, including bounded-error probabilistic algorithms. This algorithm, which achieves an exponential speedup over all classical algorithms that we consider efficient, was the motivation for [[Shor's algorithm]] for factoring.
+
+===Quantum phase estimation algorithm===
+{{main|Quantum phase estimation algorithm}}
+
+The [[quantum phase estimation algorithm]] is used to determine the eigenphase of an eigenvector of a unitary gate, given a quantum state proportional to the eigenvector and access to the gate.   The algorithm is frequently used as a subroutine in other algorithms.
+
+===Shor's algorithm===
+{{main|Shor's algorithm}}
+
+Shor's algorithm solves the [[discrete logarithm]] problem and the [[integer factorization]] problem in polynomial time,<ref>
+{{cite journal
+ | last = Shor | first = P. W.
+ | year = 1997
+ | title = Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer
+ | journal = [[SIAM Journal on Scientific and Statistical Computing]]
+ | volume = 26 | issue = 5
+ | pages = 1484–1509
+ | arxiv = quant-ph/9508027
+ | bibcode= 1995quant.ph..8027S
+ | doi=10.1137/s0097539795293172
+| s2cid = 2337707
+ }}</ref> whereas the best known classical algorithms take super-polynomial time. It is unknown whether these problems are in [[P (complexity)|P]] or [[NP-complete]]. It is also one of the few quantum algorithms that solves a non-black-box problem in polynomial time, where the best known classical algorithms run in super-polynomial time.
+
+===Hidden subgroup problem===
+The [[Abelian group|abelian]] [[hidden subgroup problem]] is a generalization of many problems that can be solved by a quantum computer, such as Simon's problem, solving [[Pell's equation]], testing the [[principal ideal]] of a [[ring (mathematics)|ring]] R and [[integer factorization|factoring]]. There are efficient quantum algorithms known for the Abelian hidden subgroup problem.<ref>{{cite conference
+ |last1=Boneh |first1=D.
+ |last2=Lipton |first2=R. J.
+ |year=1995
+ |title=Quantum cryptoanalysis of hidden linear functions
+ |editor-last=Coppersmith |editor-first=D.
+ |book-title=Proceedings of the 15th Annual International Cryptology Conference on Advances in Cryptology
+ |pages=424–437
+ |publisher=[[Springer-Verlag]]
+ |isbn=3-540-60221-6
+}}</ref> The more general hidden subgroup problem, where the group is not necessarily abelian, is a generalization of the previously mentioned problems, as well as [[graph isomorphism]] and certain [[lattice problems]]. Efficient quantum algorithms are known for certain non-abelian groups. However, no efficient algorithms are known for the [[symmetric group]], which would give an efficient algorithm for graph isomorphism<ref>{{cite arXiv
+ |last1=Moore |first1=C.|author1-link=Cris Moore
+ |last2=Russell |first2=A.
+ |last3=Schulman |first3=L. J.
+ |year=2005
+ |title=The Symmetric Group Defies Strong Fourier Sampling: Part I
+ |eprint=quant-ph/0501056
+}}</ref> and the [[dihedral group]], which would solve certain lattice problems.<ref>{{cite arXiv
+ | last = Regev | first = O.
+ | date = 2003
+ | title = Quantum Computation and Lattice Problems
+ | eprint = cs/0304005
+}}</ref>
+
+===Estimating Gauss sums===
+A [[Gauss sum]] is a type of [[exponential sum]]. The best known classical algorithm for estimating these sums takes exponential time. Since the discrete logarithm problem reduces to Gauss sum estimation, an efficient classical algorithm for estimating Gauss sums would imply an efficient classical algorithm for computing discrete logarithms, which is considered unlikely. However, quantum computers can estimate Gauss sums to polynomial precision in polynomial time.<ref>
+{{Cite arXiv
+ | last1=van Dam |first1=W.
+ | last2=Seroussi |first2=G.
+ | year =2002
+ | title = Efficient Quantum Algorithms for Estimating Gauss Sums
+ | eprint = quant-ph/0207131
+}}</ref>
+
+===Fourier fishing and Fourier checking===
+Consider an [[Oracle machine|oracle]] consisting of ''n'' random Boolean functions mapping ''n''-bit strings to a Boolean value, with the goal of finding n ''n''-bit strings ''z''<sub>1</sub>,..., ''z<sub>n</sub>'' such that for the Hadamard-Fourier transform, at least 3/4 of the strings satisfy
+
+:<math>| \tilde{f}(z_i)| \geqslant 1</math>
+
+and at least 1/4 satisfy
+
+:<math>| \tilde{f}(z_i) | \geqslant 2.</math>
+
+This can be done in [[BQP|bounded-error quantum polynomial time]] (BQP).<ref>
+{{Cite arXiv
+ | last = Aaronson | first = S.
+ | year = 2009
+ | title = BQP and the Polynomial Hierarchy
+ | class = quant-ph
+ | eprint = 0910.4698
+}}</ref>
+
+==Algorithms based on amplitude amplification==
+[[Amplitude amplification]] is a technique that allows the amplification of a chosen subspace of a quantum state. Applications of amplitude amplification usually lead to quadratic speedups over the corresponding classical algorithms. It can be considered as a generalization of Grover's algorithm.{{citation needed|date=February 2024}}
+
+===Grover's algorithm===
+{{main|Grover's algorithm}}
+
+Grover's algorithm searches an unstructured database (or an unordered list) with N entries for a marked entry, using only <math>O(\sqrt{N})</math> queries instead of the <math>O({N})</math> queries required classically.<ref>
+{{Cite arXiv|eprint=quant-ph/9605043|first=Lov K.|last=Grover|author-link=Lov Grover|title=A fast quantum mechanical algorithm for database search|date=1996 }}</ref> Classically, <math>O({N})</math> queries are required even allowing bounded-error probabilistic algorithms.
+
+Theorists have considered a hypothetical generalization of a standard quantum computer that could access the histories of the hidden variables in [[De Broglie–Bohm theory|Bohmian mechanics]]. (Such a computer is completely hypothetical and would ''not'' be a standard quantum computer, or even possible under the standard theory of quantum mechanics.) Such a hypothetical computer could implement a search of an N-item database in at most <math>O(\sqrt[3]{N})</math> steps. This is slightly faster than the <math>O(\sqrt{N})</math> steps taken by Grover's algorithm. However, neither search method would allow either model of quantum computer to solve [[NP-completeness|NP-complete]] problems in polynomial time.<ref>{{Cite web|url=https://www.scottaaronson.com/papers/qchvpra.pdf|title=Quantum Computing and Hidden Variables|last=Aaronson|first=Scott}}</ref>
+
+===Quantum counting===
+[[Quantum counting]] solves a generalization of the search problem. It solves the problem of counting the number of marked entries in an unordered list, instead of just detecting whether one exists. Specifically, it counts the number of marked entries in an <math>N</math>-element list with an error of at most <math>\varepsilon</math> by making only <math>\Theta\left(\varepsilon^{-1} \sqrt{N/k}\right)</math> queries, where <math>k</math> is the number of marked elements in the list.<ref>
+{{Cite book
+ |last1 = Brassard |first1 = G.
+ |last2=Hoyer |first2=P.
+ |last3=Tapp |first3=A.
+ |chapter = Quantum counting
+ |date = 1998
+ |title = Automata, Languages and Programming
+ |arxiv = quant-ph/9805082
+ |doi=10.1007/BFb0055105
+ |volume = 1443
+ |pages=820–831
+|series = Lecture Notes in Computer Science
+ |isbn = 978-3-540-64781-2
+ |s2cid = 14147978
+ }}</ref><ref>
+{{Cite book
+ |last1=Brassard |first1=G.
+ |last2=Hoyer |first2=P.
+ |last3=Mosca |first3=M.
+ |last4=Tapp |first4=A.
+ |year=2002
+ |chapter=Quantum Amplitude Amplification and Estimation
+ |title=Quantum Computation and Quantum Information
+ |editor=Samuel J. Lomonaco, Jr.
+ |series=AMS Contemporary Mathematics
+ |volume=305
+ |pages=53–74
+ |doi=10.1090/conm/305/05215
+ |arxiv=quant-ph/0005055
+|bibcode=2000quant.ph..5055B|isbn=978-0-8218-2140-4
+ |s2cid=54753
+ }}</ref> More precisely, the algorithm outputs an estimate <math>k'</math> for <math>k</math>, the number of marked entries, with accuracy <math>|k-k'| \leq \varepsilon k</math>.
+
+==Algorithms based on quantum walks==
+{{main|Quantum walk}}
+
+A quantum walk is the quantum analogue of a classical [[random walk]]. A classical random walk can be described by a [[probability distribution]] over some states, while a quantum walk can be described by a [[quantum superposition]] over states. Quantum walks are known to give exponential speedups for some black-box problems.<ref>
+{{cite conference
+ |last1=Childs |first1=A. M.
+ |last2=Cleve |first2=R.
+ |last3=Deotto |first3=E.
+ |last4=Farhi |first4=E.
+ |last5=Gutmann |first5=S.
+ |last6=Spielman |first6=D. A.
+ |year=2003
+ |title=Exponential algorithmic speedup by quantum walk
+ |book-title=Proceedings of the 35th Symposium on Theory of Computing
+ |pages=59–68
+ |publisher=[[Association for Computing Machinery]]
+ |arxiv=quant-ph/0209131
+ |doi=10.1145/780542.780552
+ |isbn=1-58113-674-9
+}}</ref><ref>
+{{cite conference
+ |last1=Childs |first1=A. M.
+ |last2=Schulman |first2=L. J.
+ |last3=Vazirani |first3=U. V.
+ |year=2007
+ |title=Quantum Algorithms for Hidden Nonlinear Structures
+ |book-title=Proceedings of the 48th Annual IEEE Symposium on Foundations of Computer Science
+ |pages=395–404
+ |publisher=[[IEEE]]
+ |arxiv=0705.2784
+ |doi=10.1109/FOCS.2007.18
+ |isbn=978-0-7695-3010-9
+}}</ref> They also provide polynomial speedups for many problems. A framework for the creation of quantum walk algorithms exists and is a versatile tool.<ref name="Search_via_quantum_walk" />
+
+===Boson sampling problem===
+{{main|Boson sampling}}
+
+The Boson Sampling Problem in an experimental configuration assumes<ref>{{cite journal |last1=Ralph |first1=T.C. |date=July 2013 |title=Figure 1: The boson-sampling problem |url=http://www.nature.com/nphoton/journal/v7/n7/fig_tab/nphoton.2013.175_F1.html |journal=Nature Photonics |publisher=Nature |volume=7 |issue=7 |pages=514–515 |doi=10.1038/nphoton.2013.175 |s2cid=110342419 |access-date=12 September 2014|url-access=subscription }}</ref> an input of [[boson]]s (e.g., photons) of moderate number that are randomly scattered into a large number of output modes, constrained by a defined [[unitarity]]. When individual photons are used, the problem is isomorphic to a multi-photon quantum walk.<ref>{{Cite journal |last1=Peruzzo |first1=Alberto |last2=Lobino |first2=Mirko |last3=Matthews |first3=Jonathan C. F. |last4=Matsuda |first4=Nobuyuki |last5=Politi |first5=Alberto |last6=Poulios |first6=Konstantinos |last7=Zhou |first7=Xiao-Qi |last8=Lahini |first8=Yoav |last9=Ismail |first9=Nur |last10=Wörhoff |first10=Kerstin |last11=Bromberg |first11=Yaron |last12=Silberberg |first12=Yaron |last13=Thompson |first13=Mark G. |last14=OBrien |first14=Jeremy L. |date=2010-09-17 |title=Quantum Walks of Correlated Photons |url=https://www.science.org/doi/10.1126/science.1193515 |journal=Science |language=en |volume=329 |issue=5998 |pages=1500–1503 |doi=10.1126/science.1193515 |pmid=20847264 |arxiv=1006.4764 |bibcode=2010Sci...329.1500P |hdl=10072/53193 |s2cid=13896075 |issn=0036-8075}}</ref> The problem is then to produce a fair sample of the [[probability distribution]] of the output that depends on the input arrangement of bosons and the unitarity.<ref>{{cite journal |last1=Lund |first1=A.P. |last2=Laing |first2=A. |last3=Rahimi-Keshari |first3=S. |last4=Rudolph |first4=T. |last5=O'Brien |first5=J.L. |last6=Ralph |first6=T.C. |date=5 September 2014 |title=Boson Sampling from Gaussian States |journal=Phys. Rev. Lett. |volume=113 |issue=10 |article-number=100502 |arxiv=1305.4346 |bibcode=2014PhRvL.113j0502L |doi=10.1103/PhysRevLett.113.100502 |pmid=25238340 |s2cid=27742471}}</ref> Solving this problem with a classical computer algorithm requires computing the [[Permanent (mathematics)|permanent]] of the unitary transform matrix, which may take a prohibitively long time or be outright impossible. In 2014, it was proposed<ref>{{cite web |title=The quantum revolution is a step closer |url=http://phys.org/news/2014-09-quantum-revolution-closer.html |access-date=12 September 2014 |website=Phys.org |publisher=Omicron Technology Limited}}</ref> that existing technology and standard probabilistic methods of generating single-photon states could be used as an input into a suitable quantum computable [[Linear optical quantum computing|linear optical network]] and that sampling of the output probability distribution would be demonstrably superior using quantum algorithms. In 2015, investigation predicted<ref>{{cite journal |last1=Seshadreesan |first1=Kaushik P. |last2=Olson |first2=Jonathan P. |last3=Motes |first3=Keith R. |last4=Rohde |first4=Peter P. |last5=Dowling |first5=Jonathan P. |year=2015 |title=Boson sampling with displaced single-photon Fock states versus single-photon-added coherent states: The quantum-classical divide and computational-complexity transitions in linear optics |journal=Physical Review A |volume=91 |issue=2 |article-number=022334 |arxiv=1402.0531 |bibcode=2015PhRvA..91b2334S |doi=10.1103/PhysRevA.91.022334 |s2cid=55455992}}</ref> the sampling problem had similar complexity for inputs other than [[Fock state|Fock-state]] photons and identified a transition in [[Quantum complexity theory|computational complexity]] from classically simulable to just as hard as the Boson Sampling Problem, depending on the size of coherent amplitude inputs.
+
+===Element distinctness problem===
+{{main|Element distinctness problem}}
+
+The element distinctness problem is the problem of determining whether all the elements of a list are distinct. Classically, <math>\Omega(N)</math> queries are required for a list of size <math>N</math>; however, it can be solved in <math>\Theta(N^{2/3})</math> queries on a quantum computer. The optimal algorithm was put forth by [[Andris Ambainis]],<ref>
+{{cite journal
+ |last=Ambainis |first=A.
+ |year=2007
+ |title=Quantum Walk Algorithm for Element Distinctness
+ |journal=[[SIAM Journal on Computing]]
+ |volume=37 |issue=1 |pages=210–239
+ |arxiv= quant-ph/0311001
+ |doi=10.1137/S0097539705447311
+|s2cid=6581885
+ }}</ref> and [[Yaoyun Shi]] first proved a tight lower bound when the size of the range is sufficiently large.<ref>
+{{cite conference
+ | last1=Shi | first1=Y.
+ | title=The 43rd Annual IEEE Symposium on Foundations of Computer Science, 2002. Proceedings.
+ | year=2002
+ | chapter=Quantum lower bounds for the collision and the element distinctness problems
+ | conference = Proceedings of the 43rd [[Symposium on Foundations of Computer Science]]
+ | pages=513–519
+ | arxiv = quant-ph/0112086
+ | doi=10.1109/SFCS.2002.1181975| isbn=0-7695-1822-2
+ }}</ref> Ambainis<ref>
+{{cite journal
+ |last=Ambainis |first=A.
+ |year=2005
+ |title=Polynomial Degree and Lower Bounds in Quantum Complexity: Collision and Element Distinctness with Small Range
+ |journal=[[Theory of Computing]]
+ |volume=1 |issue=1 |pages=37–46
+ |doi=10.4086/toc.2005.v001a003
+|doi-access=free
+ }}</ref> and Kutin<ref>
+{{cite journal
+ |last1=Kutin |first1=S.
+ |year=2005
+ |title=Quantum Lower Bound for the Collision Problem with Small Range
+ |journal=[[Theory of Computing]]
+ |volume=1 |issue=1 |pages=29–36
+ |doi=10.4086/toc.2005.v001a002
+|doi-access=free
+ }}</ref> independently (and via different proofs) extended that work to obtain the lower bound for all functions.
+
+===Triangle-finding problem===
+{{main|Triangle finding problem}}
+
+The triangle-finding problem is the problem of determining whether a given graph with ''N'' vertices contains a triangle (a [[clique (graph theory)|clique]] of size 3). Given oracle access to the adjacency matrix of the graph, the classical query complexity is <math>\Theta(N^2)</math>, since for a graph with only one triangle this is the query complexity needed to find any edge at all. Meanwhile, for quantum algorithms the lower bound is <math>\Omega(N)</math>, the number of queries needed to find any edge with Grover's algorithm. However, finding any edge does not guarantee finding a triangle if there exists any. A Grover search over all <math>\Theta(N^3)</math> potential triangles does solve the problem, but the query complexity, O(''N''<sup>3/2</sup>), can be improved upon.<ref>{{cite journal
+ | last1 = Li | first1 = Guanzhong
+ | last2 = Li | first2 = Lvzhou
+ | date = May 2025
+ | title = Derandomization of quantum algorithm for triangle finding
+ | url = https://www.sciencedirect.com/science/article/pii/S0890540125000318
+ | journal = Information and Computation
+ | volume = 304
+ | article-number = 105295
+ | doi = 10.1016/j.ic.2025.105295
+ | issn = 0890-5401
+| url-access = subscription
+ }}</ref>
+
+While <math>\Omega(N)</math> remains the best-known lower bound for quantum algorithms, the best algorithm known requires O(''N''<sup>5/4</sup>) queries,<ref>{{citation
+ | last = Le Gall | first = François
+ | contribution = Improved quantum algorithm for triangle finding via combinatorial arguments
+ | date = October 2014
+ | doi = 10.1109/focs.2014.31
+ | pages = 216–225
+ | publisher = IEEE
+ | title = Proceedings of the 55th Annual Symposium on Foundations of Computer Science (FOCS 2014)| arxiv = 1407.0085
+ | isbn = 978-1-4799-6517-5
+ | s2cid = 5760574
+ }}</ref> an improvement over the previous best O(''N''<sup>1.3</sup>) queries.<ref name=Search_via_quantum_walk>
+{{cite conference
+ |last1=Magniez |first1=F.
+ |last2=Nayak |first2=A.
+ |last3=Roland |first3=J.
+ |last4=Santha |first4=M.
+ |year=2007
+ |title=Search via quantum walk
+ |book-title=Proceedings of the 39th Annual ACM Symposium on Theory of Computing
+ |publisher=[[Association for Computing Machinery]]
+ |pages=575–584
+ |doi=10.1145/1250790.1250874
+ |isbn=978-1-59593-631-8
+|arxiv=quant-ph/0608026}}</ref><ref>
+{{cite journal
+ |last1=Magniez |first1=F.
+ |last2=Santha |first2=M.
+ |last3=Szegedy |first3=M.
+ |year=2007
+ |title=Quantum Algorithms for the Triangle Problem
+ |journal=[[SIAM Journal on Computing]]
+ |volume=37 |issue=2 |pages=413–424
+ |arxiv= quant-ph/0310134
+ |doi=10.1137/050643684
+|s2cid=594494
+ }}</ref>
+
+===Formula evaluation===
+A formula is a tree with a gate at each internal node and an input bit at each leaf node. The problem is to evaluate the formula, which is the output of the root node, given oracle access to the input.
+
+A well studied formula is the balanced binary tree with only NAND gates.<ref>
+{{cite web
+ |last=Aaronson |first=S.
+ |date=3 February 2007
+ |title=NAND now for something completely different
+ |url=http://scottaaronson.com/blog/?p=207
+ |work=Shtetl-Optimized
+ |access-date=2009-12-17
+}}</ref> This type of formula requires <math>\Theta(N^c)</math> queries using randomness,<ref>
+{{cite conference
+ |last1=Saks |first1=M.E.
+ |last2=Wigderson |first2=A.
+ |year=1986
+ |title=Probabilistic Boolean Decision Trees and the Complexity of Evaluating Game Trees
+ |url=http://www.math.ias.edu/~avi/PUBLICATIONS/MYPAPERS/SW86/SW86.pdf
+ |book-title=Proceedings of the 27th Annual Symposium on Foundations of Computer Science
+ |pages=29–38
+ |publisher=[[IEEE]]
+ |doi=10.1109/SFCS.1986.44
+ |isbn=0-8186-0740-8
+}}</ref> where <math>c = \log_2(1+\sqrt{33})/4 \approx 0.754</math>. With a quantum algorithm, however, it can be solved in <math>\Theta(N^{1/2})</math> queries. No better quantum algorithm for this case was known until one was found for the unconventional Hamiltonian oracle model.<ref name=Hamiltonian_NAND_Tree/> The same result for the standard setting soon followed.<ref>
+{{cite arXiv
+ |last=Ambainis |first=A.
+ |year=2007
+ |title=A nearly optimal discrete query quantum algorithm for evaluating NAND formulas
+ |class=quant-ph
+ |eprint=0704.3628
+}}</ref>
+
+Fast quantum algorithms for more complicated formulas are also known.<ref>
+{{cite conference
+ |last1=Reichardt |first1=B. W.
+ |last2=Spalek |first2=R.
+ |year=2008
+ |title=Span-program-based quantum algorithm for evaluating formulas
+ |book-title=Proceedings of the 40th Annual ACM symposium on Theory of Computing
+ |publisher=[[Association for Computing Machinery]]
+ |pages=103–112
+ |isbn=978-1-60558-047-0
+ |doi=10.1145/1374376.1374394
+|arxiv=0710.2630}}</ref>
+
+===Group commutativity===
+The problem is to determine if a [[black box group|black-box group]], given by ''k'' generators, is [[Commutativity|commutative]]. A black-box group is a group with an oracle function, which must be used to perform the group operations (multiplication, inversion, and comparison with identity). The interest in this context lies in the query complexity, which is the number of oracle calls needed to solve the problem. The deterministic and randomized query complexities are <math>\Theta(k^2)</math> and <math>\Theta(k)</math>, respectively.<ref>
+{{cite journal
+ |last=Pak |first=Igor |author1-link=Igor Pak
+ |year=2012
+ |title=Testing commutativity of a group and the power of randomization
+ |journal= [[LMS Journal of Computation and Mathematics]]
+ |volume=15 |pages=38–43
+ |doi=10.1112/S1461157012000046
+ |doi-access=free
+ }}</ref> A quantum algorithm requires <math>\Omega(k^{2/3})</math> queries, while the best-known classical algorithm uses <math>O(k^{2/3} \log k)</math> queries.<ref>
+{{cite journal
+ |last1=Magniez |first1=F.
+ |last2=Nayak |first2=A.
+ |year=2007
+ |title=Quantum Complexity of Testing Group Commutativity
+ |journal=[[Algorithmica]]
+ |volume=48 |issue=3 |pages=221–232
+ |doi=10.1007/s00453-007-0057-8
+|arxiv=quant-ph/0506265|s2cid=3163328
+ }}</ref>
+
+==BQP-complete problems==
+The [[complexity class]] '''[[BQP]]''' (bounded-error quantum polynomial time) is the set of [[decision problems]] solvable by a [[quantum computer]] in [[polynomial time]] with error probability of at most 1/3 for all instances.<ref name="Chuang2000">Michael Nielsen and Isaac Chuang (2000). ''Quantum Computation and Quantum Information''. Cambridge: Cambridge University Press. {{isbn|0-521-63503-9}}.</ref> It is the quantum analogue to the classical complexity class '''[[BPP (complexity)|BPP]]'''.
+
+A problem is '''BQP'''-complete if it is in '''BQP''' and any problem in '''BQP''' can be [[Reduction (complexity)|reduced]] to it in [[polynomial time]]. Informally, the class of '''BQP'''-complete problems are those that are as hard as the hardest problems in '''BQP''' and are themselves efficiently solvable by a quantum computer (with bounded error).
+
+===Computing knot invariants===
+Witten had shown that the [[Chern-Simons]] [[topological quantum field theory]] (TQFT) can be solved in terms of [[Jones polynomial]]s. A quantum computer can simulate a TQFT, and thereby approximate the Jones polynomial,<ref>
+{{Cite conference
+ | last1 = Aharonov | first1 = D.
+ | last2 = Jones | first2 = V.
+ | last3 = Landau | first3 = Z.
+ | year = 2006
+ | title = A polynomial quantum algorithm for approximating the Jones polynomial
+ | book-title=Proceedings of the 38th Annual ACM symposium on Theory of Computing
+ | pages = 427–436
+ | publisher=[[Association for Computing Machinery]]
+ | doi = 10.1145/1132516.1132579
+| arxiv = quant-ph/0511096| isbn = 1-59593-134-1
+ }}</ref> which as far as we know, is hard to compute classically in the worst-case scenario.{{citation needed|date=December 2014}}
+
+===Quantum simulation===
+{{main|Hamiltonian simulation}}
+The idea that quantum computers might be more powerful than classical computers originated in Richard Feynman's observation that classical computers seem to require exponential time to simulate many-particle quantum systems, yet quantum many-body systems are able to "solve themselves."<ref>
+{{Cite journal
+ | last1=Feynman | first1=R. P.
+ | year=1982
+ | title=Simulating physics with computers
+ | journal=[[International Journal of Theoretical Physics]]
+ | volume=21 | issue=6–7 | pages=467–488
+ | bibcode = 1982IJTP...21..467F
+ | doi = 10.1007/BF02650179
+| citeseerx=10.1.1.45.9310
+ | s2cid=124545445
+ }}</ref> Since then, the idea that quantum computers can simulate quantum physical processes exponentially faster than classical computers has been greatly fleshed out and elaborated. Efficient (i.e., polynomial-time) quantum algorithms have been developed for simulating both Bosonic and Fermionic systems,<ref>
+{{Cite journal
+ | last1=Abrams |first1=D. S.
+ | last2=Lloyd | first2=S.
+ | year=1997
+ | title=Simulation of many-body Fermi systems on a universal quantum computer
+ | journal=[[Physical Review Letters]]
+ | volume=79 | issue=13 | pages=2586–2589
+ | arxiv = quant-ph/9703054
+ | bibcode=1997PhRvL..79.2586A
+ | doi=10.1103/PhysRevLett.79.2586
+|s2cid=18231521
+ }}</ref> as well as the simulation of chemical reactions beyond the capabilities of current classical supercomputers using only a few hundred qubits.<ref>
+{{Cite journal
+ | last1=Kassal | first1=I.
+ | last2=Jordan | first2=S. P.
+ | last3=Love | first3=P. J.
+ | last4=Mohseni | first4=M.
+ | last5=Aspuru-Guzik | first5=A.
+ | year=2008
+ | title=Polynomial-time quantum algorithm for the simulation of chemical dynamics
+ | journal=[[Proceedings of the National Academy of Sciences of the United States of America]]
+ | volume=105 |issue=48 | pages=18681–86
+ | arxiv= 0801.2986
+ | bibcode = 2008PNAS..10518681K
+ | doi=10.1073/pnas.0808245105
+ | pmc=2596249
+ | pmid=19033207
+| doi-access=free
+ }}</ref> Quantum computers can also efficiently simulate topological quantum field theories.<ref>
+{{Cite journal
+ | last1=Freedman | first1=M.
+ | last2=Kitaev | first2=A.
+ | last3=Wang | first3=Z.
+ | year=2002
+ | title=Simulation of Topological Field Theories by Quantum Computers
+ | journal=[[Communications in Mathematical Physics]]
+ | volume=227 | issue=3 | pages=587–603
+ | arxiv = quant-ph/0001071
+ | bibcode = 2002CMaPh.227..587F
+ | doi=10.1007/s002200200635
+| s2cid=449219
+ }}</ref> In addition to its intrinsic interest, this result has led to efficient quantum algorithms for estimating [[Quantum invariant|quantum topological invariants]] such as [[Jones polynomial|Jones]]<ref>
+{{Cite journal
+ | last1=Aharonov | first1=D.
+ | last2=Jones | first2=V.
+ | last3=Landau | first3=Z.
+ | year=2009
+ | title=A polynomial quantum algorithm for approximating the Jones polynomial
+ | journal=[[Algorithmica]]
+ | volume=55 | issue=3 | pages=395–421
+ | arxiv=quant-ph/0511096
+ | doi=10.1007/s00453-008-9168-0
+| s2cid=7058660
+ }}</ref> and [[HOMFLY polynomial]]s,<ref>
+{{Cite journal
+ | last1=Wocjan |first1=P.
+ | last2=Yard | first2=J.
+ | year=2008
+ | title=The Jones polynomial: quantum algorithms and applications in quantum complexity theory
+ | journal=[[Quantum Information and Computation]]
+ | volume=8 | issue=1 | pages=147–180
+ |doi=10.26421/QIC8.1-2-10
+ | arxiv=quant-ph/0603069
+|bibcode = 2006quant.ph..3069W |s2cid=14494227
+ }}</ref> and the [[Turaev-Viro invariant]] of three-dimensional manifolds.<ref>
+{{Cite journal
+ |last1=Alagic | first1=G.
+ |last2=Jordan | first2=S.P.
+ |last3=König | first3=R.
+ |last4=Reichardt | first4=B. W.
+ |year=2010
+ |title=Approximating Turaev-Viro 3-manifold invariants is universal for quantum computation
+ |journal=[[Physical Review A]]
+ |volume=82 |issue=4 |article-number=040302
+ |arxiv=1003.0923
+ |bibcode=2010PhRvA..82d0302A
+ |doi=10.1103/PhysRevA.82.040302
+| s2cid=28281402
+ }}</ref>
+
+===Solving a linear system of equations===
+{{main|Quantum algorithm for linear systems of equations}}
+
+In 2009, [[Aram Harrow]], Avinatan Hassidim, and [[Seth Lloyd]], formulated a quantum algorithm for solving [[System of linear equations|linear systems]]. The [[Quantum algorithm for linear systems of equations|algorithm]] estimates the result of a scalar measurement on the solution vector to a given linear system of equations.<ref name="Quantum algorithm for solving linear systems of equations by Harrow et al.">{{Cite journal|arxiv = 0811.3171|last1 = Harrow|first1 = Aram W|title = Quantum algorithm for solving linear systems of equations|journal = Physical Review Letters|volume = 103|issue = 15|article-number = 150502|last2 = Hassidim|first2 = Avinatan|last3 = Lloyd|first3 = Seth|year = 2008|doi = 10.1103/PhysRevLett.103.150502|pmid = 19905613|bibcode = 2009PhRvL.103o0502H|s2cid = 5187993}}</ref>
+
+Provided that the linear system is [[sparse matrix|sparse]] and has a low [[condition number]] <math>\kappa</math>, and that the user is interested in the result of a scalar measurement on the solution vector (instead of the values of the solution vector itself), then the algorithm has a runtime of <math>O(\log(N)\kappa^2)</math>, where <math>N</math> is the number of variables in the linear system. This offers an exponential speedup over the fastest classical algorithm, which runs in <math>O(N\kappa)</math> (or <math>O(N\sqrt{\kappa})</math> for positive semidefinite matrices).
+
+==Hybrid quantum/classical algorithms==
+Hybrid Quantum/Classical Algorithms combine quantum state preparation and measurement with classical optimization.<ref>{{cite journal|last1=Moll|first1=Nikolaj|last2=Barkoutsos|first2=Panagiotis|last3=Bishop|first3=Lev S.|last4=Chow|first4=Jerry M.|last5=Cross|first5=Andrew|last6=Egger|first6=Daniel J.|last7=Filipp|first7=Stefan|last8=Fuhrer|first8=Andreas|last9=Gambetta|first9=Jay M.|last10=Ganzhorn|first10=Marc|last11=Kandala|first11=Abhinav|last12=Mezzacapo|first12=Antonio|last13=Müller|first13=Peter|last14=Riess|first14=Walter|last15=Salis|first15=Gian|last16=Smolin|first16=John|last17=Tavernelli|first17=Ivano|last18=Temme|first18=Kristan|title=Quantum optimization using variational algorithms on near-term quantum devices|journal=Quantum Science and Technology|date=2018|volume=3|issue=3|page= 030503|doi=10.1088/2058-9565/aab822|arxiv=1710.01022|bibcode=2018QS&T....3c0503M|s2cid=56376912}}</ref> These algorithms generally aim to determine the ground-state eigenvector and eigenvalue of a Hermitian operator.
+
+=== QAOA ===
+The [[quantum approximate optimization algorithm]] takes inspiration from quantum annealing, performing a discretized approximation of quantum annealing using a quantum circuit. It can be used to solve problems in graph theory.<ref>{{cite arXiv |last1=Farhi |first1=Edward |last2=Goldstone |first2=Jeffrey |last3=Gutmann |first3=Sam |date=2014-11-14 |title=A Quantum Approximate Optimization Algorithm |eprint=1411.4028 |class=quant-ph}}</ref> The algorithm makes use of classical optimization of quantum operations to maximize an "objective function."
+
+=== Variational quantum eigensolver ===
+The [[variational quantum eigensolver]] (VQE) algorithm applies classical optimization to minimize the energy expectation value of an [[Ansatz|ansatz state]] to find the ground state of a Hermitian operator, such as a molecule's Hamiltonian.<ref>{{Cite journal |last1=Peruzzo |first1=Alberto |last2=McClean |first2=Jarrod |last3=Shadbolt |first3=Peter |last4=Yung |first4=Man-Hong |last5=Zhou |first5=Xiao-Qi |last6=Love |first6=Peter J. |last7=Aspuru-Guzik |first7=Alán |last8=O'Brien |first8=Jeremy L. |date=2014-07-23 |title=A variational eigenvalue solver on a photonic quantum processor |journal=Nature Communications |language=En |volume=5 |issue=1 |page=4213 |arxiv=1304.3061 |bibcode=2014NatCo...5.4213P |doi=10.1038/ncomms5213 |issn=2041-1723 |pmc=4124861 |pmid=25055053}}</ref> It can also be extended to find excited energies of molecular Hamiltonians.<ref>{{cite journal|last1=Higgott|first1=Oscar|last2=Wang|first2=Daochen|last3=Brierley|first3=Stephen|title=Variational Quantum Computation of Excited States|journal=Quantum|year=2019|volume=3|article-number=156|doi=10.22331/q-2019-07-01-156|arxiv=1805.08138|bibcode=2019Quant...3..156H |s2cid=119185497}}</ref>
+
+=== Contracted quantum eigensolver ===
+The contracted quantum eigensolver (CQE) algorithm minimizes the residual of a contraction (or projection) of the Schrödinger equation onto the space of two (or more) electrons to find the ground- or excited-state energy and two-electron reduced density matrix of a molecule.<ref>{{Cite journal|last1=Smart|first1=Scott|last2=Mazziotti|first2=David|date=2021-02-18|title=Quantum Solver of Contracted Eigenvalue Equations for Scalable Molecular Simulations on Quantum Computing Devices|journal=Phys. Rev. Lett.|language=En|volume=125|issue=7|article-number=070504|doi=10.1103/PhysRevLett.126.070504|pmid=33666467|arxiv=2004.11416|bibcode=2021PhRvL.126g0504S|s2cid=216144443}}</ref>  It is based on classical methods for solving energies and two-electron reduced density matrices directly from the anti-Hermitian contracted Schrödinger equation.<ref>{{Cite journal|last1=Mazziotti|first1=David|date=2006-10-06|title=Anti-Hermitian Contracted Schrödinger Equation: Direct Determination of the Two-Electron Reduced Density Matrices of Many-Electron Molecules|journal=Phys. Rev. Lett.|language=En|volume=97|issue=14|article-number=143002|doi=10.1103/PhysRevLett.97.143002|pmid=17155245|bibcode=2006PhRvL..97n3002M}}</ref>
+
+==See also==
+* [[Quantum machine learning]]
+* [[Quantum optimization algorithms]]
+* [[Quantum sort]]
+* [[Primality test]]
+
+==References==
+{{reflist}}
+
+==External links==
+* The [https://quantumalgorithmzoo.org Quantum Algorithm Zoo]: A comprehensive list of quantum algorithms that provide a speedup over the fastest known classical algorithms.
+* [https://www.cs.umd.edu/~amchilds/qa/ Andrew Childs' lecture notes on quantum algorithms]
+*[https://bastion.center/the-quantum-search-algorithm/ The Quantum search algorithm - brute force] {{Webarchive|url=https://web.archive.org/web/20180901034619/https://bastion.center/the-quantum-search-algorithm/ |date=1 September 2018 }}.
+* [http://computetube.de/#quantum http://computetube.de/#quantum] Pseudo Code
+
+===Surveys===
+* {{cite book |last1=Dalzell |first1=Alexander M. |last2=McArdle |first2=Sam |chapter= |date=2025 |arxiv=2310.03011 |display-authors=1 |title=Quantum Algorithms |doi=10.1017/9781009639651 |isbn=978-1-009-63965-1 }}
+* {{Cite book | last1 = Smith | first1 = J. | last2 = Mosca | first2 = M. | doi = 10.1007/978-3-540-92910-9_43 | chapter = Algorithms for Quantum Computers | title = Handbook of Natural Computing | pages = 1451–1492 | year = 2012 | arxiv = 1001.0767 | isbn = 978-3-540-92909-3 | s2cid = 16565723 }}
+* {{Cite journal | last1 = Childs | first1 = A. M. | last2 = Van Dam | first2 = W. | doi = 10.1103/RevModPhys.82.1 | title = Quantum algorithms for algebraic problems | journal = Reviews of Modern Physics | volume = 82 | pages = 1–52 | year = 2010 | issue = 1 |bibcode = 2010RvMP...82....1C | arxiv = 0812.0380 | s2cid = 119261679 }}
+
+{{quantum computing}}
+{{Quantum mechanics topics}}
+{{emerging technologies|quantum=yes|other=yes}}
+
+{{DEFAULTSORT:Quantum Algorithm}}
+[[Category:Quantum computing]]
+[[Category:Theoretical computer science]]
+[[Category:Quantum algorithms| ]]
