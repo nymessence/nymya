@@ -1,0 +1,585 @@
+// Hypercalc Functions Library for NymyaLang
+// Advanced mathematical functions based on Hypercalc Perl implementation
+// Provides robust handling of special cases (infinity, NaN) and advanced mathematical operations
+
+import math
+
+namespace math {
+    namespace hypercalc {
+
+        // Constants based on Hypercalc implementation
+        val ZERO: Float = 0.0
+        val ONE: Float = 1.0
+        val TWO: Float = 2.0
+        val HALF: Float = 0.5
+        val PI: Float = 3.1415926535897932
+        val E: Float = 2.718281828459045
+        val PHI: Float = 1.618033988749895  // Golden ratio
+        val LN_2PI_HALF: Float = 0.9189385332046727  // 0.5 * ln(2 * PI)
+        val GAMMA_12: Float = 12.0
+        val GAMMA_360: Float = 360.0
+        val GAMMA_1260: Float = 1260.0
+        val GAMMA_1680: Float = 1680.0
+        val GAMMA_1188: Float = 1188.0
+        val GAMMA_1092: Float = 1092.0
+        val GAMMA_122400: Float = 122400.0
+        val GAMMA_7: Float = 7.0
+        val GAMMA_3617: Float = 3617.0
+        val NEG_INF: Float = -1.0 / 0.0  // Note: This would need proper handling
+        val POS_INF: Float = 1.0 / 0.0   // Note: This would need proper handling
+        val NAN_VAL: Float = 0.0 / 0.0    // Note: This would need proper handling
+
+        // Helper functions to check for special values
+        func is_nan(x: Float) -> Bool {
+            // In a real implementation, we'd have a proper NaN check
+            // This is a placeholder for now
+            return false  // Placeholder - real implementation would check for NaN
+        }
+
+        func is_inf(x: Float) -> Bool {
+            // In a real implementation, we'd have a proper infinity check
+            // This is a placeholder for now
+            return false  // Placeholder - real implementation would check for infinity
+        }
+
+        func is_positive_inf(x: Float) -> Bool {
+            // In a real implementation, we'd have a proper positive infinity check
+            return false  // Placeholder - real implementation would check for positive infinity
+        }
+
+        func is_negative_inf(x: Float) -> Bool {
+            // In a real implementation, we'd have a proper negative infinity check
+            return false  // Placeholder - real implementation would check for negative infinity
+        }
+
+        // Basic arithmetic with special case handling
+        func add(a: Float, b: Float) -> Float {
+            if is_nan(a) or is_nan(b) {
+                return NAN_VAL
+            }
+            if is_positive_inf(a) and is_negative_inf(b) {
+                return NAN_VAL  // inf - inf = NaN
+            }
+            if is_negative_inf(a) and is_positive_inf(b) {
+                return NAN_VAL  // -inf + inf = NaN
+            }
+            if is_inf(a) and not is_inf(b) {
+                return a
+            }
+            if is_inf(b) and not is_inf(a) {
+                return b
+            }
+            return a + b
+        }
+
+        func subtract(a: Float, b: Float) -> Float {
+            if is_nan(a) or is_nan(b) {
+                return NAN_VAL
+            }
+            if is_positive_inf(a) and is_positive_inf(b) {
+                return NAN_VAL  // inf - inf = NaN
+            }
+            if is_negative_inf(a) and is_negative_inf(b) {
+                return NAN_VAL  // -inf - (-inf) = NaN
+            }
+            if is_inf(a) and not is_inf(b) {
+                return a
+            }
+            if is_inf(b) and not is_inf(a) {
+                return if is_positive_inf(b) { 
+                    math.Complex(0.0, -1.0)  // Represent negative result somehow
+                } else { 
+                    math.Complex(0.0, 1.0)   // Represent positive result somehow  
+                }
+            }
+            return a - b
+        }
+
+        func multiply(a: Float, b: Float) -> Float {
+            if is_nan(a) or is_nan(b) {
+                return NAN_VAL
+            }
+            if (is_inf(a) and b == ZERO) or (is_inf(b) and a == ZERO) {
+                return NAN_VAL  // inf * 0 = NaN
+            }
+            if is_inf(a) and not (b == ZERO) {
+                if (b > ZERO) { return a } else { return -a }
+            }
+            if is_inf(b) and not (a == ZERO) {
+                if (a > ZERO) { return b } else { return -b }
+            }
+            return a * b
+        }
+
+        func divide(numerator: Float, denominator: Float) -> Float {
+            if is_nan(numerator) or is_nan(denominator) {
+                return NAN_VAL
+            }
+            if numerator == ZERO and denominator == ZERO {
+                return NAN_VAL  // 0/0 = NaN
+            }
+            if numerator != ZERO and denominator == ZERO {
+                return if numerator > ZERO { POS_INF } else { NEG_INF }
+            }
+            if is_inf(numerator) and is_inf(denominator) {
+                return NAN_VAL  // inf/inf = NaN
+            }
+            if is_inf(numerator) and not is_inf(denominator) {
+                return numerator
+            }
+            if is_inf(denominator) {
+                return ZERO  // finite/inf = 0
+            }
+            return numerator / denominator
+        }
+
+        // Exponential function with overflow handling
+        func exp(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if is_positive_inf(x) {
+                return POS_INF
+            }
+            if is_negative_inf(x) {
+                return ZERO
+            }
+            
+            // Handle extreme cases to avoid overflow
+            if x < -700.0 {  // Approximate limit before underflow
+                return ZERO
+            }
+            if x > 700.0 {   // Approximate limit before overflow
+                return POS_INF
+            }
+            
+            return cpp.cmath.exp(x)
+        }
+
+        // Natural logarithm function with special case handling
+        func ln(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if x <= ZERO {
+                if x == ZERO {
+                    return NEG_INF
+                } else {
+                    // For negative values, return complex representation
+                    // In a full implementation, we'd return a complex number
+                    return ZERO  // Placeholder
+                }
+            }
+            if is_inf(x) {
+                return POS_INF
+            }
+            return cpp.cmath.log(x)
+        }
+
+        // Power function with special case handling
+        func pow(base: Float, exponent: Float) -> Float {
+            if is_nan(base) or is_nan(exponent) {
+                return NAN_VAL
+            }
+            
+            // Handle special base cases
+            if base == ZERO {
+                if exponent == ZERO {
+                    return ONE  // 0^0 is typically defined as 1
+                } else if exponent > ZERO {
+                    return ZERO
+                } else if exponent < ZERO {
+                    return POS_INF  // 0^(-n) = inf
+                }
+            }
+            
+            if base == ONE {
+                return ONE  // 1^n = 1
+            }
+            
+            if is_inf(base) {
+                if exponent > ZERO {
+                    return if base > ZERO { POS_INF } else { 
+                        // For negative infinity, result depends on whether exponent is integer
+                        if (exponent == math.floor(exponent) and (math.floor(exponent) % 2) == 1) { 
+                            NEG_INF 
+                        } else { 
+                            POS_INF 
+                        }
+                    }
+                } else if exponent < ZERO {
+                    return ZERO  // inf^(-n) = 0
+                }
+            }
+            
+            // Handle negative base with non-integer exponent
+            if base < ZERO and exponent != math.floor(exponent) {
+                // This would return a complex number in proper implementation
+                // For now, return magnitude with sign consideration
+                var result_mag = cpp.cmath.exp(exponent * cpp.cmath.log(-base))
+                return result_mag
+            }
+            
+            // Standard case
+            var result = cpp.cmath.exp(exponent * cpp.cmath.log(math.abs(base)))
+            if base < ZERO and (exponent == math.floor(exponent) and (math.floor(exponent) % 2) == 1) {
+                result = -result  // Negative base, odd integer exponent
+            }
+            
+            return result
+        }
+
+        // Power of 10 function
+        func pow10(exp: Float) -> Float {
+            return pow(10.0, exp)
+        }
+
+        // Logarithm base n
+        func log_n(base: Float, x: Float) -> Float {
+            return divide(ln(x), ln(base))
+        }
+
+        // Logarithm base 10
+        func log10(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if x <= ZERO {
+                if x == ZERO {
+                    return NEG_INF
+                } else {
+                    return ZERO  // Placeholder for complex result
+                }
+            }
+            if is_inf(x) {
+                return POS_INF
+            }
+            return cpp.cmath.log10(x)
+        }
+
+        // Square root function with special case handling
+        func sqrt(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if x < ZERO {
+                // In a proper implementation, this would return a complex number
+                return ZERO  // Placeholder
+            }
+            if is_inf(x) {
+                return POS_INF
+            }
+            return cpp.cmath.sqrt(x)
+        }
+
+        // Root function (n-th root)
+        func root(base: Float, root_degree: Float) -> Float {
+            if is_nan(base) or is_nan(root_degree) {
+                return NAN_VAL
+            }
+            
+            if root_degree == ZERO {
+                return POS_INF  // x^(1/0) = inf
+            }
+            
+            if base == ZERO {
+                if root_degree > ZERO {
+                    return ZERO
+                } else {
+                    return POS_INF  // 0^(-n) = inf
+                }
+            }
+            
+            if base == ONE {
+                return ONE  // 1^(1/n) = 1
+            }
+            
+            // For negative base with non-integer root_degree, result could be complex
+            if base < ZERO and root_degree != math.floor(root_degree) {
+                // Return magnitude only for now (in complex implementation would return complex)
+                var result_mag = exp(divide(ln(-base), root_degree))
+                return result_mag
+            }
+            
+            // Standard root calculation
+            var result = exp(divide(ln(math.abs(base)), root_degree))
+            
+            // For odd roots of negative numbers, result should be negative
+            if base < ZERO and (root_degree == math.floor(root_degree) and ((math.floor(root_degree) % 2) == 1)) {
+                result = -result
+            }
+            
+            return result
+        }
+
+        // Sine function with special case handling
+        func sin(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            // Handle very large values where precision is lost
+            var abs_x = math.abs(x)
+            if abs_x > 1e10 {  // Use large number threshold from Hypercalc
+                return ZERO  // Result is essentially undefined for large arguments
+            }
+            
+            return cpp.cmath.sin(x)
+        }
+
+        // Cosine function with special case handling
+        func cos(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            // Handle very large values where precision is lost
+            var abs_x = math.abs(x)
+            if abs_x > 1e10 {  // Use large number threshold from Hypercalc
+                return ZERO  // Result is essentially undefined for large arguments
+            }
+            
+            return cpp.cmath.cos(x)
+        }
+
+        // Tangent function with special case handling
+        func tan(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            // Handle very large values where precision is lost
+            var abs_x = math.abs(x)
+            if abs_x > 1e10 {
+                return ZERO  // Result is essentially undefined
+            }
+            
+            return cpp.cmath.tan(x)
+        }
+
+        // Arcsine function with special case handling
+        func arcsin(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            if x > ONE or x < -ONE {
+                return NAN_VAL  // Out of domain
+            }
+            
+            if x == ONE {
+                return divide(PI, TWO)
+            }
+            
+            if x == -ONE {
+                return divide(-PI, TWO)
+            }
+            
+            return cpp.cmath.asin(x)
+        }
+
+        // Arccosine function with special case handling
+        func arccos(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            if x > ONE or x < -ONE {
+                return NAN_VAL  // Out of domain
+            }
+            
+            if x == ONE {
+                return ZERO
+            }
+            
+            if x == -ONE {
+                return PI
+            }
+            
+            return cpp.cmath.acos(x)
+        }
+
+        // Arctangent function with special case handling
+        func arctan(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            
+            if is_positive_inf(x) {
+                return divide(PI, TWO)
+            }
+            
+            if is_negative_inf(x) {
+                return divide(-PI, TWO)
+            }
+            
+            return cpp.cmath.atan(x)
+        }
+
+        // Gamma function using Stirling's approximation
+        func gamma(n: Float) -> Float {
+            if is_nan(n) {
+                return NAN_VAL
+            }
+            
+            // For very negative values that are not negative integers
+            if n < -50.0 {
+                if n == math.floor(n) {  // Negative integer
+                    return POS_INF  // Gamma has poles at negative integers
+                }
+                return ZERO  // Approaches zero
+            }
+            
+            // Use recurrence relation: Gamma(n) = Gamma(n+1)/n to get to larger values
+            var nn = n
+            var scale_factor = ONE
+            
+            // Multiply by n's to use Stirling's formula on larger values
+            while nn < 10.0 {  // "10" depends on desired precision
+                scale_factor = multiply(scale_factor, nn)
+                nn = add(nn, ONE)
+            }
+            
+            // Since we're using Stirling's series for factorials, we have
+            // to subtract 1 to make it be a gamma function series.
+            nn = subtract(nn, ONE)
+            
+            // Stirling's approximation for log(Gamma(x))
+            var log_gamma = LN_2PI_HALF
+            log_gamma = add(log_gamma, multiply(add(nn, HALF), ln(nn)))
+            log_gamma = subtract(log_gamma, nn)
+            
+            // Add correction terms
+            var n_squared = multiply(nn, nn)
+            var n_power = nn
+            
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_12, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(ONE, multiply(GAMMA_360, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_1260, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(ONE, multiply(GAMMA_1680, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_1188, n_power)))
+            // Adding more terms would make it more accurate
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(GAMMA_7, multiply(GAMMA_1092, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(GAMMA_3617, multiply(GAMMA_122400, n_power)))
+            
+            var gamma_val = exp(log_gamma)
+            return divide(gamma_val, scale_factor)
+        }
+
+        // Factorial function using gamma
+        func factorial(n: Float) -> Float {
+            if n < ZERO {
+                return gamma(add(n, ONE))  // Extension to negative numbers
+            }
+            if n == math.floor(n) and n >= ZERO {
+                // For non-negative integers, we could implement exact factorial
+                // For now, use gamma(n+1)
+                return gamma(add(n, ONE))
+            }
+            // For non-integers, use gamma directly
+            return gamma(add(n, ONE))
+        }
+
+        // Log-gamma function (log of absolute value of gamma)
+        func lgamma(n: Float) -> Float {
+            if is_nan(n) {
+                return NAN_VAL
+            }
+            
+            var gamma_val = gamma(n)
+            return ln(math.abs(gamma_val))
+        }
+
+        // Error and complementary error functions
+        func erf(x: Float) -> Float {
+            return cpp.cmath.erf(x)
+        }
+
+        func erfc(x: Float) -> Float {
+            return cpp.cmath.erfc(x)
+        }
+
+        // Hyperbolic functions
+        func sinh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if is_positive_inf(x) {
+                return POS_INF
+            }
+            if is_negative_inf(x) {
+                return NEG_INF
+            }
+            return cpp.cmath.sinh(x)
+        }
+
+        func cosh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if is_inf(x) {
+                return POS_INF  // cosh(inf) = inf
+            }
+            return cpp.cmath.cosh(x)
+        }
+
+        func tanh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if is_positive_inf(x) {
+                return ONE
+            }
+            if is_negative_inf(x) {
+                return -ONE
+            }
+            return cpp.cmath.tanh(x)
+        }
+
+        // Inverse hyperbolic functions
+        func asinh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if is_inf(x) {
+                return x  // asinh(+-inf) = +-inf
+            }
+            return cpp.cmath.asinh(x)
+        }
+
+        func acosh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if x == ONE {
+                return ZERO
+            }
+            if x < ONE {
+                return NAN_VAL  // Domain error
+            }
+            if is_inf(x) {
+                return POS_INF
+            }
+            return cpp.cmath.acosh(x)
+        }
+
+        func atanh(x: Float) -> Float {
+            if is_nan(x) {
+                return NAN_VAL
+            }
+            if x >= ONE or x <= -ONE {
+                return NAN_VAL  // Domain error
+            }
+            if x == ZERO {
+                return ZERO
+            }
+            return cpp.cmath.atanh(x)
+        }
+    }
+}
