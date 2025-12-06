@@ -1,0 +1,54 @@
+// Comprehensive Hypercalc Integration Test
+// Verifies that all hypercalc functions are properly accessible through the math namespace
+
+import math
+import crystal
+
+func test_namespace_access() -> Void {
+    crystal.manifest("Testing namespace access to hypercalc functions...")
+    
+    // Test that functions are accessible through math.hypercalc
+    var add_result = math.hypercalc.add(2.0, 3.0)
+    crystal.manifest("math.hypercalc.add(2, 3) = " + add_result)
+    
+    var exp_result = math.hypercalc.exp(1.0)
+    crystal.manifest("math.hypercalc.exp(1) ≈ " + exp_result)
+    
+    var pow_result = math.hypercalc.pow(2.0, 10.0)
+    crystal.manifest("math.hypercalc.pow(2, 10) = " + pow_result)
+    
+    var sqrt_result = math.hypercalc.sqrt(64.0)
+    crystal.manifest("math.hypercalc.sqrt(64) = " + sqrt_result)
+    
+    var gamma_result = math.hypercalc.gamma(6.0)
+    crystal.manifest("math.hypercalc.gamma(6) = " + gamma_result)
+    
+    var sin_result = math.hypercalc.sin(math.PI / 2.0)
+    crystal.manifest("math.hypercalc.sin(π/2) ≈ " + sin_result)
+    
+    var log_result = math.hypercalc.log10(1000.0)
+    crystal.manifest("math.hypercalc.log10(1000) = " + log_result)
+    
+    crystal.manifest("Namespace access test completed successfully!")
+}
+
+func test_constants() -> Void {
+    crystal.manifest("Testing hypercalc constants...")
+    
+    crystal.manifest("PI = " + math.hypercalc.PI)
+    crystal.manifest("E = " + math.hypercalc.E)
+    crystal.manifest("PHI = " + math.hypercalc.PHI)
+    crystal.manifest("ZERO = " + math.hypercalc.ZERO)
+    crystal.manifest("ONE = " + math.hypercalc.ONE)
+    crystal.manifest("TWO = " + math.hypercalc.TWO)
+    crystal.manifest("HALF = " + math.hypercalc.HALF)
+    
+    crystal.manifest("Constants test completed!")
+}
+
+func main() -> Void {
+    test_namespace_access()
+    test_constants()
+    
+    crystal.manifest("All hypercalc integration tests completed successfully!")
+}
