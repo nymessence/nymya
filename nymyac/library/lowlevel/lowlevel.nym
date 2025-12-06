@@ -1,0 +1,529 @@
+// Low-level Bitshift, Memory, and Register Operations Library for NymyaLang
+// Provides direct access to bit manipulation and memory operations
+
+import crystal
+
+namespace lowlevel {
+
+    // Bitwise operations
+    namespace bitwise {
+
+        // Bitwise AND operation
+        func and(a: Int, b: Int) -> Int {
+            return a & b
+        }
+
+        // Bitwise OR operation
+        func or(a: Int, b: Int) -> Int {
+            return a | b
+        }
+
+        // Bitwise XOR operation
+        func xor(a: Int, b: Int) -> Int {
+            return a ^ b
+        }
+
+        // Bitwise NOT operation
+        func not(a: Int) -> Int {
+            return ~a
+        }
+
+        // Left bit shift: a << b
+        func left_shift(a: Int, b: Int) -> Int {
+            return a << b
+        }
+
+        // Right bit shift (arithmetic): a >> b
+        func right_shift(a: Int, b: Int) -> Int {
+            return a >> b
+        }
+
+        // Right bit shift (logical): treats number as unsigned
+        func logical_right_shift(a: Int, b: Int) -> Int {
+            // Since NymyaLang doesn't distinguish between signed/unsigned at the language level,
+            // this is implementation-dependent. For now, treat as arithmetic shift
+            // In a real implementation, this might call a different operation
+            return a >> b
+        }
+
+        // Rotate left: rotate bits left by b positions
+        func rotate_left(value: Int, positions: Int) -> Int {
+            var bits = 32  // Assuming 32-bit integers
+            if value < 0 {
+                bits = 64  // For larger integers
+            }
+            var effective_positions = positions % bits
+            if effective_positions < 0 {
+                effective_positions += bits
+            }
+            return ((value << effective_positions) | (value >> (bits - effective_positions))) & 
+                   ((1 << bits) - 1)
+        }
+
+        // Rotate right: rotate bits right by b positions
+        func rotate_right(value: Int, positions: Int) -> Int {
+            var bits = 32  // Assuming 32-bit integers  
+            if value < 0 {
+                bits = 64  // For larger integers
+            }
+            var effective_positions = positions % bits
+            if effective_positions < 0 {
+                effective_positions += bits
+            }
+            return ((value >> effective_positions) | (value << (bits - effective_positions))) & 
+                   ((1 << bits) - 1)
+        }
+
+        // Count leading zeros
+        func count_leading_zeros(value: Int) -> Int {
+            if value == 0 {
+                return 32  // Assuming 32-bit, adjust based on implementation
+            }
+            
+            var count = 0
+            var v = math.abs(value)  // Work with absolute value
+            while (v & (1 << 31)) == 0 and count < 32 {
+                v = v << 1
+                count = count + 1
+            }
+            return count
+        }
+
+        // Count trailing zeros
+        func count_trailing_zeros(value: Int) -> Int {
+            if value == 0 {
+                return 32  // Assuming 32-bit
+            }
+            
+            var count = 0
+            var v = math.abs(value)
+            while (v & 1) == 0 and count < 32 {
+                v = v >> 1
+                count = count + 1
+            }
+            return count
+        }
+
+        // Count number of set bits (population count)
+        func pop_count(value: Int) -> Int {
+            var count = 0
+            var v = math.abs(value)  // Work with absolute value
+            while v != 0 {
+                count = count + (v & 1)
+                v = v >> 1
+            }
+            return count
+        }
+
+        // Test if a specific bit is set
+        func test_bit(value: Int, position: Int) -> Bool {
+            return (value & (1 << position)) != 0
+        }
+
+        // Set a specific bit
+        func set_bit(value: Int, position: Int) -> Int {
+            return value | (1 << position)
+        }
+
+        // Clear a specific bit
+        func clear_bit(value: Int, position: Int) -> Int {
+            return value & ~(1 << position)
+        }
+
+        // Toggle a specific bit
+        func toggle_bit(value: Int, position: Int) -> Int {
+            return value ^ (1 << position)
+        }
+
+        // Extract bit field: extract 'length' bits starting at 'position'
+        func extract_bit_field(value: Int, position: Int, length: Int) -> Int {
+            var mask = (1 << length) - 1  // Create mask with 'length' 1-bits
+            return (value >> position) & mask
+        }
+
+        // Insert bit field: insert 'field' value into 'target' at 'position' with 'length'
+        func insert_bit_field(target: Int, field: Int, position: Int, length: Int) -> Int {
+            var mask = (1 << length) - 1  // Create mask with 'length' 1-bits
+            var field_masked = field & mask
+            var cleared_target = target & ~(mask << position)
+            return cleared_target | (field_masked << position)
+        }
+    }
+
+    // Memory operations
+    namespace memory {
+
+        // Memory block representation
+        class MemBlock {
+            ptr: crystal.Pointer
+            size: Int
+
+            init(size_bytes: Int) {
+                this.size = size_bytes
+                this.ptr = crystal.cpp.cstdlib.malloc(size_bytes)
+            }
+
+            func dispose() -> Void {
+                if this.ptr.address != 0 {
+                    crystal.cpp.cstdlib.free(this.ptr)
+                    this.ptr = crystal.Pointer(0)
+                    this.size = 0
+                }
+            }
+
+            func write_byte(offset: Int, value: Int) -> Void {
+                // This would require direct memory access which may not be available
+                // in a safe language like NymyaLang
+                // This is a placeholder implementation
+                crystal.manifest("Writing byte " + value + " at offset " + offset + " in memory block")
+            }
+
+            func read_byte(offset: Int) -> Int {
+                // Placeholder implementation
+                crystal.manifest("Reading byte from offset " + offset + " in memory block")
+                return 0
+            }
+
+            func fill(value: Int) -> Void {
+                // Fill memory block with a specific value
+                // This would use memset in a real implementation
+                crystal.manifest("Filling memory block with value " + value)
+            }
+
+            func copy_from(source: MemBlock, src_offset: Int, dest_offset: Int, length: Int) -> Void {
+                // Copy memory from another block
+                // This would use memcpy in a real implementation
+                crystal.manifest("Copying " + length + " bytes from block")
+            }
+
+            func compare(other: MemBlock) -> Int {
+                // Compare memory blocks
+                // Returns 0 if equal, negative if less than, positive if greater
+                crystal.manifest("Comparing memory blocks")
+                return 0
+            }
+        }
+
+        // Direct memory access functions (using C++ equivalents)
+        func allocate(size: Int) -> crystal.Pointer {
+            return crystal.cpp.cstdlib.malloc(size)
+        }
+
+        func deallocate(ptr: crystal.Pointer) -> Void {
+            crystal.cpp.cstdlib.free(ptr)
+        }
+
+        func copy(dest: crystal.Pointer, src: crystal.Pointer, size: Int) -> Void {
+            crystal.cpp.cstdlib.memcpy(dest, src, size)
+        }
+
+        func move(dest: crystal.Pointer, src: crystal.Pointer, size: Int) -> Void {
+            crystal.cpp.cstdlib.memmove(dest, src, size)
+        }
+
+        func set(ptr: crystal.Pointer, value: Int, size: Int) -> Void {
+            crystal.cpp.cstdlib.memset(ptr, value, size)
+        }
+
+        func compare(ptr1: crystal.Pointer, ptr2: crystal.Pointer, size: Int) -> Int {
+            // This would use memcmp in C++, but we'll simulate it
+            return 0  // Placeholder
+        }
+    }
+
+    // Register operations
+    namespace register {
+
+        // General purpose register
+        class GPRegister {
+            value: Int
+            width: Int  // Register width in bits (e.g., 32, 64)
+
+            init(width_bits: Int) {
+                this.value = 0
+                this.width = width_bits
+            }
+
+            init(width_bits: Int, initial_value: Int) {
+                this.width = width_bits
+                this.value = initial_value & ((1 << width_bits) - 1)  // Mask to register width
+            }
+
+            func get_value() -> Int {
+                return this.value
+            }
+
+            func set_value(val: Int) -> Void {
+                this.value = val & ((1 << this.width) - 1)  // Mask to register width
+            }
+
+            func set_bit(position: Int) -> Void {
+                if position < this.width {
+                    this.value = this.value | (1 << position)
+                }
+            }
+
+            func clear_bit(position: Int) -> Void {
+                if position < this.width {
+                    this.value = this.value & ~(1 << position)
+                }
+            }
+
+            func toggle_bit(position: Int) -> Void {
+                if position < this.width {
+                    this.value = this.value ^ (1 << position)
+                }
+            }
+
+            func test_bit(position: Int) -> Bool {
+                if position >= this.width {
+                    return false
+                }
+                return ((this.value >> position) & 1) == 1
+            }
+
+            func shift_left(bits: Int) -> Void {
+                var shift_amount = bits % this.width
+                this.value = (this.value << shift_amount) & ((1 << this.width) - 1)
+            }
+
+            func shift_right(bits: Int) -> Void {
+                var shift_amount = bits % this.width
+                this.value = this.value >> shift_amount
+            }
+
+            func arithmetic_shift_right(bits: Int) -> Void {
+                var shift_amount = bits % this.width
+                // Arithmetic shift preserves sign bit for signed integers
+                // This is simulated by checking the sign bit
+                var sign_bit = this.value & (1 << (this.width - 1))
+                this.value = this.value >> shift_amount
+                // If we're simulating arithmetic shift, we might need to preserve sign
+                // For now, we'll do a logical shift
+            }
+
+            func rotate_left(bits: Int) -> Void {
+                var effective_bits = bits % this.width
+                var left_part = (this.value << effective_bits) & ((1 << this.width) - 1)
+                var right_part = this.value >> (this.width - effective_bits)
+                this.value = left_part | right_part
+            }
+
+            func rotate_right(bits: Int) -> Void {
+                var effective_bits = bits % this.width
+                var right_part = (this.value >> effective_bits) & ((1 << this.width) - 1)
+                var left_part = this.value << (this.width - effective_bits)
+                this.value = (left_part | right_part) & ((1 << this.width) - 1)
+            }
+
+            func to_string() -> String {
+                return "Register(" + this.width + "): 0x" + format_as_hex(this.value)
+            }
+
+            // Helper to format value as hex string
+            func format_as_hex(val: Int) -> String {
+                // This would depend on the implementation of hex formatting in NymyaLang
+                // For now, return a simple representation
+                return val.to_string()
+            }
+        }
+
+        // Flag register with specific flag positions
+        class FlagRegister {
+            value: Int
+            width: Int
+
+            init(width_bits: Int) {
+                this.value = 0
+                this.width = width_bits
+            }
+
+            // Common flag positions
+            func set_carry() -> Void {
+                this.value = this.value | (1 << 0)  // Bit 0: Carry flag
+            }
+
+            func clear_carry() -> Void {
+                this.value = this.value & ~(1 << 0)
+            }
+
+            func is_carry() -> Bool {
+                return (this.value & (1 << 0)) != 0
+            }
+
+            func set_zero() -> Void {
+                this.value = this.value | (1 << 6)  // Bit 6: Zero flag
+            }
+
+            func clear_zero() -> Void {
+                this.value = this.value & ~(1 << 6)
+            }
+
+            func is_zero() -> Bool {
+                return (this.value & (1 << 6)) != 0
+            }
+
+            func set_sign() -> Void {
+                this.value = this.value | (1 << 7)  // Bit 7: Sign flag
+            }
+
+            func clear_sign() -> Void {
+                this.value = this.value & ~(1 << 7)
+            }
+
+            func is_sign() -> Bool {
+                return (this.value & (1 << 7)) != 0
+            }
+
+            func set_overflow() -> Void {
+                this.value = this.value | (1 << 11)  // Bit 11: Overflow flag
+            }
+
+            func clear_overflow() -> Void {
+                this.value = this.value & ~(1 << 11)
+            }
+
+            func is_overflow() -> Bool {
+                return (this.value & (1 << 11)) != 0
+            }
+
+            func get_value() -> Int {
+                return this.value
+            }
+
+            func set_value(val: Int) -> Void {
+                this.value = val & ((1 << this.width) - 1)
+            }
+        }
+
+        // Simple register bank
+        class RegisterBank {
+            registers: List[GPRegister]
+            flag_register: FlagRegister
+
+            init(num_registers: Int, register_width: Int) {
+                this.registers = []
+                for i in range(num_registers) {
+                    this.registers.append(GPRegister(register_width))
+                }
+                this.flag_register = FlagRegister(16)  // 16-bit flag register
+            }
+
+            func get_register(index: Int) -> GPRegister {
+                if index >= 0 and index < this.registers.length {
+                    return this.registers[index]
+                }
+                return this.registers[0]  // Return first register as default
+            }
+
+            func set_register(index: Int, value: Int) -> Void {
+                if index >= 0 and index < this.registers.length {
+                    this.registers[index].set_value(value)
+                }
+            }
+
+            func get_flag_register() -> FlagRegister {
+                return this.flag_register
+            }
+
+            func perform_operation(op: String, reg1_idx: Int, reg2_idx: Int) -> Void {
+                var reg1 = this.get_register(reg1_idx)
+                var reg2 = this.get_register(reg2_idx)
+                
+                if op == "ADD" {
+                    var result = reg1.get_value() + reg2.get_value()
+                    reg1.set_value(result)
+                    // Set flags based on result
+                    if result == 0 {
+                        this.flag_register.set_zero()
+                    } else {
+                        this.flag_register.clear_zero()
+                    }
+                    if result < 0 {
+                        this.flag_register.set_sign()
+                    } else {
+                        this.flag_register.clear_sign()
+                    }
+                } else if op == "SUB" {
+                    var result = reg1.get_value() - reg2.get_value()
+                    reg1.set_value(result)
+                    // Set flags
+                    if result == 0 {
+                        this.flag_register.set_zero()
+                    } else {
+                        this.flag_register.clear_zero()
+                    }
+                    if result < 0 {
+                        this.flag_register.set_sign()
+                    } else {
+                        this.flag_register.clear_sign()
+                    }
+                } else if op == "AND" {
+                    var result = bitwise.and(reg1.get_value(), reg2.get_value())
+                    reg1.set_value(result)
+                } else if op == "OR" {
+                    var result = bitwise.or(reg1.get_value(), reg2.get_value())
+                    reg1.set_value(result)
+                } else if op == "XOR" {
+                    var result = bitwise.xor(reg1.get_value(), reg2.get_value())
+                    reg1.set_value(result)
+                }
+            }
+        }
+    }
+
+    // Low-level utility functions
+    namespace utils {
+
+        // Swap two values without temporary variable (using XOR)
+        func swap_xor(a: Int, b: Int) -> List[Int] {
+            var result_a = a ^ b
+            var result_b = result_a ^ b
+            result_a = result_a ^ result_b
+            return [result_a, result_b]
+        }
+
+        // Endian conversion utilities
+        func swap_endian_16(value: Int) -> Int {
+            return ((value & 0xFF) << 8) | ((value >> 8) & 0xFF)
+        }
+
+        func swap_endian_32(value: Int) -> Int {
+            return ((value & 0xFF) << 24) | 
+                   (((value >> 8) & 0xFF) << 16) | 
+                   (((value >> 16) & 0xFF) << 8) | 
+                   ((value >> 24) & 0xFF)
+        }
+
+        // Alignment functions
+        func align_up(value: Int, alignment: Int) -> Int {
+            return (value + alignment - 1) & ~(alignment - 1)
+        }
+
+        func align_down(value: Int, alignment: Int) -> Int {
+            return value & ~(alignment - 1)
+        }
+
+        // Check if value is a power of two
+        func is_power_of_two(value: Int) -> Bool {
+            if value <= 0 {
+                return false
+            }
+            return (value & (value - 1)) == 0
+        }
+
+        // Get next power of two
+        func next_power_of_two(value: Int) -> Int {
+            if value <= 0 {
+                return 1
+            }
+            var v = value - 1
+            v = v | (v >> 1)
+            v = v | (v >> 2)
+            v = v | (v >> 4)
+            v = v | (v >> 8)
+            v = v | (v >> 16)
+            return v + 1
+        }
+    }
+}
