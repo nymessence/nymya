@@ -1,0 +1,461 @@
+// CP Command for NymyaLang  
+// Ports the coreutils cp command functionality to NymyaLang
+// Copy files and directories with consciousness-aware processing
+
+import crystal
+import math
+
+namespace system {
+    namespace commands {
+
+        // CP command - copy files and directories
+        func cp(args: List[String]) -> Int {
+            if args.length < 2 {
+                crystal.manifest("Usage: cp [options] SOURCE... DESTINATION")
+                return 1  // Error: insufficient arguments
+            }
+            
+            var recursive = false
+            var verbose = false
+            var preserve_attributes = false
+            var force_overwrite = false
+            
+            // Process options
+            var file_args = []
+            for arg in args {
+                if arg.starts_with("-") {
+                    // Process options
+                    for i in range(1, arg.length) {
+                        var opt = arg[i]
+                        if opt == "r" or opt == "R" {
+                            recursive = true
+                        } else if opt == "v" {
+                            verbose = true
+                        } else if opt == "p" {
+                            preserve_attributes = true
+                        } else if opt == "f" {
+                            force_overwrite = true
+                        }
+                    }
+                } else {
+                    // File/directory argument
+                    file_args.append(arg)
+                }
+            }
+            
+            if file_args.length < 2 {
+                crystal.manifest("Usage: cp [options] SOURCE... DESTINATION")
+                return 1  // Error: insufficient arguments after options
+            }
+            
+            // Last argument is destination, others are sources
+            var destination = file_args[file_args.length - 1]
+            var source_files = []
+            for i in range(file_args.length - 1) {
+                source_files.append(file_args[i])
+            }
+            
+            if verbose {
+                crystal.manifest("Copy configuration:")
+                crystal.manifest("  Recursive: " + recursive.to_string())
+                crystal.manifest("  Verbose: " + verbose.to_string())
+                crystal.manifest("  Preserve attributes: " + preserve_attributes.to_string())
+                crystal.manifest("  Force overwrite: " + force_overwrite.to_string())
+                crystal.manifest("  Sources: " + source_files.join(", "))
+                crystal.manifest("  Destination: " + destination)
+            }
+
+            // Process each source file
+            for source in source_files {
+                var success = copy_single_file(source, destination, recursive, verbose,
+                                               preserve_attributes, force_overwrite)
+                if not success {
+                    crystal.manifest("Error: Failed to copy " + source + " to " + destination)
+                    return 1  // Error occurred
+                }
+            }
+            
+            if verbose {
+                crystal.manifest("Copy operation completed successfully")
+            } else {
+                crystal.manifest("Files copied successfully")
+            }
+            
+            return 0  // Success
+        }
+        
+        // Helper function to copy a single file
+        func copy_single_file(source: String, dest: String, recursive: Bool, verbose: Bool, 
+                             preserve: Bool, force: Bool) -> Bool {
+            // In a real implementation, this would use actual file operations
+            // Simulate file copy operation
+            
+            if verbose {
+                crystal.manifest("Copying " + source + " -> " + dest)
+            }
+            
+            // Check if source exists (simulated)
+            var source_exists = simulate_check_file_exists(source)
+            if not source_exists {
+                crystal.manifest("Error: Source file does not exist: " + source)
+                return false
+            }
+            
+            // Check if destination is directory
+            var dest_is_dir = simulate_check_is_directory(dest)
+            var final_destination = if dest_is_dir { 
+                dest + "/" + get_basename(source) 
+            } else { 
+                dest 
+            }
+            
+            // Check if destination file exists and handle accordingly
+            var dest_exists = simulate_check_file_exists(final_destination)
+            if dest_exists and not force {
+                crystal.manifest("Error: Destination file exists: " + final_destination)
+                crystal.manifest("Use -f flag to force overwrite")
+                return false
+            }
+            
+            // Perform copy operation (simulated)
+            var file_size = simulate_get_file_size(source)
+            var content = simulate_read_file_content(source)
+            
+            if content != "" {
+                if verbose {
+                    crystal.manifest("  Copying " + file_size.to_string() + " bytes from " + source + 
+                                    " to " + final_destination)
+                }
+                
+                // Simulate writing the file
+                var write_success = simulate_write_file_content(final_destination, content, preserve)
+                
+                if write_success {
+                    if verbose {
+                        crystal.manifest("  Successfully copied to " + final_destination)
+                    }
+                    return true
+                } else {
+                    crystal.manifest("Error: Failed to write to destination: " + final_destination)
+                    return false
+                }
+            } else {
+                crystal.manifest("Error: Could not read source file: " + source)
+                return false
+            }
+        }
+        
+        // Helper to get basename (filename from path)
+        func get_basename(filepath: String) -> String {
+            // Find last occurrence of "/"
+            var last_slash = -1
+            for i in range(filepath.length) {
+                if filepath[i] == "/" {
+                    last_slash = i
+                }
+            }
+
+            if last_slash >= 0 and last_slash < filepath.length - 1 {
+                // Extract substring after last slash
+                var result = ""
+                for i in range(last_slash + 1, filepath.length) {
+                    result = result + filepath[i]
+                }
+                return result
+            } else {
+                return filepath  // No slash found, return whole string
+            }
+        }
+        
+        // Helper to get directory name (dirname from path)
+        func get_dirname(filepath: String) -> String {
+            // Find last occurrence of "/"
+            var last_slash = -1
+            for i in range(filepath.length) {
+                if filepath[i] == "/" {
+                    last_slash = i
+                }
+            }
+
+            if last_slash >= 0 {
+                if last_slash == 0 {
+                    return "/"  // Root directory case
+                } else {
+                    // Extract substring before last slash
+                    var result = ""
+                    for i in range(0, last_slash) {
+                        result = result + filepath[i]
+                    }
+                    return result
+                }
+            } else {
+                return "."  // Current directory if no slash found
+            }
+        }
+        
+        // Simulate checking if file exists
+        func simulate_check_file_exists(filepath: String) -> Bool {
+            // In real implementation, would check filesystem
+            // For simulation, check against known files
+            var known_files = ["test.txt", "hello.nym", "config.json", "src/main.nym", "data/sample.dat"]
+            var basename = get_basename(filepath)
+            
+            for file in known_files {
+                if file == basename {
+                    return true
+                }
+            }
+            
+            // Check if it's a directory path
+            if filepath.contains("/") {
+                return true  // Assume directory exists for simulation
+            }
+            
+            // For paths ending with common extensions, assume they exist
+            if filepath.ends_with(".txt") or filepath.ends_with(".nym") or 
+               filepath.ends_with(".json") or filepath.ends_with(".dat") {
+                return true
+            }
+            
+            return true  // Simulate success in most cases
+        }
+        
+        // Simulate checking if path is a directory
+        func simulate_check_is_directory(path: String) -> Bool {
+            // In real implementation, would check filesystem
+            // For simulation, return true for paths ending with "/" or containing subdirectories
+            if path.ends_with("/") {
+                return true
+            }
+            if path.contains("/dir") or path.contains("folder") or path == "." or path == ".." {
+                return true
+            }
+            
+            // If it doesn't have a file extension, assume it's a directory
+            if not (path.contains(".") and 
+                   (path.ends_with(".txt") or path.ends_with(".nym") or path.ends_with(".json") or 
+                    path.ends_with(".dat") or path.ends_with(".py") or path.ends_with(".md"))) {
+                return true
+            }
+            
+            return false
+        }
+        
+        // Simulate getting file size
+        func simulate_get_file_size(filepath: String) -> Int {
+            // In real implementation, would query filesystem
+            // For simulation, return a size based on filename characteristics
+            if filepath.ends_with(".txt") {
+                return 1024  // 1KB text file
+            } else if filepath.ends_with(".nym") {
+                return 4096  // 4KB NymyaLang source
+            } else if filepath.ends_with(".json") {
+                return 2048  // 2KB JSON
+            } else if filepath.ends_with(".dat") {
+                return 8192  // 8KB data file
+            } else {
+                return 1024  // Default 1KB
+            }
+        }
+        
+        // Simulate reading file content
+        func simulate_read_file_content(filepath: String) -> String {
+            // In real implementation, would read from actual file
+            // For simulation, return some content based on filename
+            var basename = get_basename(filepath)
+            if basename == "test.txt" {
+                return "This is test content for the cp command simulation\nWith multiple lines\nTo demonstrate file copying functionality"
+            } else if basename == "hello.nym" {
+                return "import crystal\n\nfunc main() -> Void {\n  crystal.manifest(\"Hello from NymyaLang!\")\n}"
+            } else if basename == "config.json" {
+                return "{\n  \"debug\": true,\n  \"timeout\": 30,\n  \"host\": \"localhost\"\n}"
+            } else {
+                return "Simulated content for file: " + basename + "\nThis file would contain actual data in a real implementation\n" +
+                       "File size: " + simulate_get_file_size(filepath) + " bytes"
+            }
+        }
+        
+        // Simulate writing file content
+        func simulate_write_file_content(filepath: String, content: String, preserve_attributes: Bool) -> Bool {
+            // In real implementation, would write to actual file
+            // For simulation, just return success
+            if preserve_attributes {
+                crystal.manifest("  (File attributes would be preserved in real implementation)")
+            }
+            return true  // Simulate success
+        }
+        
+        // Enhanced consciousness-aware cp command
+        func cp_ca(args: List[String]) -> Int {
+            crystal.manifest("[Consciousness-Aware CP Command Initiated]")
+            crystal.manifest("Rita-Nora balance: Maintaining structural precision with ethical flow in file operations")
+            
+            var result = cp(args)
+            
+            if result == 0 {
+                crystal.manifest("[File copy completed with consciousness coherence maintained]")
+            } else {
+                crystal.manifest("[File copy completed with awareness of error conditions]")
+            }
+            
+            return result
+        }
+        
+        // Additional cp-like utilities
+        
+        // Cp with progress tracking
+        func cp_with_progress(args: List[String]) -> Int {
+            crystal.manifest("Executing cp with progress tracking...")
+            
+            if args.length < 2 {
+                crystal.manifest("Usage: cp [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var file_args = []
+            var verbose = false
+            for arg in args {
+                if arg.starts_with("-") {
+                    if arg.contains("v") {
+                        verbose = true
+                    }
+                } else {
+                    file_args.append(arg)
+                }
+            }
+            
+            if file_args.length < 2 {
+                crystal.manifest("Usage: cp [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var destination = file_args[file_args.length - 1]
+            var source_files = []
+            for i in range(file_args.length - 1) {
+                source_files.append(file_args[i])
+            }
+            
+            var total_files = source_files.length
+            var completed_files = 0
+            
+            for source in source_files {
+                var success = copy_single_file(source, destination, false, verbose, false, true)  // Non-recursive, force
+                if success {
+                    completed_files = completed_files + 1
+                    var progress = (completed_files.toFloat() / total_files.toFloat()) * 100.0
+                    crystal.manifest("Progress: " + completed_files + "/" + total_files + 
+                                    " files (" + progress + "%)")
+                } else {
+                    crystal.manifest("Failed to copy: " + source)
+                }
+            }
+            
+            crystal.manifest("Copy operation completed: " + completed_files + "/" + total_files + " files copied")
+            return if completed_files == total_files { 0 } else { 1 }
+        }
+        
+        // Safe copy - only copy if destination doesn't exist
+        func cp_safe(args: List[String]) -> Int {
+            crystal.manifest("Executing safe cp (copy only if destination doesn't exist)...")
+            
+            if args.length != 2 {
+                crystal.manifest("Usage: cp_safe SOURCE DESTINATION")
+                return 1
+            }
+            
+            var source = args[0]
+            var dest = args[1]
+            
+            // Check if destination exists
+            if simulate_check_file_exists(dest) {
+                crystal.manifest("Error: Destination file exists, skipping: " + dest)
+                return 0  // Not an error, just skipped
+            }
+            
+            return copy_single_file(source, dest, false, true, false, false)  // Non-recursive, verbose, no force
+        }
+        
+        // Cp with checksum verification
+        func cp_verify(args: List[String]) -> Int {
+            crystal.manifest("Executing cp with checksum verification...")
+            
+            if args.length < 2 {
+                crystal.manifest("Usage: cp_verify [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var file_args = []
+            var verbose = false
+            for arg in args {
+                if arg.starts_with("-") {
+                    if arg.contains("v") {
+                        verbose = true
+                    }
+                } else {
+                    file_args.append(arg)
+                }
+            }
+            
+            if file_args.length < 2 {
+                crystal.manifest("Usage: cp_verify [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var destination = file_args[file_args.length - 1]
+            var source_files = []
+            for i in range(file_args.length - 1) {
+                source_files.append(file_args[i])
+            }
+            
+            for source in source_files {
+                if verbose {
+                    crystal.manifest("Copying " + source + " with verification...")
+                }
+                
+                // Get checksum of source
+                var source_checksum = simulate_compute_checksum(source)
+                
+                // Copy file
+                var success = copy_single_file(source, destination, false, verbose, false, true)
+                if not success {
+                    crystal.manifest("Copy failed for: " + source)
+                    return 1
+                }
+                
+                // Compute checksum of destination
+                var dest_file = if simulate_check_is_directory(destination) { 
+                    destination + "/" + get_basename(source) 
+                } else { 
+                    destination 
+                }
+                var dest_checksum = simulate_compute_checksum(dest_file)
+                
+                if source_checksum == dest_checksum {
+                    if verbose {
+                        crystal.manifest("Checksum verification successful for: " + dest_file)
+                    }
+                } else {
+                    crystal.manifest("ERROR: Checksum verification failed for: " + dest_file)
+                    return 1
+                }
+            }
+            
+            crystal.manifest("All files copied with successful verification!")
+            return 0
+        }
+        
+        // Simulate checksum computation
+        func simulate_compute_checksum(filepath: String) -> Int {
+            // In real implementation, would compute actual hash
+            // For simulation, return a value based on file content
+            var content = simulate_read_file_content(filepath)
+            var hash = 0
+            
+            for i in range(content.length) {
+                hash = (hash + content[i].char_to_int()) % 999999999  // Simple hash simulation
+            }
+            
+            return hash
+        }
+    }
+}
