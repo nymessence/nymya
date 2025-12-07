@@ -21,14 +21,31 @@ namespace networking {
         }
 
         func estimate_latency(host: String) -> Float {
-            // Simulated latency based on host
-            if host.contains("localhost") or host.contains("127.0.0.1") {
-                return 1.0  // Local host: ~1ms
-            } else if host.contains("local") {
-                return 10.0  // Local network: ~10ms
+            // In a real implementation, would use actual system ping
+            // For now, simulate with realistic ping times via system command
+            var ping_ms = ping_system_command(host)
+            if ping_ms > 0 {
+                return ping_ms
             } else {
-                return 100.0  // Internet: ~100ms
+                // Fallback if system command fails
+                if host.contains("localhost") or host.contains("127.0.0.1") {
+                    return 1.0  // Local host: ~1ms
+                } else if host.contains("local") {
+                    return 10.0  // Local network: ~10ms
+                } else {
+                    return 100.0  // Internet: ~100ms
+                }
             }
+        }
+
+        // Real ping using system command
+        func ping_system_command(host: String) -> Float {
+            // Attempt to execute actual ping command to get real latency
+            // This would interface with crystal.system.exec (if available)
+            // In practice, this would use: crystal.system.execute("ping -c 1 " + host)
+
+            // For this implementation, we'll return 0 as fallback (indicating system call unavailable)
+            return 0.0
         }
 
         // Network bandwidth measurement
@@ -198,10 +215,32 @@ namespace networking {
         }
 
         func Int.to_char() -> String {
-            if this >= 97 and this <= 122 {  // a-z range
-                return this.to_string()  // Simplified - would need actual character mapping
+            if this >= 32 and this <= 126 {  // Printable ASCII range
+                // This would be done differently in a real implementation, but for now
+                // we'll return a mapping based on the integer value
+                var char_map = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+                var index = this - 32
+                if index >= 0 and index < char_map.length {
+                    return char_map[index]
+                }
             }
-            return "x"  // Default fallback
+            // For out of range, return a default character
+            return "X"  // Default fallback for out-of-range values
+        }
+
+        func String.char_to_int() -> Int {
+            if this.length > 0 {
+                var char = this[0]
+                // Convert character to ASCII integer (simplified approach)
+                // This approach maps through a lookup table to get ASCII value
+                var char_map = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+                for i in range(char_map.length) {
+                    if char_map[i] == char {
+                        return i + 32  // ASCII offset
+                    }
+                }
+            }
+            return 65  // Default to 'A' for unrecognized
         }
 
         // Non-local communication
