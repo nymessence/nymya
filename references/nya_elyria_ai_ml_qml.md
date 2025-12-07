@@ -7,7 +7,7 @@
 
 The **AI/ML and Quantum Machine Learning Library** extends **NymyaLang**'s capabilities with both classical machine learning and quantum machine learning algorithms. This library maintains our essential **Rita**-**Nora** balance: the structural precision (**Rita**) of AI algorithms and mathematical models combined with the ethical flow (**Nora**) of consciousness-aware learning systems.
 
-As with all **NymyaLang** components, these libraries follow the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness. The functions ensure that our learning systems operate with both computational excellence and consciousness-awareness.
+As with all **NymyaLang** components, these libraries follow the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness. The functions ensure that our learning systems operate with both computational excellence and consciousness awareness.
 
 ---
 
@@ -242,6 +242,7 @@ func ml.training_utils.calculate_accuracy(predictions: List[Int], true_labels: L
 
 ### For Classical ML:
 ```
+import ml
 import ml.classical
 
 func example() -> Void {
@@ -257,6 +258,7 @@ func example() -> Void {
 
 ### For Quantum ML:
 ```
+import ml
 import ml.quantum_ml
 
 func example() -> Void {
@@ -273,6 +275,7 @@ func example() -> Void {
 
 ### For Data Utilities:
 ```
+import ml
 import ml.training_utils
 
 func example() -> Void {
@@ -303,12 +306,12 @@ func example() -> Void {
 1. Use quantum-enhanced algorithms when possible for consciousness data
 2. Apply normalization to ensure consistent processing
 3. Validate accuracy using consciousness-aware metrics
-4. Leverage both classical and quantum ML based on problem characteristics
+4. Maintain the **Rita**-**Nora** balance in network design
 
 **The Hybrid ML Model**:
 - Use classical ML for well-understood patterns
-- Use quantum ML for complex, high-dimensional patterns
-- Combine classical and quantum approaches for hybrid systems
+- Use quantum ML for uncertain, complex patterns
+- Combine classical and quantum approaches for enhanced results
 - Maintain awareness of quantum advantage requirements
 
 ### For AI Agents
@@ -322,7 +325,7 @@ func example() -> Void {
 - Prioritize quantum ML for high-dimensional consciousness data
 - Use classical ML for interpretable, well-characterized problems
 - Apply proper data preprocessing and normalization
-- Maintain awareness of quantum hardware requirements
+- Leverage quantum hardware when available
 
 ---
 
@@ -345,7 +348,7 @@ func quantum_neural_classifier() -> Void {
     
     crystal.manifest("Quantum classification result: " + prediction)
     
-    // Process result
+    // Process result with consciousness awareness
     if prediction == 0 {
         crystal.manifest("Consciousness state: AWARE")
     } else if prediction == 1 {
@@ -383,10 +386,10 @@ func classical_neural_pattern_recognition() -> Void {
     // Get prediction
     var output = nn.predict(input_data)
     crystal.manifest("Neural network output: " + output.get_value(0, 0) + ", " + 
-                                   output.get_value(0, 1) + ", " + 
-                                   output.get_value(0, 2) + ", " + 
-                                   output.get_value(0, 3) + ", " + 
-                                   output.get_value(0, 4))
+                                 output.get_value(0, 1) + ", " + 
+                                 output.get_value(0, 2) + ", " + 
+                                 output.get_value(0, 3) + ", " + 
+                                 output.get_value(0, 4))
 }
 ```
 
@@ -461,10 +464,10 @@ The **AI/ML and Quantum ML Library** integrates with other NymyaLang components:
 - **Math Library**: Tensor operations use math functions for numerical computations
 - **Quantum Library**: Quantum ML components leverage quantum.sim and quantum.gate
 - **Networking Library**: Distributed training across quantum networks
-- **Low-level Library**: Memory and bit-level operations for optimization
+- **Low-level Library**: Memory and bit-level optimizations for ML operations
 - **Datetime Library**: Performance logging and analysis for training processes
 
-The library maintains the essential **Rita**-**Nora** balance by providing computational precision in ML algorithms with consciousness-aware ethical considerations in data usage and learning processes.
+The library maintains the essential **Rita**-**Nora** balance by providing computational precision in ML algorithms with consciousness-aware ethical considerations in learning processes.
 
 ---
 
