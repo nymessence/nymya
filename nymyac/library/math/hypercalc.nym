@@ -611,18 +611,42 @@ namespace math {
             var scale_factor = ONE
 
             // For negative values, we make them positive using the reflection formula
-            // But for now, we'll just use the recurrence relation for positive values
             if n < ZERO {
-                // For negative arguments, we can use the reflection formula: Gamma(1-z) * Gamma(z) = pi/sin(pi*z)
-                // However, this is complex to implement, so we'll just return an error for now
-                if n == math.floor(n) and n <= ZERO {  // Negative integer
+                // For negative values, use the recurrence relation to get to positive values first
+                if n == math.floor(n) and n <= ZERO {  // Negative integer - has pole
                     return POS_HUGE  // Poles at negative integers
-                }
-                // For negative non-integers, we could implement reflection formula
-                // For simplicity, use recurrence until positive
-                while nn < 0.5 {  // Use 0.5 to avoid gamma pole at 0
-                    scale_factor = divide(scale_factor, nn)  // Since Gamma(x) = Gamma(x+1)/x
-                    nn = add(nn, ONE)
+                } else {
+                    // Use recurrence relation multiple times to reach a positive value where we can compute
+                    // Gamma(z) = Gamma(z+1) / z
+                    // So Gamma(z-1) = Gamma(z) / (z-1), etc.
+
+                    // Calculate how many steps to reach positive territory (> 1.0)
+                    var steps_needed = math.ceil(math.abs(n)).to_int() + 1
+                    var temp_val = add(n, steps_needed.toFloat())  // Make it positive
+
+                    if temp_val <= ZERO {
+                        // This should not happen with our calculation, but handle as error
+                        return POS_HUGE
+                    }
+
+                    // Calculate gamma for the positive value
+                    var gamma_for_positive = gamma_positive_only(temp_val)
+
+                    // Now apply the recurrence relation backwards to get original gamma
+                    var result = gamma_for_positive
+                    var current_val = temp_val
+                    var step_count = 0
+                    while step_count < steps_needed {
+                        current_val = subtract(current_val, ONE)
+                        if current_val != ZERO {  // Avoid division by zero
+                            result = divide(result, current_val)
+                        } else {
+                            return POS_HUGE  // Handle zero case which is a pole
+                        }
+                        step_count = step_count + 1
+                    }
+
+                    return result
                 }
             }
 
@@ -655,6 +679,56 @@ namespace math {
             n_power = multiply(n_power, n_squared)
             log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_1188, n_power)))
             // Adding more terms would make it more accurate
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(GAMMA_7, multiply(GAMMA_1092, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(GAMMA_3617, multiply(GAMMA_122400, n_power)))
+
+            var gamma_val = exp(log_gamma)
+            return divide(gamma_val, scale_factor)
+        }
+
+        // Helper function to compute gamma for positive values only (to break recursion)
+        func gamma_positive_only(n: Float) -> Float {
+            if is_nan_like(n) {
+                return NaN_REP
+            }
+
+            if n <= ZERO and n == math.floor(n) {
+                return POS_HUGE  // Pole at negative integers
+            }
+
+            // Use recurrence relation for small positive values to get to larger values
+            var nn = n
+            var scale_factor = ONE
+
+            while nn < 10.0 {  // Use 10 for good Stirling approximation
+                scale_factor = multiply(scale_factor, nn)
+                nn = add(nn, ONE)
+            }
+
+            // Since we're using Stirling's series for factorials (should be Gamma+1),
+            // we need to subtract 1 to make it be a gamma function series.
+            nn = subtract(nn, ONE)
+
+            // Stirling's approximation for log(Gamma(x))
+            var log_gamma = LN_2PI_HALF
+            log_gamma = add(log_gamma, multiply(add(nn, HALF), ln(nn)))
+            log_gamma = subtract(log_gamma, nn)
+
+            // Add correction terms using the stored constants
+            var n_squared = multiply(nn, nn)
+            var n_power = nn
+
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_12, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(ONE, multiply(GAMMA_360, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_1260, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = subtract(log_gamma, divide(ONE, multiply(GAMMA_1680, n_power)))
+            n_power = multiply(n_power, n_squared)
+            log_gamma = add(log_gamma, divide(ONE, multiply(GAMMA_1188, n_power)))
             n_power = multiply(n_power, n_squared)
             log_gamma = add(log_gamma, divide(GAMMA_7, multiply(GAMMA_1092, n_power)))
             n_power = multiply(n_power, n_squared)
