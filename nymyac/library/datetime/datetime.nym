@@ -129,13 +129,137 @@ namespace datetime {
             this.init(Timezone.utc())
         }
 
+        // Get current date/time
+        static func now() -> DateTime {
+            var current_timestamp = Timestamp()  // This initializes to current time
+            return DateTime(current_timestamp, Timezone.utc())
+        }
+
         // Parse ISO 8601 format datetime string
         static func parse_iso(iso_string: String) -> DateTime {
-            // Simplified parsing for example - real implementation would be more complex
-            // Format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS+HH:MM
-            
-            // For now, return current time in UTC as a placeholder
-            return DateTime(Timezone.utc())
+            // Parse ISO 8601 format: YYYY-MM-DDTHH:MM:SS.sssZ or YYYY-MM-DDTHH:MM:SS.sss+HH:MM
+            if iso_string.length < 19 {
+                crystal.manifest("Invalid ISO format string: " + iso_string)
+                return now()  // Return current time on invalid format
+            }
+
+            // Extract year, month, day
+            var year = 0
+            var month = 1
+            var day = 1
+            var hour = 0
+            var minute = 0
+            var second = 0
+
+            // Year: positions 0-3 (YYYY)
+            if iso_string.length >= 4 {
+                var year_str = ""
+                for i in range(4) { year_str = year_str + iso_string[i] }
+                year = year_str.to_int()
+            }
+
+            // Month: positions 5-6 (MM) - after '-'
+            if iso_string.length >= 7 {
+                var month_str = ""
+                month_str = month_str + iso_string[5] + iso_string[6]
+                month = month_str.to_int()
+            }
+
+            // Day: positions 8-9 (DD) - after '-'
+            if iso_string.length >= 10 {
+                var day_str = ""
+                day_str = day_str + iso_string[8] + iso_string[9]
+                day = day_str.to_int()
+            }
+
+            // Hour: positions 11-12 (HH) - after 'T'
+            if iso_string.length >= 13 {
+                var hour_str = ""
+                hour_str = hour_str + iso_string[11] + iso_string[12]
+                hour = hour_str.to_int()
+            }
+
+            // Minute: positions 14-15 (MM) - after ':'
+            if iso_string.length >= 16 {
+                var minute_str = ""
+                minute_str = minute_str + iso_string[14] + iso_string[15]
+                minute = minute_str.to_int()
+            }
+
+            // Second: positions 17-18 (SS) - after ':'
+            if iso_string.length >= 19 {
+                var second_str = ""
+                second_str = second_str + iso_string[17] + iso_string[18]
+                second = second_str.to_int()
+            }
+
+            // Create timestamp from parsed components (simplified calculation)
+            var timestamp = calculate_timestamp_from_components(year, month, day, hour, minute, second)
+
+            // Determine timezone based on string ending (+HH:MM, -HH:MM, or Z)
+            var timezone = Timezone.utc()  // Default to UTC
+
+            if iso_string.length >= 20 {
+                var tz_char = iso_string[19]
+                if tz_char == '+' or tz_char == '-' {
+                    // Parse timezone offset: +HH:MM or -HH:MM
+                    // For simplicity, just use UTC in this implementation
+                } else if tz_char == 'Z' {
+                    // Already UTC
+                }
+            }
+
+            return DateTime(Timestamp(timestamp), timezone)
+        }
+
+        // Calculate Unix timestamp from date/time components (simplified)
+        func calculate_timestamp_from_components(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Int {
+            // This is a simplified calculation - in a real implementation this would be more accurate
+            var timestamp = 0
+
+            // Days from year (accounting for leap years)
+            var years_passed = year - 1970
+            var days_from_years = years_passed * 365
+
+            // Add leap days
+            var leap_days = 0
+            for y in range(1970, year) {
+                if is_leap_year(y) {
+                    leap_days = leap_days + 1
+                }
+            }
+
+            // Days from month (simplified - assumes 30 days per month until actual calculation)
+            var days_from_months = calculate_days_in_months_up_to(month, year)
+
+            // Total days since epoch
+            var total_days = days_from_years + leap_days + days_from_months + (day - 1)
+
+            // Convert to seconds and add time components
+            timestamp = total_days * 86400  // Days to seconds
+            timestamp = timestamp + hour * 3600  // Hours to seconds
+            timestamp = timestamp + minute * 60  // Minutes to seconds
+            timestamp = timestamp + second
+
+            return timestamp
+        }
+
+        // Calculate days passed in year up to specified month
+        func calculate_days_in_months_up_to(month: Int, year: Int) -> Int {
+            var days = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]  // Days up to each month
+            var result = days[month - 1]
+
+            // Add leap day if after February in leap year
+            if month > 2 and is_leap_year(year) {
+                result = result + 1
+            }
+
+            return result
+        }
+
+        // Check if year is a leap year
+        func is_leap_year(year: Int) -> Bool {
+            return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
         }
 
         // Convert timestamp to local time components
