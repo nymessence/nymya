@@ -1,0 +1,623 @@
+// AI/ML and Quantum Machine Learning Library for NymyaLang
+// Provides both classical ML and quantum ML capabilities
+
+import math
+import quantum
+import crystal
+import lowlevel
+import networking
+
+namespace ml {
+
+    // Classical Machine Learning operations
+    namespace classical {
+
+        // Basic tensor operations
+        class Tensor {
+            data: List[List[Float]]  // 2D tensor for now
+            rows: Int
+            cols: Int
+
+            init(r: Int, c: Int) {
+                this.rows = r
+                this.cols = c
+                this.data = []
+                for i in range(r) {
+                    var row = []
+                    for j in range(c) {
+                        row.append(0.0)  // Initialize with zeros
+                    }
+                    this.data.append(row)
+                }
+            }
+
+            init(from_data: List[List[Float]]) {
+                this.rows = from_data.length
+                this.cols = if this.rows > 0 { from_data[0].length } else { 0 }
+                this.data = from_data
+            }
+
+            func set_value(row: Int, col: Int, value: Float) -> Void {
+                if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+                    this.data[row][col] = value
+                }
+            }
+
+            func get_value(row: Int, col: Int) -> Float {
+                if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+                    return this.data[row][col]
+                }
+                return 0.0
+            }
+
+            func add(other: Tensor) -> Tensor {
+                if this.rows != other.rows or this.cols != other.cols {
+                    crystal.manifest("ERROR: Cannot add tensors of different dimensions")
+                    return Tensor(0, 0)
+                }
+                
+                var result = Tensor(this.rows, this.cols)
+                for i in range(this.rows) {
+                    for j in range(this.cols) {
+                        result.set_value(i, j, this.get_value(i, j) + other.get_value(i, j))
+                    }
+                }
+                return result
+            }
+
+            func multiply(other: Tensor) -> Tensor {
+                if this.cols != other.rows {
+                    crystal.manifest("ERROR: Cannot multiply tensors with incompatible dimensions")
+                    return Tensor(0, 0)
+                }
+                
+                var result = Tensor(this.rows, other.cols)
+                for i in range(this.rows) {
+                    for j in range(other.cols) {
+                        var sum = 0.0
+                        for k in range(this.cols) {
+                            sum = sum + this.get_value(i, k) * other.get_value(k, j)
+                        }
+                        result.set_value(i, j, sum)
+                    }
+                }
+                return result
+            }
+
+            func scalar_multiply(scalar: Float) -> Tensor {
+                var result = Tensor(this.rows, this.cols)
+                for i in range(this.rows) {
+                    for j in range(this.cols) {
+                        result.set_value(i, j, this.get_value(i, j) * scalar)
+                    }
+                }
+                return result
+            }
+
+            func transpose() -> Tensor {
+                var result = Tensor(this.cols, this.rows)
+                for i in range(this.rows) {
+                    for j in range(this.cols) {
+                        result.set_value(j, i, this.get_value(i, j))
+                    }
+                }
+                return result
+            }
+
+            func apply_activation(func_name: String) -> Tensor {
+                var result = Tensor(this.rows, this.cols)
+                for i in range(this.rows) {
+                    for j in range(this.cols) {
+                        var val = this.get_value(i, j)
+                        var activated_val = 0.0
+                        
+                        if func_name == "sigmoid" {
+                            activated_val = 1.0 / (1.0 + math.exp(-val))
+                        } else if func_name == "relu" {
+                            activated_val = math.max(0.0, val)
+                        } else if func_name == "tanh" {
+                            activated_val = math.tanh(val)
+                        } else if func_name == "linear" {
+                            activated_val = val
+                        } else {
+                            crystal.manifest("Unknown activation function: " + func_name)
+                            activated_val = val  // Default to linear
+                        }
+                        
+                        result.set_value(i, j, activated_val)
+                    }
+                }
+                return result
+            }
+
+            func get_shape() -> String {
+                return "(" + this.rows + " x " + this.cols + ")"
+            }
+
+            func print_tensor() -> Void {
+                crystal.manifest("Tensor " + this.get_shape() + ":")
+                for i in range(this.rows) {
+                    var row_str = ""
+                    for j in range(this.cols) {
+                        row_str = row_str + this.get_value(i, j).to_string() + " "
+                    }
+                    crystal.manifest("  " + row_str)
+                }
+            }
+        }
+
+        // Basic neural network layer
+        class Layer {
+            weights: Tensor
+            biases: Tensor
+            activation: String
+
+            init(input_size: Int, output_size: Int, activation_func: String) {
+                this.weights = Tensor(input_size, output_size)
+                this.biases = Tensor(1, output_size)
+                this.activation = activation_func
+                
+                // Initialize weights with small random values
+                var qrng = networking.QRNG()
+                for i in range(input_size) {
+                    for j in range(output_size) {
+                        var weight = (qrng.generate_float() - 0.5) * 0.4  // Range: -0.2 to 0.2
+                        this.weights.set_value(i, j, weight)
+                    }
+                }
+                
+                // Initialize biases to zeros
+                for j in range(output_size) {
+                    this.biases.set_value(0, j, 0.0)
+                }
+            }
+
+            func forward(input: Tensor) -> Tensor {
+                // Matrix multiplication: input * weights
+                var weighted_sum = input.multiply(this.weights)
+                
+                // Add biases
+                for j in range(weighted_sum.cols) {
+                    var current_val = weighted_sum.get_value(0, j)
+                    var bias_val = this.biases.get_value(0, j)
+                    weighted_sum.set_value(0, j, current_val + bias_val)
+                }
+                
+                // Apply activation function
+                var activated = weighted_sum.apply_activation(this.activation)
+                return activated
+            }
+
+            func get_weights() -> Tensor {
+                return this.weights
+            }
+
+            func get_biases() -> Tensor {
+                return this.biases
+            }
+        }
+
+        // Neural network
+        class NeuralNetwork {
+            layers: List[Layer]
+
+            init() {
+                this.layers = []
+            }
+
+            func add_layer(layer: Layer) -> Void {
+                this.layers.append(layer)
+            }
+
+            func predict(input: Tensor) -> Tensor {
+                var output = input
+                for layer in this.layers {
+                    output = layer.forward(output)
+                }
+                return output
+            }
+
+            func get_num_layers() -> Int {
+                return this.layers.length
+            }
+        }
+
+        // Basic activation functions
+        func sigmoid(x: Float) -> Float {
+            return 1.0 / (1.0 + math.exp(-x))
+        }
+
+        func relu(x: Float) -> Float {
+            return math.max(0.0, x)
+        }
+
+        func tanh_activation(x: Float) -> Float {
+            return math.tanh(x)
+        }
+
+        // Loss functions
+        func mean_squared_error(predictions: List[Float], targets: List[Float]) -> Float {
+            if predictions.length != targets.length {
+                crystal.manifest("ERROR: Prediction and target lengths don't match")
+                return 0.0
+            }
+            
+            var sum = 0.0
+            for i in range(predictions.length) {
+                var diff = predictions[i] - targets[i]
+                sum = sum + diff * diff
+            }
+            
+            return sum / predictions.length.toFloat()
+        }
+
+        func cross_entropy_loss(predictions: List[Float], targets: List[Float]) -> Float {
+            if predictions.length != targets.length {
+                crystal.manifest("ERROR: Prediction and target lengths don't match")
+                return 0.0
+            }
+            
+            var sum = 0.0
+            for i in range(predictions.length) {
+                var pred = math.max(predictions[i], 0.0001)  // Avoid log(0)
+                sum = sum - targets[i] * math.ln(pred)
+            }
+            
+            return sum / predictions.length.toFloat()
+        }
+
+        // Basic training loop simulation (since we don't have full backpropagation)
+        func simulate_training(nn: NeuralNetwork, inputs: List[Tensor], targets: List[Tensor], epochs: Int) -> Void {
+            crystal.manifest("Simulating training for " + epochs + " epochs...")
+            
+            for epoch in range(epochs) {
+                var total_loss = 0.0
+                
+                for i in range(inputs.length) {
+                    var prediction = nn.predict(inputs[i])
+                    var target = targets[i]
+                    
+                    // Calculate loss (simplified)
+                    var epoch_loss = 0.0
+                    for j in range(prediction.cols) {
+                        var pred_val = prediction.get_value(0, j)
+                        var target_val = target.get_value(0, j)
+                        var diff = pred_val - target_val
+                        epoch_loss = epoch_loss + diff * diff
+                    }
+                    
+                    total_loss = total_loss + epoch_loss
+                }
+                
+                var avg_loss = total_loss / inputs.length.toFloat()
+                
+                if epoch % 10 == 0 {  // Print every 10 epochs
+                    crystal.manifest("Epoch " + epoch + ", Average Loss: " + avg_loss)
+                }
+            }
+            
+            crystal.manifest("Training simulation completed!")
+        }
+    }
+
+    // Quantum Machine Learning operations
+    namespace quantum_ml {
+
+        // Quantum Feature Map for embedding classical data into quantum states
+        func encode_data(circuit: quantum.sim.Circuit, data: List[Float]) -> Void {
+            // Simple feature map: encode each data point into a qubit rotation
+            for i in range(math.min(data.length, circuit.get_statevector().length)) {
+                if i < circuit.num_qubits {
+                    // Use quantum rotation gates to encode data
+                    quantum.gate.ry(circuit, i, data[i])  // Encode as rotation on y-axis
+                }
+            }
+        }
+
+        // Parameterized Quantum Circuit (PQC) - basic version
+        class ParameterizedCircuit {
+            circuit: quantum.sim.Circuit
+            num_qubits: Int
+            parameters: List[Float]
+
+            init(n_qubits: Int) {
+                this.circuit = quantum.sim.create_circuit(n_qubits)
+                this.num_qubits = n_qubits
+                this.parameters = []
+                
+                // Initialize with some random parameters
+                var qrng = networking.QRNG()
+                for i in range(n_qubits * 2) {  // Some parameters per qubit
+                    this.parameters.append(qrng.generate_float() * 2.0 * math.PI)  // 0 to 2π
+                }
+            }
+
+            func apply_layer(layer_idx: Int) -> Void {
+                // Apply rotation gates with parameters
+                for qubit in range(this.num_qubits) {
+                    var param_idx = layer_idx * this.num_qubits + qubit
+                    if param_idx < this.parameters.length {
+                        quantum.gate.rx(this.circuit, qubit, this.parameters[param_idx])
+                    }
+                    
+                    // Add entangling gates between adjacent qubits
+                    if qubit < this.num_qubits - 1 {
+                        quantum.gate.cx(this.circuit, qubit, qubit + 1)
+                    }
+                }
+            }
+
+            func apply_circuit() -> Void {
+                // Apply several layers
+                for layer in range(2) {  // Use 2 layers for example
+                    this.apply_layer(layer)
+                }
+            }
+
+            func measure_all() -> List[Int] {
+                this.apply_circuit()
+                return quantum.sim.measure_all(this.circuit)
+            }
+
+            func get_statevector() -> List[math.Complex] {
+                this.apply_circuit()
+                return this.circuit.get_statevector()
+            }
+
+            func update_parameters(new_params: List[Float]) -> Void {
+                this.parameters = new_params
+            }
+
+            func get_parameters() -> List[Float] {
+                return this.parameters
+            }
+        }
+
+        // Quantum Variational Classifier
+        class VariationalClassifier {
+            pqc: ParameterizedCircuit
+            num_classes: Int
+            weights: List[Float]
+
+            init(n_qubits: Int, n_classes: Int) {
+                this.pqc = ParameterizedCircuit(n_qubits)
+                this.num_classes = n_classes
+                
+                // Initialize random weights
+                var qrng = networking.QRNG()
+                this.weights = []
+                for i in range(n_classes) {
+                    this.weights.append((qrng.generate_float() - 0.5) * 2.0)  // Range: -1 to 1
+                }
+            }
+
+            func forward(input_data: List[Float]) -> List[Float] {
+                // Encode input data into quantum circuit
+                encode_data(this.pqc.circuit, input_data)
+                
+                // Apply parameterized quantum circuit
+                this.pqc.apply_circuit()
+                
+                // Measure outcomes
+                var measurements = quantum.sim.measure_all(this.pqc.circuit)
+                
+                // Compute outputs using weights
+                var outputs = []
+                for i in range(this.num_classes) {
+                    // Simple model: use measurement result as basis for classification
+                    var value = this.weights[i] * measurements[0].toFloat()  // Simplified
+                    outputs.append(math.tanh(value))  // Use tanh as output activation
+                }
+                
+                return outputs
+            }
+
+            func predict(input_data: List[Float]) -> Int {
+                var outputs = this.forward(input_data)
+                
+                // Find the class with highest output
+                var max_idx = 0
+                var max_val = outputs[0]
+                for i in range(1, outputs.length) {
+                    if outputs[i] > max_val {
+                        max_val = outputs[i]
+                        max_idx = i
+                    }
+                }
+                
+                return max_idx
+            }
+
+            func get_weights() -> List[Float] {
+                return this.weights
+            }
+        }
+
+        // Quantum Support Vector Machine (QSVM) concept
+        class QuantumSVM {
+            feature_map_qubits: Int
+            dual_coefficients: List[Float]
+            support_vectors: List[List[Float]]
+
+            init(feature_dim: Int) {
+                this.feature_map_qubits = feature_dim  // For simplicity
+                this.dual_coefficients = []
+                this.support_vectors = []
+            }
+
+            func fit(training_data: List[List[Float]], labels: List[Int]) -> Void {
+                crystal.manifest("Quantum SVM training simulation...")
+                
+                // In a real implementation, this would involve quantum kernel computation
+                // Here we just store the data as placeholders
+                
+                for i in range(labels.length) {
+                    this.support_vectors.append(training_data[i])
+                    this.dual_coefficients.append(1.0)  // Placeholder coefficient
+                }
+                
+                crystal.manifest("QSVM trained with " + labels.length + " support vectors")
+            }
+
+            func predict_single(data_point: List[Float]) -> Int {
+                // Simulated quantum kernel computation
+                var similarity = 0.0
+                for sv in this.support_vectors {
+                    // Calculate similarity (simulated quantum kernel)
+                    for i in range(math.min(data_point.length, sv.length)) {
+                        similarity = similarity + (data_point[i] - sv[i]) * (data_point[i] - sv[i])
+                    }
+                }
+                
+                // Return positive class if similarity is low (close to support vectors)
+                return if similarity < 1.0 { 1 } else { 0 }
+            }
+
+            func predict_batch(data_batch: List[List[Float]]) -> List[Int] {
+                var predictions = []
+                for dp in data_batch {
+                    predictions.append(this.predict_single(dp))
+                }
+                return predictions
+            }
+        }
+
+        // Quantum Neural Network Layer
+        class QuantumNeuralLayer {
+            num_qubits: Int
+            circuit: quantum.sim.Circuit
+            weights: List[Float]
+
+            init(n_qubits: Int) {
+                this.num_qubits = n_qubits
+                this.circuit = quantum.sim.create_circuit(n_qubits)
+                
+                // Initialize weights randomly
+                var qrng = networking.QRNG()
+                this.weights = []
+                for i in range(n_qubits) {
+                    this.weights.append(qrng.generate_float() * math.PI)  // 0 to π
+                }
+            }
+
+            func forward(inputs: List[Float]) -> List[Float] {
+                // Encode inputs into quantum state
+                encode_data(this.circuit, inputs)
+                
+                // Apply parameterized rotations using weights
+                for i in range(math.min(this.num_qubits, inputs.length)) {
+                    quantum.gate.ry(this.circuit, i, this.weights[i] * inputs[i])
+                }
+                
+                // Measure to get classical output
+                var measurements = quantum.sim.measure_all(this.circuit)
+                
+                // Convert quantum measurements back to classical outputs
+                var outputs = []
+                for m in measurements {
+                    outputs.append(m.toFloat())  // Convert to float
+                }
+                
+                return outputs
+            }
+        }
+    }
+
+    // Training utilities
+    namespace training_utils {
+
+        // Dataset generator for testing
+        func generate_simple_dataset(num_samples: Int) -> List[List[Float]] {
+            var dataset = []
+            var qrng = networking.QRNG()
+            
+            for i in range(num_samples) {
+                var sample = []
+                for j in range(3) {  // 3 features
+                    sample.append(qrng.generate_float())  // Random value 0-1
+                }
+                dataset.append(sample)
+            }
+            
+            return dataset
+        }
+
+        // Label generator for testing
+        func generate_labels(datasets: List[List[Float]]) -> List[Int] {
+            var labels = []
+            for sample in datasets {
+                // Simple classification: if sum of features > threshold, class 1
+                var sum = 0.0
+                for val in sample {
+                    sum = sum + val
+                }
+                labels.append(if sum > 1.5 { 1 } else { 0 })
+            }
+            return labels
+        }
+
+        // Accuracy calculator
+        func calculate_accuracy(predictions: List[Int], true_labels: List[Int]) -> Float {
+            if predictions.length != true_labels.length {
+                crystal.manifest("ERROR: Prediction and label lengths don't match")
+                return 0.0
+            }
+            
+            var correct = 0
+            for i in range(predictions.length) {
+                if predictions[i] == true_labels[i] {
+                    correct = correct + 1
+                }
+            }
+            
+            return (correct.toFloat() / predictions.length.toFloat()) * 100.0
+        }
+
+        // Data normalization
+        func normalize_data(data: List[List[Float]]) -> List[List[Float]] {
+            if data.length == 0 or data[0].length == 0 {
+                return data
+            }
+            
+            var normalized = []
+            
+            // Calculate min/max for each feature
+            var mins = []
+            var maxs = []
+            var num_features = data[0].length
+            
+            for j in range(num_features) {
+                var min_val = data[0][j]
+                var max_val = data[0][j]
+                
+                for i in range(data.length) {
+                    if data[i][j] < min_val {
+                        min_val = data[i][j]
+                    }
+                    if data[i][j] > max_val {
+                        max_val = data[i][j]
+                    }
+                }
+                
+                mins.append(min_val)
+                maxs.append(max_val)
+            }
+            
+            // Normalize each feature to range [0, 1]
+            for i in range(data.length) {
+                var normalized_sample = []
+                for j in range(num_features) {
+                    if maxs[j] == mins[j] {
+                        normalized_sample.append(0.0)  // Avoid division by zero
+                    } else {
+                        var normalized_val = (data[i][j] - mins[j]) / (maxs[j] - mins[j])
+                        normalized_sample.append(normalized_val)
+                    }
+                }
+                normalized.append(normalized_sample)
+            }
+            
+            return normalized
+        }
+    }
+}
