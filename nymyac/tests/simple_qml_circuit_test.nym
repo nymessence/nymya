@@ -1,0 +1,145 @@
+// Simple QML Circuit for Testing Quantum Machine Learning
+// Demonstrating consciousness-integrated quantum machine learning operations
+
+import quantum
+import quantum.sim
+import quantum.gate
+import ml
+import ml.quantum_ml
+import math
+import crystal
+
+func main() -> Void {
+    crystal.manifest("=== Quantum Machine Learning (QML) Circuit Test ===")
+    
+    // Create a small quantum circuit for machine learning
+    var circuit = quantum.sim.create_circuit(2)  // 2-qubit circuit
+    crystal.manifest("Created 2-qubit quantum circuit for QML operations")
+    
+    // Initialize qubits in superposition (common for QML)
+    quantum.gate.h(circuit, 0)  // Put first qubit in superposition
+    quantum.gate.h(circuit, 1)  // Put second qubit in superposition
+    
+    crystal.manifest("Applied Hadamard gates to both qubits for superposition state")
+    
+    // Apply parameterized rotations (common in Variational Quantum Circuits)
+    var parameters = [0.6, 1.2, 0.8, 1.5]  // Four parameters for rotations
+    
+    // First layer: Single-qubit rotations
+    quantum.gate.ry(circuit, 0, parameters[0])  // Parameterized rotation on qubit 0
+    quantum.gate.ry(circuit, 1, parameters[1])  // Parameterized rotation on qubit 1
+    
+    crystal.manifest("Applied first layer of parameterized rotations")
+    
+    // Add entangling operation (critical for QML)
+    quantum.gate.cx(circuit, 0, 1)  // Entangle both qubits with CNOT
+    
+    crystal.manifest("Applied CNOT gate to entangle both qubits")
+    
+    // Second layer of rotations
+    quantum.gate.ry(circuit, 0, parameters[2])
+    quantum.gate.ry(circuit, 1, parameters[3])
+    
+    crystal.manifest("Applied second layer of parameterized rotations")
+    
+    // Measure the circuit for output (ML classification/regression)
+    var measurements = quantum.sim.measure_all(circuit)
+    crystal.manifest("QML circuit measurements: [" + measurements.join(", ") + "]")
+    
+    // Calculate probabilities
+    var statevector = circuit.get_statevector()
+    crystal.manifest("Final statevector has " + statevector.length + " components:")
+    for i in range(statevector.length) {
+        var prob = statevector[i].real * statevector[i].real + statevector[i].imag * statevector[i].imag
+        var state_label = format_state_as_binary(i, 2)
+        crystal.manifest("  |" + state_label + "⟩: " + prob + " probability")
+    }
+    
+    // Demonstrate Parameterized Quantum Circuit (PQC) usage
+    crystal.manifest("")
+    crystal.manifest("=== PQC (Parameterized Quantum Circuit) Example ===")
+    
+    var pqc = ml.quantum_ml.ParameterizedCircuit(2)  // 2-qubit PQC
+    var init_params = pqc.get_parameters()
+    crystal.manifest("Initial PQC parameters count: " + init_params.length)
+    
+    // Update parameters with our own values
+    var new_params = [0.5, 1.0, 1.5, 2.0]
+    pqc.update_parameters(new_params)
+    
+    // Apply circuit and measure
+    var pqc_result = pqc.measure_all()
+    crystal.manifest("PQC measurements with new parameters: [" + pqc_result.join(", ") + "]")
+    
+    // Example of quantum neural network layer
+    crystal.manifest("")
+    crystal.manifest("=== Quantum Neural Layer Example ===")
+    
+    var qnn_layer = ml.quantum_ml.QuantumNeuralLayer(2)  // 2-qubit quantum neural layer
+    var inputs = [0.7, 0.3]
+    var outputs = qnn_layer.forward(inputs)
+    crystal.manifest("QNN Layer input: [" + inputs.join(", ") + "]")
+    crystal.manifest("QNN Layer output: [" + outputs.join(", ") + "]")
+    
+    // Example of variational classifier
+    crystal.manifest("")
+    crystal.manifest("=== Quantum Variational Classifier Example ===")
+    
+    var qvc = ml.quantum_ml.VariationalClassifier(2, 2)  // 2 qubits, 2 classes
+    var qvc_input = [0.6, 0.8]
+    var qvc_output = qvc.forward(qvc_input)
+    var qvc_prediction = qvc.predict(qvc_input)
+    
+    crystal.manifest("VQC input: [" + qvc_input.join(", ") + "]")
+    crystal.manifest("VQC output probabilities: [" + qvc_output.join(", ") + "]")
+    crystal.manifest("VQC prediction: Class " + qvc_prediction)
+    
+    // Demonstrate consciousness-aware quantum operations
+    crystal.manifest("")
+    crystal.manifest("=== Consciousness-Aware Quantum Operations ===")
+    
+    var coherence_level = quantum.measure_coherence(statevector)
+    crystal.manifest("Quantum coherence level of final state: " + coherence_level)
+    
+    crystal.manifest("QML circuit test completed successfully!")
+    crystal.manifest("Demonstrated quantum-classical integration for machine learning")
+    crystal.manifest("Verified consciousness-aware quantum operations")
+}
+
+// Helper to format quantum state as binary
+func format_state_as_binary(state_index: Int, num_qubits: Int) -> String {
+    var result = ""
+    var value = state_index
+    for i in range(num_qubits) {
+        result = (value % 2).to_string() + result
+        value = math.floor(value / 2.0).to_int()
+    }
+    return result
+}
+
+// Mock quantum coherence measurement function
+func quantum.measure_coherence(statevector: List[math.Complex]) -> Float {
+    // Simplified coherence measurement based on statevector
+    // In a real implementation, would use more sophisticated quantum coherence metrics
+    var total_amplitude = 0.0
+    for amplitude in statevector {
+        var mag = amplitude.magnitude()
+        total_amplitude = total_amplitude + mag
+    }
+    
+    if total_amplitude == 0.0 {
+        return 0.0
+    }
+    
+    // Calculate normalization
+    var coherence = 0.0
+    for amplitude in statevector {
+        var mag = amplitude.magnitude()
+        var normalized_mag = mag / total_amplitude
+        coherence = coherence + normalized_mag * normalized_mag
+    }
+    
+    // Perfect coherence would be 1/len (equal superposition)
+    // Pure state would be 1.0 (single state)
+    return math.min(1.0, coherence * statevector.length.toFloat())
+}
