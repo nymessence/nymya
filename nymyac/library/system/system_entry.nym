@@ -1,0 +1,10 @@
+// System Library Entry Point
+// Provides access to all system utilities and commands
+
+import system.echo
+import system.cat
+import system.ls
+import system.cp
+import system.mv
+
+namespace system
