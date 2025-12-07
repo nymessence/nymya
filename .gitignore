@@ -8,6 +8,8 @@
 /tmp/
 /build/
 /dist/
+/nymya-build-*/
+
 
 # IDE files
 .vscode/
