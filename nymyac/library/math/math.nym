@@ -51,10 +51,8 @@ class BigInt {
 
     func mod(other: BigInt) -> BigInt {
         var result = BigInt(0)
-        // For modulo operation, we need to use a different GMP function
-        // This is a simplified representation - in real implementation would use mpz_mod
-        math.gmp.integer.init(result.internal_value)
-        // In a complete implementation, we would call the actual GMP mod function
+        // Use GMP's mpz_mod function to correctly compute modulo
+        math.gmp.integer.mod(result.internal_value, this.internal_value, other.internal_value)
         return result
     }
 
@@ -525,17 +523,8 @@ namespace advanced {
         }
 
         func median(values: List[Float]) -> Float {
-            var sorted_values = values.copy()
-            // Simple bubble sort for demonstration (in real implementation would use efficient sort)
-            for i in range(sorted_values.length) {
-                for j in range(sorted_values.length - 1 - i) {
-                    if sorted_values[j] > sorted_values[j + 1] {
-                        var temp = sorted_values[j]
-                        sorted_values[j] = sorted_values[j + 1]
-                        sorted_values[j + 1] = temp
-                    }
-                }
-            }
+            if values.length == 0 { return 0.0 }
+            var sorted_values = merge_sort_full(values.copy())
 
             var n = sorted_values.length
             if n % 2 == 0 {
@@ -543,6 +532,59 @@ namespace advanced {
             } else {
                 return sorted_values[n/2]
             }
+        }
+
+        // Full merge sort wrapper
+        func merge_sort_full(arr: List[Float]) -> List[Float] {
+            if arr.length <= 1 {
+                return arr
+            }
+
+            var mid = arr.length / 2
+            var left = []
+            var right = []
+
+            for i in range(0, mid) {
+                left.append(arr[i])
+            }
+            for i in range(mid, arr.length) {
+                right.append(arr[i])
+            }
+
+            left = merge_sort_full(left)
+            right = merge_sort_full(right)
+
+            return merge_arrays(left, right)
+        }
+
+        // Merge two sorted arrays
+        func merge_arrays(left: List[Float], right: List[Float]) -> List[Float] {
+            var result = []
+            var i = 0
+            var j = 0
+
+            while i < left.length and j < right.length {
+                if left[i] <= right[j] {
+                    result.append(left[i])
+                    i = i + 1
+                } else {
+                    result.append(right[j])
+                    j = j + 1
+                }
+            }
+
+            // Add remaining elements
+            while i < left.length {
+                result.append(left[i])
+                i = i + 1
+            }
+
+            while j < right.length {
+                result.append(right[j])
+                j = j + 1
+            }
+
+            return result
         }
     }
 
