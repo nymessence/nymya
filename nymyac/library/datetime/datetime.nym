@@ -212,33 +212,30 @@ namespace datetime {
             return DateTime(Timestamp(timestamp), timezone)
         }
 
-        // Calculate Unix timestamp from date/time components (simplified)
+        // Calculate Unix timestamp from date/time components (accurate implementation)
         func calculate_timestamp_from_components(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Int {
-            // This is a simplified calculation - in a real implementation this would be more accurate
             var timestamp = 0
 
-            // Days from year (accounting for leap years)
-            var years_passed = year - 1970
-            var days_from_years = years_passed * 365
-
-            // Add leap days
-            var leap_days = 0
+            // Calculate days from year (accounting for leap years accurately)
+            var days_from_years = 0
             for y in range(1970, year) {
                 if is_leap_year(y) {
-                    leap_days = leap_days + 1
+                    days_from_years = days_from_years + 366  // Leap year has 366 days
+                } else {
+                    days_from_years = days_from_years + 365  // Regular year has 365 days
                 }
             }
 
-            // Days from month (simplified - assumes 30 days per month until actual calculation)
+            // Days from month (accounting for each month's specific length and leap year)
             var days_from_months = calculate_days_in_months_up_to(month, year)
 
             // Total days since epoch
-            var total_days = days_from_years + leap_days + days_from_months + (day - 1)
+            var total_days = days_from_years + days_from_months + (day - 1)
 
             // Convert to seconds and add time components
-            timestamp = total_days * 86400  // Days to seconds
-            timestamp = timestamp + hour * 3600  // Hours to seconds
-            timestamp = timestamp + minute * 60  // Minutes to seconds
+            timestamp = total_days * 86400  // Days to seconds (86400 = 24*60*60)
+            timestamp = timestamp + hour * 3600  // Hours to seconds (3600 = 60*60)
+            timestamp = timestamp + minute * 60  // Minutes to seconds (60 seconds per minute)
             timestamp = timestamp + second
 
             return timestamp
@@ -260,6 +257,15 @@ namespace datetime {
         // Check if year is a leap year
         func is_leap_year(year: Int) -> Bool {
             return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+        }
+
+        // Get number of days in a year
+        func get_days_in_year(year: Int) -> Int {
+            if is_leap_year(year) {
+                return 366
+            } else {
+                return 365
+            }
         }
 
         // Convert timestamp to local time components
@@ -284,10 +290,18 @@ namespace datetime {
             var minutes = (seconds_in_day % 3600) / 60
             var seconds = (seconds_in_day % 60)
             
-            // Simplified calculation - real implementation would need to account for leap years, etc.
-            // For this implementation, we'll assume a simplified model
-            var year = 1970 + (days / 365).to_int()
-            var day_of_year = (days % 365).to_int()
+            // Calculate year accurately accounting for leap years
+            var calculated_year = 1970
+            var remaining_days = days
+
+            // Subtract days year by year until we find the right year
+            while remaining_days >= get_days_in_year(calculated_year) {
+                remaining_days = remaining_days - get_days_in_year(calculated_year)
+                calculated_year = calculated_year + 1
+            }
+
+            var year = calculated_year
+            var day_of_year = remaining_days.to_int() + 1  // Add 1 since days are 1-indexed
             
             // For simplicity, we'll set some reasonable defaults
             return TimeComponents(year, day_of_year, hours.to_int(), minutes.to_int(), seconds.to_int())
