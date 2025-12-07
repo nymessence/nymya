@@ -1,0 +1,51 @@
+// Test file for echo command implementation
+
+import system.commands
+import crystal
+
+func test_echo_functionality() -> Void {
+    crystal.manifest("Testing echo command functionality...")
+    
+    // Test basic echo
+    var args1 = ["Hello", "World"]
+    system.commands.echo(args1)
+    
+    // Test echo with -n (no newline)
+    var args2 = ["-n", "Hello", "without", "newline"]
+    system.commands.echo(args2)
+    
+    // Test consciousness-aware echo
+    var args3 = ["Consciousness-aware", "echo", "test"]
+    system.commands.echo_ca(args3)
+    
+    crystal.manifest("Echo command tests completed!")
+}
+
+func test_sysutils() -> Void {
+    crystal.manifest("Testing system utilities...")
+    
+    // Test true command
+    var true_result = system.sysutils.true_cmd()
+    crystal.manifest("True command returned: " + true_result)
+    
+    // Test false command
+    var false_result = system.sysutils.false_cmd()
+    crystal.manifest("False command returned: " + false_result)
+    
+    // Test whoami
+    var user = system.sysutils.whoami()
+    crystal.manifest("Whoami returned: " + user)
+    
+    // Test hostname
+    var host = system.sysutils.hostname()
+    crystal.manifest("Hostname returned: " + host)
+    
+    crystal.manifest("System utilities tests completed!")
+}
+
+func main() -> Void {
+    test_echo_functionality()
+    test_sysutils()
+    
+    crystal.manifest("All system command tests completed successfully!")
+}

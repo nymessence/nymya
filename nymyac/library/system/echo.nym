@@ -1,0 +1,122 @@
+// Echo Command for NymyaLang
+// Ports the coreutils echo command functionality to NymyaLang
+
+import crystal
+import math
+
+namespace system {
+    namespace commands {
+        
+        // The echo command - print arguments to output
+        func echo(args: List[String]) -> Void {
+            var output = ""
+            var newline = true
+            var i = 0
+            
+            // Process arguments to handle options
+            while i < args.length {
+                var arg = args[i]
+                if arg == "-n" {
+                    newline = false
+                } else if arg == "-e" {
+                    // Process escape sequences (simplified)
+                    // In future, we could handle \n, \t, etc.
+                } else if arg == "-E" {
+                    // Disable interpretation of backslash escapes (default behavior)
+                } else {
+                    // Regular argument - add to output
+                    if output.length > 0 {
+                        output = output + " "
+                    }
+                    output = output + arg
+                }
+                i = i + 1
+            }
+            
+            if newline {
+                crystal.manifest(output)
+            } else {
+                crystal.print(output)
+            }
+        }
+        
+        // Enhanced echo with consciousness-aware features
+        func echo_ca(args: List[String]) -> Void {
+            var output = ""
+            var newline = true
+            var i = 0
+            
+            while i < args.length {
+                var arg = args[i]
+                if arg == "-n" {
+                    newline = false
+                } else {
+                    if output.length > 0 {
+                        output = output + " "
+                    }
+                    output = output + arg
+                }
+                i = i + 1
+            }
+            
+            if newline {
+                // Consciousness-aware output with Rita-Nora balance
+                crystal.manifest("Echo: " + output + " [Coherence: Maintained]")
+            } else {
+                crystal.print("Echo: " + output + " [Coherence: Maintained]")
+            }
+        }
+    }
+    
+    // Main system utilities namespace
+    namespace sysutils {
+        // Basic file and system operations
+        
+        // Sleep command - delay for specified number of seconds
+        func sleep(duration_seconds: Float) -> Void {
+            // In a real implementation, this would interface with the system sleep function
+            // For now we'll just simulate it with a note
+            crystal.manifest("Sleeping for " + duration_seconds + " seconds...")
+            // Actual sleeping would require system calls that aren't available in this context
+        }
+        
+        // True command - always returns success status
+        func true_cmd() -> Int {
+            crystal.manifest("True command executed successfully")
+            return 0  // Success code
+        }
+        
+        // False command - always returns failure status
+        func false_cmd() -> Int {
+            crystal.manifest("False command executed (intended failure)")
+            return 1  // Failure code
+        }
+        
+        // Print working directory (pwd)
+        func pwd() -> String {
+            // In a real implementation, this would get the current working directory
+            // For now, we'll return a placeholder
+            var current_dir = "/nymya/working/dir"  // Placeholder for actual cwd
+            crystal.manifest("Current directory: " + current_dir)
+            return current_dir
+        }
+        
+        // Whoami - get current user
+        func whoami() -> String {
+            // In a real implementation, this would get the current user name
+            // For now, we'll return a placeholder
+            var current_user = "nymya_user"  // Placeholder for actual user
+            crystal.manifest("Current user: " + current_user)
+            return current_user
+        }
+        
+        // Hostname - get system hostname
+        func hostname() -> String {
+            // In a real implementation, this would get the system hostname
+            // For now, we'll return a placeholder
+            var system_hostname = "nymya-node.local"  // Placeholder for actual hostname
+            crystal.manifest("System hostname: " + system_hostname)
+            return system_hostname
+        }
+    }
+}
