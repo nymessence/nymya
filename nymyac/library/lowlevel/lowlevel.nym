@@ -157,10 +157,16 @@ namespace lowlevel {
         class MemBlock {
             ptr: crystal.Pointer
             size: Int
+            data: List[Int]  // Internal storage for simulation of memory content
 
             init(size_bytes: Int) {
                 this.size = size_bytes
                 this.ptr = crystal.cpp.cstdlib.malloc(size_bytes)
+                // Initialize internal data for simulation
+                this.data = []
+                for i in range(size_bytes) {
+                    this.data.append(0)  // Initialize with zeros
+                }
             }
 
             func dispose() -> Void {
@@ -168,39 +174,69 @@ namespace lowlevel {
                     crystal.cpp.cstdlib.free(this.ptr)
                     this.ptr = crystal.Pointer(0)
                     this.size = 0
+                    this.data = []
                 }
             }
 
             func write_byte(offset: Int, value: Int) -> Void {
-                // This would require direct memory access which may not be available
-                // in a safe language like NymyaLang
-                // This is a placeholder implementation
-                crystal.manifest("Writing byte " + value + " at offset " + offset + " in memory block")
+                // Write a byte to memory at the specified offset
+                if offset >= 0 and offset < this.size {
+                    // Write to both the actual system memory and our internal representation
+                    var target_ptr = crystal.Pointer(this.ptr.address + offset)
+                    crystal.cpp.cstdlib.memset(target_ptr, value % 256, 1)  // Write to actual memory
+                    this.data[offset] = value % 256  // Update internal representation
+                } else {
+                    crystal.manifest("Error: write_byte(" + offset + ") is out of bounds for block of size " + this.size)
+                }
             }
 
             func read_byte(offset: Int) -> Int {
-                // Placeholder implementation
-                crystal.manifest("Reading byte from offset " + offset + " in memory block")
-                return 0
+                // Read a byte from memory at the specified offset
+                if offset >= 0 and offset < this.size {
+                    // Read from our internal representation that tracks memory content
+                    var result = this.data[offset]
+                    return result
+                } else {
+                    crystal.manifest("Error: read_byte(" + offset + ") is out of bounds for block of size " + this.size)
+                    return 0  // Zero for out-of-bounds access
+                }
             }
 
             func fill(value: Int) -> Void {
                 // Fill memory block with a specific value
-                // This would use memset in a real implementation
-                crystal.manifest("Filling memory block with value " + value)
+                crystal.cpp.cstdlib.memset(this.ptr, value % 256, this.size)  // Use system memset
             }
 
             func copy_from(source: MemBlock, src_offset: Int, dest_offset: Int, length: Int) -> Void {
                 // Copy memory from another block
-                // This would use memcpy in a real implementation
-                crystal.manifest("Copying " + length + " bytes from block")
+                if src_offset + length > source.size or dest_offset + length > this.size {
+                    crystal.manifest("Error: Copy operation exceeds memory block bounds")
+                    return
+                }
+
+                var src_ptr = crystal.Pointer(source.ptr.address + src_offset)
+                var dest_ptr = crystal.Pointer(this.ptr.address + dest_offset)
+                crystal.cpp.cstdlib.memcpy(dest_ptr, src_ptr, length)  // Use system memcpy
             }
 
             func compare(other: MemBlock) -> Int {
                 // Compare memory blocks
                 // Returns 0 if equal, negative if less than, positive if greater
-                crystal.manifest("Comparing memory blocks")
-                return 0
+                var min_size = math.min(this.size, other.size)
+                var result = crystal.cpp.cstdlib.memcmp(this.ptr, other.ptr, min_size)
+
+                if result == 0 {
+                    // Blocks are equal up to min_size; compare remaining lengths
+                    if this.size == other.size {
+                        return 0
+                    } else if this.size < other.size {
+                        return -1
+                    } else {
+                        return 1
+                    }
+                }
+
+                return result
             }
         }
 
