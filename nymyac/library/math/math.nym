@@ -4,6 +4,7 @@
 import math.hypercalc
 import math.functions
 import lowlevel
+import networking
 
 namespace math
 
