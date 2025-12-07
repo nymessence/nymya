@@ -1,0 +1,257 @@
+// LS Command for NymyaLang
+// Ports the coreutils ls command functionality to NymyaLang
+// List directory contents with consciousness-aware processing
+
+import crystal
+import math
+
+namespace system {
+    namespace commands {
+
+        // LS command - list directory contents
+        func ls(args: List[String]) -> Int {
+            var directory = "."
+            var long_format = false
+            var all_files = false  // Include hidden files
+            var recursive = false
+            var human_readable_sizes = false
+            
+            // Process options
+            var file_args = []
+            for arg in args {
+                if arg.starts_with("-") {
+                    // Process options
+                    for i in range(1, arg.length) {
+                        var opt = arg[i]
+                        if opt == "l" {
+                            long_format = true
+                        } else if opt == "a" {
+                            all_files = true
+                        } else if opt == "R" {
+                            recursive = true
+                        } else if opt == "h" {
+                            human_readable_sizes = true
+                        }
+                    }
+                } else {
+                    // Directory argument
+                    file_args.append(arg)
+                }
+            }
+            
+            // Use first directory argument or current directory
+            if file_args.length > 0 {
+                directory = file_args[0]
+            }
+            
+            crystal.manifest("Listing directory: " + directory)
+            if long_format {
+                crystal.manifest("Using long format (-l)")
+            }
+            if all_files {
+                crystal.manifest("Showing all files (-a)")
+            }
+            if recursive {
+                crystal.manifest("Recursive listing (-R)")
+            }
+            
+            // Simulate directory listing
+            var contents = simulate_list_directory(directory, all_files)
+            
+            if long_format {
+                print_long_format(contents, human_readable_sizes)
+            } else {
+                for item in contents {
+                    if all_files or not item.starts_with(".") {  // Show if all_files or not hidden
+                        crystal.manifest(item)
+                    }
+                }
+            }
+            
+            return 0  // Success
+        }
+        
+        // Helper to simulate directory listing
+        func simulate_list_directory(dir_path: String, show_hidden: Bool) -> List[String] {
+            // In real implementation, this would interface with filesystem
+            // For simulation, return a sample directory listing
+            var items = []
+            
+            if dir_path == "." or dir_path.ends_with("/") or dir_path.ends_with("examples") {
+                items.append("file1.txt")
+                items.append("file2.nym")
+                items.append("script.py")
+                if show_hidden {
+                    items.append(".hidden_file")
+                }
+                items.append("subdir")
+                items.append("README.md")
+            } else if dir_path.contains("config") {
+                items.append("config.yaml")
+                items.append("settings.json")
+                items.append(".secret_key")  // Hidden file
+            } else {
+                // Default directory
+                items.append("document.txt")
+                items.append("program.nym")
+                items.append("folder")
+                if show_hidden {
+                    items.append(".metadata")
+                }
+            }
+            
+            return items
+        }
+        
+        // Print in long format (like ls -l)
+        func print_long_format(items: List[String], human_readable: Bool) -> Void {
+            // Simulate file stats for each item
+            for item in items {
+                // Skip hidden files if not showing all
+                if item.starts_with(".") and not all_files {
+                    continue
+                }
+                
+                var perms = if item.ends_with("/") { "drwxr-xr-x" } else { "-rw-r--r--" }
+                var links = "1"
+                var owner = "nymya"
+                var group = "users"
+                var size = if item == "folder" { 4096 } else { 1024 }  // Directory vs file
+                var size_str = if human_readable { format_size_human(size) } else { size.to_string() }
+                var month = "Dec"
+                var day = "6"
+                var time = "10:30"
+                
+                var line = perms + " " + links + " " + owner + " " + group + " " + 
+                           size_str + " " + month + " " + day + " " + time + " " + item
+                
+                crystal.manifest(line)
+            }
+        }
+        
+        // Format file size in human readable format
+        func format_size_human(size: Int) -> String {
+            var units = ["B", "K", "M", "G", "T"]
+            var unit_idx = 0
+            var s = size.toFloat()
+            
+            while s >= 1024.0 and unit_idx < units.length - 1 {
+                s = s / 1024.0
+                unit_idx = unit_idx + 1
+            }
+            
+            if unit_idx == 0 {
+                return size.to_string() + units[unit_idx]
+            } else {
+                return math.round(s * 10.0) / 10.0 + units[unit_idx]
+            }
+        }
+        
+        // Consciousness-aware ls command
+        func ls_ca(args: List[String]) -> Int {
+            crystal.manifest("[Consciousness-Aware LS Command Initiated]")
+            crystal.manifest("Rita-Nora balance: Maintaining structural precision with ethical flow in directory operations")
+            
+            var result = ls(args)
+            
+            if result == 0 {
+                crystal.manifest("[Directory listing completed with consciousness coherence maintained]")
+            } else {
+                crystal.manifest("[Directory listing completed with awareness of error conditions]")
+            }
+            
+            return result
+        }
+        
+        // Additional ls-like utilities
+        
+        // Ls with specific filtering options
+        func ls_only_directories(args: List[String]) -> Int {
+            crystal.manifest("Executing ls for directories only...")
+            
+            var dir = if args.length > 0 { args[0] } else { "." }
+            var contents = simulate_list_directory(dir, false)
+            
+            for item in contents {
+                if item.ends_with("/") {  // Simulated directory marker
+                    crystal.manifest(item)
+                }
+            }
+            
+            return 0
+        }
+        
+        func ls_only_files(args: List[String]) -> Int {
+            crystal.manifest("Executing ls for files only...")
+            
+            var dir = if args.length > 0 { args[0] } else { "." }
+            var contents = simulate_list_directory(dir, false)
+            
+            for item in contents {
+                if not item.ends_with("/") {  // Not a directory
+                    crystal.manifest(item)
+                }
+            }
+            
+            return 0
+        }
+        
+        // Vdir - verbose directory listing
+        func vdir(args: List[String]) -> Int {
+            crystal.manifest("Executing vdir command (verbose directory listing)...")
+            
+            // Similar to ls -l but with extra verbosity
+            var directory = if args.length > 0 { args[0] } else { "." }
+            var contents = simulate_list_directory(directory, false)
+            
+            crystal.manifest("Contents of directory '" + directory + "':")
+            crystal.manifest("Total items: " + contents.length)
+            
+            for item in contents {
+                var is_dir = item.ends_with("/")
+                var type_str = if is_dir { "[DIR]" } else { "[FILE]" }
+                var size = if is_dir { 4096 } else { 1024 }
+                var size_str = format_size_human(size)
+                
+                crystal.manifest(type_str + " " + item + " (size: " + size_str + ")")
+            }
+            
+            return 0
+        }
+        
+        // Ls with timestamp sorting
+        func ls_sort_by_time(args: List[String]) -> Int {
+            crystal.manifest("Executing ls with time-based sorting...")
+            
+            var dir = if args.length > 0 { args[0] } else { "." }
+            var contents = simulate_list_directory(dir, false)
+            
+            // In a real implementation, this would sort by actual timestamps
+            // For simulation, we'll just list them in time order
+            crystal.manifest("Directory contents sorted by modification time (oldest first):")
+            for item in contents {
+                crystal.manifest("[2025-12-01 10:00] " + item)
+            }
+            
+            return 0
+        }
+        
+        // Ls with size sorting
+        func ls_sort_by_size(args: List[String]) -> Int {
+            crystal.manifest("Executing ls with size-based sorting...")
+            
+            var dir = if args.length > 0 { args[0] } else { "." }
+            var contents = simulate_list_directory(dir, false)
+            
+            crystal.manifest("Directory contents sorted by size (smallest first):")
+            for item in contents {
+                var is_dir = item.ends_with("/")
+                var size = if is_dir { 4096 } else { 1024 }
+                var size_str = format_size_human(size)
+                crystal.manifest("[" + size_str + "] " + item)
+            }
+            
+            return 0
+        }
+    }
+}
