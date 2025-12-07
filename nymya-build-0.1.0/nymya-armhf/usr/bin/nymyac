@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "NymyaLang Compiler v0.1.0 (arch: armhf)"
+echo "Usage: nymyac <input.nym> -o <output>"
+echo ""
+echo "This is a mock binary for demonstration purposes."
+echo "In a real .deb package, this would be the functional compiler."

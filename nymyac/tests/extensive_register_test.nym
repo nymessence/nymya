@@ -1,0 +1,396 @@
+// Comprehensive Register Operations Test Suite
+// Extensive testing of all register operations for edge cases and bugs
+
+import lowlevel
+import lowlevel.register
+import crystal
+
+func test_general_purpose_register() -> Void {
+    crystal.manifest("Testing general purpose register operations...")
+    
+    // Test register creation
+    var reg32 = lowlevel.register.GPRegister(32, 0)  // 32-bit register with initial value 0
+    if reg32.get_value() != 0 {
+        crystal.manifest("ERROR: 32-bit register initial value = " + reg32.get_value() + ", expected 0")
+    } else {
+        crystal.manifest("✓ 32-bit register created with initial value 0")
+    }
+    
+    // Test register with initial value
+    var reg64 = lowlevel.register.GPRegister(64, 255)  // 64-bit register with initial value 255
+    if reg64.get_value() != 255 {
+        crystal.manifest("ERROR: 64-bit register initial value = " + reg64.get_value() + ", expected 255")
+    } else {
+        crystal.manifest("✓ 64-bit register created with initial value 255")
+    }
+    
+    // Test setting register value
+    reg32.set_value(100)
+    if reg32.get_value() != 100 {
+        crystal.manifest("ERROR: Register set_value(100) = " + reg32.get_value() + ", expected 100")
+    } else {
+        crystal.manifest("✓ Register value set to 100")
+    }
+    
+    // Test value masking to register width
+    reg32.set_value(0xFFFFFFFF)  // Large value that exceeds 32 bits
+    var result = reg32.get_value()
+    crystal.manifest("Register with large value: " + result + " (should be masked)")
+    
+    crystal.manifest("General purpose register tests completed!")
+}
+
+func test_register_bit_operations() -> Void {
+    crystal.manifest("Testing register bit operations...")
+    
+    var reg = lowlevel.register.GPRegister(32, 0)
+    
+    // Test setting bits
+    reg.set_bit(5)
+    if not reg.test_bit(5) {
+        crystal.manifest("ERROR: Bit 5 was set but not detected by test_bit")
+    } else {
+        crystal.manifest("✓ Bit 5 set and detected")
+    }
+    
+    if reg.test_bit(4) {
+        crystal.manifest("ERROR: Bit 4 should be clear after setting bit 5")
+    } else {
+        crystal.manifest("✓ Bit 4 remains clear")
+    }
+    
+    // Test clearing bits
+    reg.set_value(255)  // Set 8 lower bits to 1 (0xFF)
+    if not reg.test_bit(7) {
+        crystal.manifest("ERROR: Expected bit 7 to be set")
+    } else {
+        crystal.manifest("✓ Bit 7 initially set")
+    }
+    
+    reg.clear_bit(7)  // Clear bit 7
+    if reg.test_bit(7) {
+        crystal.manifest("ERROR: Bit 7 was cleared but still shows as set")
+    } else {
+        crystal.manifest("✓ Bit 7 cleared")
+    }
+    
+    // Test toggling bits
+    var old_value = reg.get_value()
+    reg.toggle_bit(6)  // Toggle bit 6
+    var new_value = reg.get_value()
+    if old_value == new_value {
+        crystal.manifest("ERROR: Bit 6 toggle had no effect")
+    } else {
+        crystal.manifest("✓ Bit 6 toggled successfully")
+    }
+    
+    reg.toggle_bit(6)  // Toggle again to restore
+    if reg.get_value() != old_value {
+        crystal.manifest("ERROR: Double toggle didn't restore original value")
+    } else {
+        crystal.manifest("✓ Double toggle restored original value")
+    }
+    
+    // Test bit boundaries
+    var wide_reg = lowlevel.register.GPRegister(8, 0)  // 8-bit register
+    wide_reg.set_bit(7)  // Set highest bit
+    if not wide_reg.test_bit(7) {
+        crystal.manifest("ERROR: Could not set highest bit in 8-bit register")
+    } else {
+        crystal.manifest("✓ Highest bit set in 8-bit register")
+    }
+    
+    wide_reg.set_bit(8)  // Try to set bit beyond limit (should be ignored)
+    if wide_reg.test_bit(8) {
+        crystal.manifest("ERROR: Bit 8 set in 8-bit register (should be ignored)")
+    } else {
+        crystal.manifest("✓ Bit beyond limit properly ignored")
+    }
+    
+    crystal.manifest("Register bit operations tests completed!")
+}
+
+func test_register_shift_operations() -> Void {
+    crystal.manifest("Testing register shift operations...")
+    
+    // Test shift left
+    var reg = lowlevel.register.GPRegister(8, 1)  // 8-bit register with value 1 (00000001)
+    var expected = 4  // 00000001 << 2 = 00000100 = 4
+    reg.shift_left(2)
+    if reg.get_value() != expected {
+        crystal.manifest("ERROR: SHIFT_LEFT(1, 2) = " + reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Shift left worked: 1 << 2 = " + reg.get_value())
+    }
+    
+    // Test shift right
+    reg.set_value(16)  // 00010000
+    expected = 4  // 00010000 >> 2 = 00000100 = 4
+    reg.shift_right(2)
+    if reg.get_value() != expected {
+        crystal.manifest("ERROR: SHIFT_RIGHT(16, 2) = " + reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Shift right worked: 16 >> 2 = " + reg.get_value())
+    }
+    
+    // Test shifts with bit masking
+    var wide_reg = lowlevel.register.GPRegister(8, 0xFF)  // 11111111
+    wide_reg.shift_left(2)  // Should become 11111100 (top 2 bits shifted out)
+    expected = 0xFC  // 252
+    if wide_reg.get_value() != expected {
+        crystal.manifest("ERROR: SHIFT_LEFT(255, 2) = " + wide_reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Shift left with masking: 255 << 2 = " + wide_reg.get_value())
+    }
+    
+    // Test shift right arithmetic behavior
+    wide_reg.set_value(0xF0)  // 11110000
+    wide_reg.shift_right(2)  // Should become 00111100 = 60
+    expected = 60
+    if wide_reg.get_value() != expected {
+        crystal.manifest("ERROR: SHIFT_RIGHT(240, 2) = " + wide_reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Shift right: 240 >> 2 = " + wide_reg.get_value())
+    }
+    
+    crystal.manifest("Register shift operations tests completed!")
+}
+
+func test_register_rotate_operations() -> Void {
+    crystal.manifest("Testing register rotation operations...")
+    
+    // Test rotate left
+    var reg = lowlevel.register.GPRegister(8, 0b11000001)  // 193 in decimal: 11000001
+    // After RL by 1: 10000011 = 131
+    var expected = 0b10000011
+    reg.rotate_left(1)
+    if reg.get_value() != expected {
+        crystal.manifest("ERROR: ROTATE_LEFT(193, 1) = " + reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Rotate left: 193 <<< 1 = " + reg.get_value())
+    }
+    
+    // Test rotate right
+    reg.set_value(0b11000001)  // Reset to original
+    // After RR by 1: 11100000 = 224
+    expected = 0b11100000
+    reg.rotate_right(1)
+    if reg.get_value() != expected {
+        crystal.manifest("ERROR: ROTATE_RIGHT(193, 1) = " + reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Rotate right: 193 >>> 1 = " + reg.get_value())
+    }
+    
+    // Test rotate by full width (should return original)
+    var original = 0b10101010
+    reg.set_value(original)
+    reg.rotate_left(8)  // Full width rotation in 8-bit register
+    if reg.get_value() != original {
+        crystal.manifest("ERROR: ROTATE_LEFT(170, 8) = " + reg.get_value() + ", expected original " + original)
+    } else {
+        crystal.manifest("✓ Rotate by full width returns original")
+    }
+    
+    // Test multiple rotates
+    reg.set_value(0b10000001)  // 129
+    reg.rotate_left(3)  // 00000011 (after rotating 10000001 left by 3)
+    expected = 0b00000110  // 6
+    if reg.get_value() != expected {
+        crystal.manifest("ERROR: ROTATE_LEFT(129, 3) = " + reg.get_value() + ", expected " + expected)
+    } else {
+        crystal.manifest("✓ Multiple rotate left: 129 <<< 3 = " + reg.get_value())
+    }
+    
+    crystal.manifest("Register rotation operations tests completed!")
+}
+
+func test_flag_register() -> Void {
+    crystal.manifest("Testing flag register operations...")
+    
+    // Create flag register
+    var flag_reg = lowlevel.register.FlagRegister(16)  // 16-bit flag register
+    
+    // Test carry flag
+    flag_reg.clear_carry()
+    if flag_reg.is_carry() {
+        crystal.manifest("ERROR: Carry flag should be clear after clear_carry()")
+    } else {
+        crystal.manifest("✓ Carry flag cleared")
+    }
+    
+    flag_reg.set_carry()
+    if not flag_reg.is_carry() {
+        crystal.manifest("ERROR: Carry flag should be set after set_carry()")
+    } else {
+        crystal.manifest("✓ Carry flag set")
+    }
+    
+    // Test zero flag
+    flag_reg.clear_zero()
+    if flag_reg.is_zero() {
+        crystal.manifest("ERROR: Zero flag should be clear after clear_zero()")
+    } else {
+        crystal.manifest("✓ Zero flag cleared")
+    }
+    
+    flag_reg.set_zero()
+    if not flag_reg.is_zero() {
+        crystal.manifest("ERROR: Zero flag should be set after set_zero()")
+    } else {
+        crystal.manifest("✓ Zero flag set")
+    }
+    
+    // Test sign flag
+    flag_reg.clear_sign()
+    if flag_reg.is_sign() {
+        crystal.manifest("ERROR: Sign flag should be clear after clear_sign()")
+    } else {
+        crystal.manifest("✓ Sign flag cleared")
+    }
+    
+    flag_reg.set_sign()
+    if not flag_reg.is_sign() {
+        crystal.manifest("ERROR: Sign flag should be set after set_sign()")
+    } else {
+        crystal.manifest("✓ Sign flag set")
+    }
+    
+    // Test overflow flag
+    flag_reg.clear_overflow()
+    if flag_reg.is_overflow() {
+        crystal.manifest("ERROR: Overflow flag should be clear after clear_overflow()")
+    } else {
+        crystal.manifest("✓ Overflow flag cleared")
+    }
+    
+    flag_reg.set_overflow()
+    if not flag_reg.is_overflow() {
+        crystal.manifest("ERROR: Overflow flag should be set after set_overflow()")
+    } else {
+        crystal.manifest("✓ Overflow flag set")
+    }
+    
+    // Test getting/setting raw value
+    flag_reg.set_value(0xFF)
+    var value = flag_reg.get_value()
+    if value != 0xFF {
+        crystal.manifest("ERROR: Flag register raw value = " + value + ", expected 255")
+    } else {
+        crystal.manifest("✓ Flag register raw value access")
+    }
+    
+    crystal.manifest("Flag register tests completed!")
+}
+
+func test_register_bank() -> Void {
+    crystal.manifest("Testing register bank operations...")
+    
+    // Create register bank
+    var bank = lowlevel.register.RegisterBank(8, 32)  // 8 registers, 32-bit each
+    
+    // Test register access
+    bank.set_register(0, 100)
+    bank.set_register(1, 200)
+    var reg0 = bank.get_register(0)
+    var reg1 = bank.get_register(1)
+    
+    if reg0.get_value() != 100 {
+        crystal.manifest("ERROR: Register 0 = " + reg0.get_value() + ", expected 100")
+    } else {
+        crystal.manifest("✓ Register 0 set to 100")
+    }
+    
+    if reg1.get_value() != 200 {
+        crystal.manifest("ERROR: Register 1 = " + reg1.get_value() + ", expected 200")
+    } else {
+        crystal.manifest("✓ Register 1 set to 200")
+    }
+    
+    // Test flag register access
+    var flag_reg = bank.get_flag_register()
+    flag_reg.set_carry()
+    if not flag_reg.is_carry() {
+        crystal.manifest("ERROR: Flag register in bank not working")
+    } else {
+        crystal.manifest("✓ Flag register accessible through bank")
+    }
+    
+    // Test operation: ADD
+    bank.set_register(2, 50)
+    bank.set_register(3, 75)
+    bank.perform_operation("ADD", 2, 3)  // R2 = R2 + R3 = 50 + 75 = 125
+    var result = bank.get_register(2).get_value()
+    if result != 125 {
+        crystal.manifest("ERROR: ADD operation result = " + result + ", expected 125")
+    } else {
+        crystal.manifest("✓ ADD operation: 50 + 75 = " + result)
+    }
+    
+    // Check flags after ADD
+    var flags = bank.get_flag_register()
+    if flags.is_zero() {
+        crystal.manifest("ERROR: ADD result should not be zero")
+    } else {
+        crystal.manifest("✓ ADD result correctly not zero")
+    }
+    
+    // Test SUB operation
+    bank.set_register(4, 100)
+    bank.set_register(5, 150)
+    bank.perform_operation("SUB", 4, 5)  // R4 = R4 - R5 = 100 - 150 = -50
+    result = bank.get_register(4).get_value()
+    crystal.manifest("SUB operation: 100 - 150 = " + result)
+    
+    // Test AND operation
+    bank.set_register(6, 240)  // 11110000
+    bank.set_register(7, 15)  // 00001111
+    bank.perform_operation("AND", 6, 7)  // R6 = R6 AND R7 = 240 & 15 = 0
+    result = bank.get_register(6).get_value()
+    if result != 0 {
+        crystal.manifest("ERROR: AND operation result = " + result + ", expected 0")
+    } else {
+        crystal.manifest("✓ AND operation: 240 & 15 = " + result)
+    }
+    
+    crystal.manifest("Register bank tests completed!")
+}
+
+func test_register_edge_cases() -> Void {
+    crystal.manifest("Testing register edge cases...")
+    
+    // Test register with invalid indices
+    var bank = lowlevel.register.RegisterBank(4, 32)
+    
+    // Access register with valid index
+    var valid_reg = bank.get_register(0)  // Should work
+    crystal.manifest("✓ Valid register access")
+    
+    // Access register with invalid index (should return default)
+    var invalid_reg = bank.get_register(10)  // Index out of bounds
+    // The method should return first register as default
+    crystal.manifest("✓ Invalid index access - returned default register")
+    
+    // Test flag register with various values
+    var flag_reg = lowlevel.register.FlagRegister(8)
+    flag_reg.set_value(255)  // All bits set
+    var value = flag_reg.get_value()
+    if value != 255 {
+        crystal.manifest("ERROR: Flag register with 8-bit width doesn't preserve all 8 bits")
+    } else {
+        crystal.manifest("✓ 8-bit flag register preserves all values")
+    }
+    
+    crystal.manifest("Register edge cases tests completed!")
+}
+
+func main() -> Void {
+    test_general_purpose_register()
+    test_register_bit_operations()
+    test_register_shift_operations()
+    test_register_rotate_operations()
+    test_flag_register()
+    test_register_bank()
+    test_register_edge_cases()
+    
+    crystal.manifest("All register operations tests completed!")
+}

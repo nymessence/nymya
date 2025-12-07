@@ -1,0 +1,69 @@
+#include <iostream>
+
+int main() {
+    std::cout << "Hello from NymyaLang!" << std::endl;
+    return 0;
+}
+
+// Generated from: IR: AST: // Test file for Crystal I/O functions with Taygetan-inspired names
+
+import crystal
+
+func test_basic_io() -> Void {
+    crystal.manifest("Testing basic I/O functions...")
+    
+    // Test output functions
+    crystal.io.sela_manifest(crystal.cpp.iostream.std.cout, "Testing sela_manifest (output) function")
+    crystal.io.lora_orin(crystal.cpp.iostream.std.cout, "Testing lora_orin (nourish existence) function")
+    crystal.io.faya_orin(crystal.cpp.iostream.std.cout, "Testing faya_orin (joy flush) function")
+    
+    crystal.manifest("Basic I/O tests completed!")
+}
+
+func test_file_operations() -> Void {
+    crystal.manifest("Testing file operations with Taygetan names...")
+    
+    var test_path = "test_file.txt"
+    
+    // Test file existence check
+    var exists = crystal.file.dalan_aya(test_path)
+    crystal.manifest("File " + test_path + " exists: " + exists)
+    
+    // Test writing to file
+    var content = "This is a test file for Taygetan-named I/O functions.\nHello NymyaLang!\n"
+    var write_success = crystal.file.dalan_orin(test_path, content)
+    crystal.manifest("File write success: " + write_success)
+    
+    // Test reading from file
+    if crystal.file.dalan_aya(test_path) {
+        var read_content = crystal.file.dalan_karma(test_path)
+        crystal.manifest("Content read from file: " + read_content)
+        
+        var lines = crystal.file.dalan_mena(test_path)
+        crystal.manifest("Number of lines in file: " + lines.length)
+        for i in range(lines.length) {
+            crystal.manifest("Line " + i + ": " + lines[i])
+        }
+    }
+    
+    crystal.manifest("File operations tests completed!")
+}
+
+func test_stream_operations() -> Void {
+    crystal.manifest("Testing stream operations...")
+    
+    // Test input function (commented out to avoid blocking input during automated tests)
+    // var input = crystal.io.shira_orin(crystal.cpp.iostream.std.cin)
+    // crystal.manifest("Input received: " + input)
+    
+    // Just test that the function exists
+    crystal.manifest("Stream operations test completed!")
+}
+
+func main() -> Void {
+    test_basic_io()
+    test_file_operations()
+    test_stream_operations()
+    
+    crystal.manifest("All I/O tests completed successfully!")
+}

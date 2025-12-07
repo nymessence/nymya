@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  nymya-cross-compiler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nymya-cross-compiler
+    volumes:
+      - ./nymyac:/opt/nymya/nymyac:rw
+      - nymya_build_cache:/opt/nymya/target
+    working_dir: /opt/nymya
+    environment:
+      - CARGO_HOME=/opt/nymya/.cargo
+      - RUST_BACKTRACE=1
+    stdin_open: true
+    tty: true
+    privileged: true  # Required for QEMU emulation testing
+
+  nymya-tester-arm64:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nymya-tester-arm64
+    volumes:
+      - ./nymyac:/opt/nymya/nymyac:rw
+      - nymya_build_cache:/opt/nymya/target
+    working_dir: /opt/nymya
+    command: /opt/nymya/build_arm64.sh
+    environment:
+      - CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+    privileged: true
+
+  nymya-tester-x86_64:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nymya-tester-x86_64
+    volumes:
+      - ./nymyac:/opt/nymya/nymyac:rw
+      - nymya_build_cache:/opt/nymya/target
+    working_dir: /opt/nymya
+    command: /opt/nymya/build_x86_64.sh
+    environment:
+      - CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=x86_64-linux-gnu-gcc
+    privileged: true
+
+  nymya-tester-riscv64:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nymya-tester-riscv64
+    volumes:
+      - ./nymyac:/opt/nymya/nymyac:rw
+      - nymya_build_cache:/opt/nymya/target
+    working_dir: /opt/nymya
+    command: /opt/nymya/build_riscv64.sh
+    environment:
+      - CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
+    privileged: true
+
+volumes:
+  nymya_build_cache:

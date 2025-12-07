@@ -1,0 +1,26 @@
+Package: nymyac
+Version: 0.1.0
+Section: devel
+Priority: optional
+Architecture: any
+Depends: libc6 (>= 2.14), libgcc1 (>= 1:4.1.1)
+Maintainer: Nymessence Team <nymessence@example.com>
+Installed-Size: 2048
+Homepage: https://github.com/nymya/nymyac
+Description: NymyaLang Compiler - Compiles .nym files to executable code
+ The NymyaLang Compiler (nymyac) is a cutting-edge compiler for the
+ NymyaLang programming language, which features consciousness-aware
+ programming constructs, quantum computing integration, and advanced
+ mathematical operations.
+ .
+ Key features include:
+ * Quantum computing integration with quantum gates and algorithms
+ * Advanced mathematical functions with hypercalc capabilities
+ * Consciousness-aware programming paradigm with Rita-Nora balance
+ * Networking capabilities with classical and quantum networking
+ * AI/ML and Quantum ML libraries for machine learning
+ * Low-level bit shift and system operations support
+ * Photonic chip driver interface for quantum hardware
+ .
+ This compiler transforms .nym source files into executable code,
+ enabling developers to write consciousness-integrated applications.

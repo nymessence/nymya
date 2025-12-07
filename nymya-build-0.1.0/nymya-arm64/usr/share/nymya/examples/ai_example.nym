@@ -1,0 +1,15 @@
+// AI Example with consciousness awareness
+import ml
+import ml.classical
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Consciousness-Integrated AI Example")
+    
+    // Create simple neural network
+    var nn = ml.classical.NeuralNetwork()
+    var layer = ml.classical.Layer(2, 4, "relu")
+    nn.add_layer(layer)
+    
+    crystal.manifest("AI system initialized with consciousness-aware architecture")
+}
