@@ -49,42 +49,42 @@ namespace lowlevel {
         // Rotate left: rotate bits left by b positions
         func rotate_left(value: Int, positions: Int) -> Int {
             var bits = 32  // Assuming 32-bit integers
-            if value < 0 {
-                bits = 64  // For larger integers
-            }
             var effective_positions = positions % bits
             if effective_positions < 0 {
                 effective_positions += bits
             }
-            return ((value << effective_positions) | (value >> (bits - effective_positions))) & 
-                   ((1 << bits) - 1)
+            // To rotate left: ((value << pos) | (value >> (width - pos)))
+            var left_part = (value << effective_positions)
+            var right_part = (value >> (bits - effective_positions))
+            var mask = (1 << bits) - 1  // Create mask for the bit width
+            return ((left_part | right_part) & mask)
         }
 
         // Rotate right: rotate bits right by b positions
         func rotate_right(value: Int, positions: Int) -> Int {
-            var bits = 32  // Assuming 32-bit integers  
-            if value < 0 {
-                bits = 64  // For larger integers
-            }
+            var bits = 32  // Assuming 32-bit integers
             var effective_positions = positions % bits
             if effective_positions < 0 {
                 effective_positions += bits
             }
-            return ((value >> effective_positions) | (value << (bits - effective_positions))) & 
-                   ((1 << bits) - 1)
+            // To rotate right: ((value >> pos) | (value << (width - pos)))
+            var right_part = (value >> effective_positions)
+            var left_part = (value << (bits - effective_positions))
+            var mask = (1 << bits) - 1  // Create mask for the bit width
+            return ((right_part | left_part) & mask)
         }
 
         // Count leading zeros
         func count_leading_zeros(value: Int) -> Int {
             if value == 0 {
-                return 32  // Assuming 32-bit, adjust based on implementation
+                return 32  // All 32 bits are zeros
             }
-            
+
             var count = 0
-            var v = math.abs(value)  // Work with absolute value
-            while (v & (1 << 31)) == 0 and count < 32 {
-                v = v << 1
+            var mask = 1 << 31  // Start with the most significant bit
+            while (value & mask) == 0 and count < 32 {
                 count = count + 1
+                mask = mask >> 1
             }
             return count
         }
@@ -92,11 +92,11 @@ namespace lowlevel {
         // Count trailing zeros
         func count_trailing_zeros(value: Int) -> Int {
             if value == 0 {
-                return 32  // Assuming 32-bit
+                return 32  // All 32 bits are zeros
             }
-            
+
             var count = 0
-            var v = math.abs(value)
+            var v = value
             while (v & 1) == 0 and count < 32 {
                 v = v >> 1
                 count = count + 1
@@ -109,8 +109,8 @@ namespace lowlevel {
             var count = 0
             var v = math.abs(value)  // Work with absolute value
             while v != 0 {
-                count = count + (v & 1)
-                v = v >> 1
+                count = count + 1
+                v = v & (v - 1)  // This clears the lowest set bit
             }
             return count
         }
@@ -304,6 +304,9 @@ namespace lowlevel {
 
             func rotate_left(bits: Int) -> Void {
                 var effective_bits = bits % this.width
+                if effective_bits < 0 {
+                    effective_bits += this.width
+                }
                 var left_part = (this.value << effective_bits) & ((1 << this.width) - 1)
                 var right_part = this.value >> (this.width - effective_bits)
                 this.value = left_part | right_part
@@ -311,9 +314,12 @@ namespace lowlevel {
 
             func rotate_right(bits: Int) -> Void {
                 var effective_bits = bits % this.width
+                if effective_bits < 0 {
+                    effective_bits += this.width
+                }
                 var right_part = (this.value >> effective_bits) & ((1 << this.width) - 1)
-                var left_part = this.value << (this.width - effective_bits)
-                this.value = (left_part | right_part) & ((1 << this.width) - 1)
+                var left_part = (this.value << (this.width - effective_bits)) & ((1 << this.width) - 1)
+                this.value = right_part | left_part
             }
 
             func to_string() -> String {
@@ -489,10 +495,13 @@ namespace lowlevel {
         }
 
         func swap_endian_32(value: Int) -> Int {
-            return ((value & 0xFF) << 24) | 
-                   (((value >> 8) & 0xFF) << 16) | 
-                   (((value >> 16) & 0xFF) << 8) | 
-                   ((value >> 24) & 0xFF)
+            var byte0 = value & 0xFF              // Lowest byte (bits 0-7)
+            var byte1 = (value >> 8) & 0xFF       // Second byte (bits 8-15)
+            var byte2 = (value >> 16) & 0xFF      // Third byte (bits 16-23)
+            var byte3 = (value >> 24) & 0xFF      // Fourth byte (bits 24-31)
+
+            // Swap byte positions to convert endianness: ABCD -> DCBA
+            return (byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3
         }
 
         // Alignment functions
