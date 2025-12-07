@@ -407,11 +407,11 @@ namespace math {
                 return ONE  // 1^(1/n) = 1
             }
 
-            // For negative base with non-integer root_degree, result could be complex
+            // For negative base with non-integer root_degree, result would be complex
             if base < ZERO and root_degree != math.floor(root_degree) {
-                // Return magnitude only for now (in complex implementation would return complex)
-                var result_mag = exp(divide(ln(-base), root_degree))
-                return result_mag
+                // In complex number field, this would return complex result
+                // For real number domain, return NaN_REP to indicate undefined operation
+                return NaN_REP
             }
 
             // Standard root calculation
