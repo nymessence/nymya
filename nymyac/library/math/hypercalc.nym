@@ -50,7 +50,8 @@ namespace math {
         }
 
         func is_nan_like(x: Float) -> Bool {
-            return x != x  // NaN is the only value where x != x
+            // Check for NaN using the fundamental property: NaN != NaN
+            return x != x
         }
 
         func is_inf_like(x: Float) -> Bool {
