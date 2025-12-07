@@ -262,8 +262,8 @@ namespace lowlevel {
         }
 
         func compare(ptr1: crystal.Pointer, ptr2: crystal.Pointer, size: Int) -> Int {
-            // This would use memcmp in C++, but we'll simulate it
-            return 0  // Placeholder
+            // Use C++ memcmp function for actual memory comparison
+            return crystal.cpp.cstdlib.memcmp(ptr1, ptr2, size)
         }
     }
 
@@ -330,12 +330,22 @@ namespace lowlevel {
 
             func arithmetic_shift_right(bits: Int) -> Void {
                 var shift_amount = bits % this.width
+                if shift_amount == 0 { return }  // No shift needed
+
                 // Arithmetic shift preserves sign bit for signed integers
-                // This is simulated by checking the sign bit
+                // If the sign bit is set, fill with 1s; else fill with 0s
                 var sign_bit = this.value & (1 << (this.width - 1))
-                this.value = this.value >> shift_amount
-                // If we're simulating arithmetic shift, we might need to preserve sign
-                // For now, we'll do a logical shift
+
+                if sign_bit != 0 {
+                    // Negative number - preserve sign bit (shift in 1s)
+                    var shifted = this.value >> shift_amount
+                    // Create mask to fill upper bits with 1s
+                    var mask = ((1 << shift_amount) - 1) << (this.width - shift_amount)
+                    this.value = shifted | mask
+                } else {
+                    // Positive number - logical shift is sufficient
+                    this.value = this.value >> shift_amount
+                }
             }
 
             func rotate_left(bits: Int) -> Void {
