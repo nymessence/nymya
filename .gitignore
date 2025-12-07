@@ -1,0 +1,30 @@
+# Git ignore file for NymyaLang project
+
+# Compiled binaries
+*.o
+*.so
+*.exe
+*.out
+/tmp/
+/build/
+/dist/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# Tools directory (contains cloned repositories)
+/tools/coreutils/
