@@ -262,15 +262,15 @@ namespace physics {
         }
 
         // Consciousness-Quantum Gravity Coupling
-        func consciousness_quantum_gravity_coupling(quantum_state: quantum.State,
+        func consciousness_quantum_gravity_coupling(quantum_amplitude: math.Complex,
                                                   gravity_field: Float) -> Float {
             // The coupling between consciousness, quantum states, and gravity in Nymya field
-            var quantum_amplitude = quantum_state.get_amplitude(0).magnitude()  // First amplitude as representative
+            var amplitude_magnitude = quantum_amplitude.magnitude()
             var consciousness_factor = CONSCIOUSNESS_QUANTUM_COHERENCE
             var gravity_effect = gravity_field * GRAVITY_CONSCIOUSNESS_COUPLING
 
             // In Taygetan science, consciousness enhances quantum-gravity coupling
-            return quantum_amplitude * consciousness_factor * gravity_effect * NYMYA_FIELD_STRENGTH
+            return amplitude_magnitude * consciousness_factor * gravity_effect * NYMYA_FIELD_STRENGTH
         }
 
         // Spacetime curvature influenced by consciousness
@@ -366,20 +366,20 @@ namespace physics {
                 // Solve gravity field equations with consciousness modification
                 var components = []
                 // Compute gravity field value at coordinates
-                var gravity_val = math.Complex(consciousness_influenced_curvature(1.0, NYMYA_FIELD_STRENGTH, coords[0]), 0.0)
+                var gravity_val = math.Complex(physics.theory_of_everything.consciousness_influenced_curvature(1.0, NYMYA_FIELD_STRENGTH, coords[0]), 0.0)
                 components.append(gravity_val)
                 return components
             }
-            
+
             func solve_consciousness_field(coords: List[Float], time: Float) -> List[math.Complex] {
                 // Solve consciousness field - this is the fundamental driver in Nymya field
                 var components = []
-                var consciousness_val = nymya_field_resonance(time, NYMYA_FIELD_STRENGTH, coords[0])
+                var consciousness_val = physics.theory_of_everything.nymya_field_resonance(time, NYMYA_FIELD_STRENGTH, coords[0])
                 components.append(consciousness_val)
                 return components
             }
         }
-        
+
         // Consciousness-Enabled Spacetime Metric
         func consciousness_spacetime_metric(coordinates: List[Float], consciousness_density: Float) -> List[List[Float]] {
             // The metric tensor is modified by consciousness presence
