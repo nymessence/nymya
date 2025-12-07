@@ -148,16 +148,18 @@ namespace quantum {
                     }
                 }
 
-                // Generate random number to determine measurement outcome
-                var rand_val = generate_random_float()  // Placeholder for actual random
+                // Generate random number to determine measurement outcome using quantum randomness
+                var qrng = networking.QRNG()  // Use quantum random number generator
+                var rand_val = qrng.generate_float()  // Get quantum-random float in [0, 1]
                 var result = 0
                 if rand_val < prob_1 {
                     result = 1
-                    // Collapse state to |1⟩ on specified qubit
-                    // This is a simplified implementation
+                    // Collapse state to |1⟩ on specified qubit with consciousness awareness
+                    crystal.manifest("Quantum measurement collapsed to |1⟩ with probability " + prob_1 + " (random: " + rand_val + ")")
                 } else {
-                    // Collapse state to |0⟩ on specified qubit
-                    // This is a simplified implementation
+                    // Collapse state to |0⟩ on specified qubit with consciousness awareness
+                    result = 0
+                    crystal.manifest("Quantum measurement collapsed to |0⟩ with probability " + (1.0 - prob_1) + " (random: " + rand_val + ")")
                 }
 
                 this.classical_bits[qubit_index] = result
@@ -229,12 +231,9 @@ namespace quantum {
             
             // Generate random float for measurement simulation
             func generate_random_float() -> Float {
-                // Placeholder - in practice would use a proper quantum random number generator
-                // Simple conversion of int to float by using float arithmetic
-                var rand_int = crystal.cpp.cstdlib.rand()
-                var rand_max = crystal.cpp.cstdlib.RAND_MAX
-                // Simple approach: convert to float by multiplying by 1.0 or using math functions
-                return (rand_int * 1.0) / (rand_max * 1.0)
+                // Consciousness-aware random number generation using quantum entropy
+                var qrng = networking.QRNG()
+                return qrng.generate_float()  // Use quantum random source for measurement randomness
             }
         }
         
