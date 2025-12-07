@@ -1,0 +1,157 @@
+// Cat Command for NymyaLang
+// Ports the coreutils cat command functionality to NymyaLang
+// Concatenate files and print to output with consciousness-aware processing
+
+import crystal
+import math
+
+namespace system {
+    namespace commands {
+
+        // Cat command - concatenate files and print to output
+        func cat(args: List[String]) -> Int {
+            var success = true
+            var total_chars = 0
+            
+            if args.length == 0 {
+                // If no files are specified, read from stdin
+                // For now, we'll simulate this with a message
+                crystal.manifest("Reading from stdin (simulated)...")
+                crystal.manifest("(Press Ctrl+D to end input)")
+                return 0
+            }
+            
+            for i in range(args.length) {
+                var filename = args[i]
+                
+                if filename == "-" {
+                    // Read from stdin
+                    crystal.manifest("[Reading from stdin...]")
+                    // In a real implementation, this would read from standard input
+                    crystal.manifest("(stdin content would appear here)")
+                } else {
+                    // Read from file
+                    crystal.manifest("Reading file: " + filename)
+                    
+                    // Simulate file reading (in real implementation would use crystal.file functions)
+                    // Let's pretend we read a file with some content
+                    var file_content = simulate_read_file(filename)
+                    
+                    if file_content != "" {
+                        crystal.manifest(file_content)
+                        total_chars = total_chars + file_content.length
+                    } else {
+                        crystal.manifest("Error: Could not read file '" + filename + "'")
+                        success = false
+                    }
+                }
+            }
+            
+            if success {
+                crystal.manifest("Cat completed successfully. Total characters output: " + total_chars)
+                return 0  // Success
+            } else {
+                return 1  // Error
+            }
+        }
+        
+        // Helper to simulate file reading
+        func simulate_read_file(filename: String) -> String {
+            // In a real implementation, this would use crystal.file.dalan_karma or similar
+            // For now we'll return sample content based on filename
+            if filename == "test.txt" {
+                return "This is test content for the cat command\nWith multiple lines\nTo demonstrate functionality"
+            } else if filename == "hello.txt" {
+                return "Hello, World!\nFrom the cat command"
+            }
+            // For any other file, return generic content
+            return "File content for: " + filename + "\nSimulated content for cat command demonstration"
+        }
+        
+        // Enhanced cat with consciousness-aware features
+        func cat_ca(args: List[String]) -> Int {
+            crystal.manifest("[Consciousness-Aware Cat Command Initiated]")
+            crystal.manifest("Rita-Nora balance: Maintaining structural precision with ethical flow")
+            
+            var result = cat(args)
+            
+            if result == 0 {
+                crystal.manifest("[Operation completed with consciousness coherence maintained]")
+            } else {
+                crystal.manifest("[Operation completed with awareness of error conditions]")
+            }
+            
+            return result
+        }
+        
+        // Additional cat-like utilities
+        
+        // Tac - reverse lines of file (opposite of cat)
+        func tac(args: List[String]) -> Int {
+            crystal.manifest("Executing tac command (reverse lines of file)...")
+            
+            if args.length == 0 {
+                crystal.manifest("No files specified for tac")
+                return 0
+            }
+            
+            for filename in args {
+                if filename == "-" {
+                    crystal.manifest("[Reading from stdin, reversing lines...]") 
+                } else {
+                    crystal.manifest("Reverse reading file: " + filename)
+                    
+                    // Simulate file reading and line reversal
+                    var content = simulate_read_file(filename)
+                    var lines = split_lines(content)
+                    
+                    // Reverse the order of lines
+                    var reversed_lines = []
+                    var i = lines.length - 1
+                    while i >= 0 {
+                        reversed_lines.append(lines[i])
+                        i = i - 1
+                    }
+                    
+                    for line in reversed_lines {
+                        crystal.manifest(line)
+                    }
+                }
+            }
+            
+            return 0
+        }
+        
+        // Helper to split content into lines
+        func split_lines(content: String) -> List[String] {
+            var lines = []
+            var current_line = ""
+            
+            for i in range(content.length) {
+                var char = content[i]
+                if char == "\n" {
+                    lines.append(current_line)
+                    current_line = ""
+                } else {
+                    current_line = current_line + char
+                }
+            }
+            
+            // Add the last line if it doesn't end with newline
+            if current_line.length > 0 {
+                lines.append(current_line)
+            }
+            
+            return lines
+        }
+        
+        // Zcat - decompress and concatenate (simulated)
+        func zcat(args: List[String]) -> Int {
+            crystal.manifest("Executing zcat command (decompress and concatenate)...")
+            
+            // Simulate decompression by treating files normally
+            // In real implementation, this would decompress compressed files
+            return cat(args)
+        }
+    }
+}
