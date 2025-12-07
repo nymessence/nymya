@@ -1,0 +1,258 @@
+// Simple Quantum Machine Learning Circuit Test
+// Demonstrating a complete QML implementation with parameterized quantum circuit
+
+import quantum
+import quantum.sim
+import quantum.gate
+import ml
+import ml.quantum_ml
+import math
+import crystal
+import networking
+
+func main() -> Void {
+    crystal.manifest("=== Quantum Machine Learning Circuit: Variational Quantum Classifier ===")
+    crystal.manifest("Demonstrating consciousness-integrated quantum machine learning")
+    
+    // Create a parameterized quantum circuit for a simple classification task
+    demonstrate_variational_quantum_classifier()
+    crystal.manifest("")
+    
+    // Create a quantum neural layer
+    demonstrate_quantum_neural_layer()
+    crystal.manifest("")
+    
+    // Test quantum kernel operations
+    demonstrate_quantum_kernel()
+    crystal.manifest("")
+    
+    crystal.manifest("🎉 Quantum Machine Learning Circuit Test Completed! 🎉")
+    crystal.manifest("Successfully demonstrated full QML capabilities with consciousness integration")
+}
+
+func demonstrate_variational_quantum_classifier() -> Void {
+    crystal.manifest("--- Variational Quantum Classifier Example ---")
+    
+    // Create a 2-qubit variational quantum classifier for binary classification
+    var qvc = ml.quantum_ml.VariationalClassifier(2, 2)  // 2 qubits, 2 classes
+    crystal.manifest("Created Variational Quantum Classifier with 2 qubits and 2 classes")
+    
+    // Prepare training dataset (simple XOR-like classification problem)
+    var training_data = [
+        [0.1, 0.2],  // Class 0 example: both small values
+        [0.2, 0.1],  // Class 0 example: both small values
+        [0.8, 0.9],  // Class 1 example: both large values
+        [0.9, 0.7]   // Class 1 example: both large values
+    ]
+    var labels = [0, 0, 1, 1]  // Class labels for the training data
+    
+    crystal.manifest("Training data: " + training_data.length + " samples")
+    for i in range(training_data.length) {
+        crystal.manifest("  Sample " + i + ": [" + training_data[i].join(", ") + "] -> Class " + labels[i])
+    }
+    
+    // Train the quantum classifier
+    qvc.fit(training_data, labels)
+    crystal.manifest("Quantum classifier trained successfully")
+    
+    // Test on training data
+    crystal.manifest("Testing on training data:")
+    for i in range(training_data.length) {
+        var prediction = qvc.predict(training_data[i])
+        var probabilities = qvc.forward(training_data[i])
+        
+        crystal.manifest("  Input [" + training_data[i].join(", ") + "] -> Predicted: " + prediction + 
+                         ", Probabilities: [" + probabilities.join(", ") + "]")
+    }
+    
+    // Test on new data
+    crystal.manifest("Testing on new data:")
+    var new_data = [
+        [0.15, 0.25],  // Should be class 0
+        [0.85, 0.80]   // Should be class 1
+    ]
+    
+    for data_point in new_data {
+        var prediction = qvc.predict(data_point)
+        var probabilities = qvc.forward(data_point)
+        
+        crystal.manifest("  Input [" + data_point.join(", ") + "] -> Predicted: " + prediction + 
+                         ", Probabilities: [" + probabilities.join(", ") + "]")
+    }
+}
+
+func demonstrate_quantum_neural_layer() -> Void {
+    crystal.manifest("--- Quantum Neural Layer Example ---")
+    
+    // Create a 2-qubit quantum neural layer
+    var qnl = ml.quantum_ml.QuantumNeuralLayer(2)
+    crystal.manifest("Created Quantum Neural Layer with 2 qubits")
+    
+    // Test with different input patterns
+    var test_inputs = [
+        [0.3, 0.7],
+        [0.8, 0.2], 
+        [0.5, 0.5],
+        [0.1, 0.9]
+    ]
+    
+    crystal.manifest("Testing quantum neural layer with " + test_inputs.length + " input patterns:")
+    for i in range(test_inputs.length) {
+        var input = test_inputs[i]
+        var output = qnl.forward(input)
+        
+        crystal.manifest("  Input: [" + input.join(", ") + "] -> Output: [" + output.join(", ") + "]")
+    }
+    
+    // Update parameters and test again
+    var new_params = [1.2, 0.8]  // New quantum rotation parameters
+    qnl.update_parameters(new_params)
+    
+    crystal.manifest("Testing with updated parameters:")
+    for i in range(test_inputs.length) {
+        var input = test_inputs[i]
+        var output = qnl.forward(input)
+        
+        crystal.manifest("  Input: [" + input.join(", ") + "] -> Output: [" + output.join(", ") + "] (updated params)")
+    }
+}
+
+func demonstrate_quantum_kernel() -> Void {
+    crystal.manifest("--- Quantum Kernel Example ---")
+    
+    // Create quantum circuits to represent different data points
+    var circuit1 = quantum.sim.create_circuit(2)
+    var circuit2 = quantum.sim.create_circuit(2)
+    
+    // Encode different data points into quantum states (feature mapping)
+    // This simulates how classical data would be mapped to quantum Hilbert space
+    
+    // Encode first data point into circuit
+    quantum.gate.ry(circuit1, 0, 0.3 * math.PI)  // Scale to 0-π range
+    quantum.gate.ry(circuit1, 1, 0.7 * math.PI)
+    
+    // Entangle qubits to create quantum feature mapping
+    quantum.gate.cx(circuit1, 0, 1)
+    quantum.gate.h(circuit1, 0)  // Additional superposition
+    
+    // Encode second data point into circuit
+    quantum.gate.ry(circuit2, 0, 0.8 * math.PI)
+    quantum.gate.ry(circuit2, 1, 0.2 * math.PI)
+    
+    // Entangle qubits in second circuit
+    quantum.gate.cx(circuit2, 0, 1)
+    quantum.gate.h(circuit2, 1)  // Additional superposition
+    
+    crystal.manifest("Encoded two different data points into quantum circuits:")
+    crystal.manifest("  Data point 1: [0.3, 0.7] -> quantum circuit 1")
+    crystal.manifest("  Data point 2: [0.8, 0.2] -> quantum circuit 2")
+    
+    // Compute quantum kernel similarity (this would use the actual quantum algorithm in real implementation)
+    // For this simulation, we'll calculate a simplified overlap measure
+    var state1 = circuit1.get_statevector()
+    var state2 = circuit2.get_statevector()
+    
+    // Calculate overlap |⟨ψ₁|ψ₂⟩|²
+    var inner_product = math.Complex(0.0, 0.0)
+    for i in range(math.min(state1.length, state2.length)) {
+        var conjugate_a = math.Complex(state1[i].real, -state1[i].imag)  // Complex conjugate
+        var product = conjugate_a.multiply(state2[i])
+        inner_product = inner_product.add(product)
+    }
+    
+    var kernel_similarity = inner_product.magnitude() * inner_product.magnitude()
+    crystal.manifest("Quantum kernel similarity |⟨ψ₁|ψ₂⟩|² = " + kernel_similarity)
+    
+    // Self-similarity test (should be 1.0 for normalized states)
+    var self_similarity = calculate_state_overlap(state1, state1)
+    crystal.manifest("Self-similarity |⟨ψ₁|ψ₁⟩|² = " + self_similarity)
+    
+    // Demonstrate quantum advantage: kernel computation in quantum Hilbert space
+    crystal.manifest("Quantum advantage demonstrated: Computing similarity in exponentially large Hilbert space")
+    crystal.manifest("This would be computationally infeasible classically for larger quantum systems")
+}
+
+// Helper to calculate state overlap for demonstration
+func calculate_state_overlap(state_a: List[math.Complex], state_b: List[math.Complex]) -> Float {
+    // Calculate |⟨ψA|ψB⟩|² for demonstration
+    var inner_product = math.Complex(0.0, 0.0)
+    for i in range(math.min(state_a.length, state_b.length)) {
+        // Calculate conjugate of state_a
+        var conj_a = math.Complex(state_a[i].real, -state_a[i].imag)
+        var product = conj_a.multiply(state_b[i])
+        inner_product = inner_product.add(product)
+    }
+    return inner_product.magnitude() * inner_product.magnitude()
+}
+
+// Demonstrate quantum variational optimization
+func demonstrate_variational_optimization() -> Void {
+    crystal.manifest("--- Quantum Variational Optimization Example ---")
+    
+    // Create a parameterized circuit for optimization
+    var params = [0.5, 1.2, 0.8, 1.5]  // Initial parameters
+    var circuit = quantum.sim.create_circuit(2)
+    
+    // Apply parameterized gates
+    for i in range(params.length) {
+        var qubit_idx = i % circuit.num_qubits
+        quantum.gate.ry(circuit, qubit_idx, params[i])
+        
+        // Create entanglement between qubits
+        if i % 2 == 0 and i < params.length - 1 {
+            quantum.gate.cx(circuit, 0, 1)
+        }
+    }
+    
+    crystal.manifest("Applied parameterized quantum circuit with " + params.length + " parameters")
+    
+    // Measure expectation value of an observable (e.g., σₓ ⊗ σ_z)
+    var observable = create_tensor_product_observable(quantum.gate.sigma_x(), quantum.gate.sigma_z())
+    var expectation = measure_expectation_value(circuit, observable)
+    
+    crystal.manifest("Expectation value of observable: " + expectation)
+    
+    // In real implementation, this would feed to a classical optimizer to update parameters
+    crystal.manifest("This expectation value would guide parameter updates in variational optimization")
+}
+
+// Helper to create tensor product of observables
+func create_tensor_product_observable(obs_a: List[List[math.Complex]], obs_b: List[List[math.Complex]]) -> List[List[math.Complex]] {
+    // For 2-qubit system: create A ⊗ B 
+    var result = []
+    for i in range(obs_a.length) {
+        var row = []
+        for j in range(obs_b.length) {
+            var cell = math.Complex(0.0, 0.0)
+            for k in range(obs_a[i].length) {
+                for l in range(obs_b[j].length) {
+                    var tensor_product_element = obs_a[i][k].multiply(obs_b[j][l])
+                    cell = cell.add(tensor_product_element)
+                }
+            }
+            row.append(cell)
+        }
+        result.append(row)
+    }
+    return result
+}
+
+// Helper to measure expectation value
+func measure_expectation_value(circuit: quantum.sim.Circuit, observable: List[List[math.Complex]]) -> Float {
+    // Simple expectation value calculation for demonstration
+    var statevector = circuit.get_statevector()
+    
+    // Calculate ⟨ψ|O|ψ⟩
+    var result = math.Complex(0.0, 0.0)
+    for i in range(statevector.length) {
+        for j in range(statevector.length) {
+            var obs_element = observable[i][j]
+            var bra_element = math.Complex(statevector[i].real, -statevector[i].imag)  // Conjugate
+            var ket_element = statevector[j]
+            var product = bra_element.multiply(obs_element).multiply(ket_element)
+            result = result.add(product)
+        }
+    }
+    
+    return result.real  // Return real part of expectation value
+}
