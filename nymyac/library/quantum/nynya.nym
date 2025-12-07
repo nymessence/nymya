@@ -368,15 +368,19 @@ namespace quantum {
         
         // Additional consciousness-aware quantum operations
         
-        func is_open_dissipative(description: String) -> Bool {
-            // Check if the system description indicates an open, dissipative system
-            // This would check for environment coupling, decoherence, etc.
-            return description.contains("open") or 
-                   description.contains("dissipative") or
-                   description.contains("environment") or
-                   description.contains("coupled") or
-                   description.contains("consciousness") or
-                   description.contains("nym")
+        namespace system {
+            func is_open_dissipative(description: String) -> Bool {
+                // Check if the system description indicates an open, dissipative system
+                // This would check for environment coupling, decoherence, etc.
+                return description.contains("open") or
+                       description.contains("dissipative") or
+                       description.contains("environment") or
+                       description.contains("coupled") or
+                       description.contains("consciousness") or
+                       description.contains("nym") or
+                       description.contains("quantum") or
+                       description.contains("interaction")
+            }
         }
         
         // Exception for structural breaches (Rita violations)
