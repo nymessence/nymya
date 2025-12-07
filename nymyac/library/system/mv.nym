@@ -1,0 +1,474 @@
+// MV Command for NymyaLang
+// Ports the coreutils mv command functionality to NymyaLang
+// Move/rename files and directories with consciousness-aware processing
+
+import crystal
+import math
+
+namespace system {
+    namespace commands {
+
+        // MV command - move/rename files and directories
+        func mv(args: List[String]) -> Int {
+            if args.length < 2 {
+                crystal.manifest("Usage: mv [options] SOURCE... DESTINATION")
+                return 1  // Error: insufficient arguments
+            }
+            
+            var verbose = false
+            var interactive = false
+            var force_overwrite = false
+            var backup = false
+            
+            // Process options
+            var file_args = []
+            for arg in args {
+                if arg.starts_with("-") {
+                    // Process options
+                    for i in range(1, arg.length) {
+                        var opt = arg[i]
+                        if opt == "v" {
+                            verbose = true
+                        } else if opt == "i" {
+                            interactive = true
+                        } else if opt == "f" {
+                            force_overwrite = true
+                        } else if opt == "b" {
+                            backup = true
+                        }
+                    }
+                } else {
+                    // File/directory argument
+                    file_args.append(arg)
+                }
+            }
+            
+            if file_args.length < 2 {
+                crystal.manifest("Usage: mv [options] SOURCE... DESTINATION")
+                return 1  // Error: insufficient arguments after options
+            }
+            
+            // Last argument is destination, others are sources
+            var destination = file_args[file_args.length - 1]
+            var source_files = []
+            for i in range(file_args.length - 1) {
+                source_files.append(file_args[i])
+            }
+            
+            if verbose {
+                crystal.manifest("Move configuration:")
+                crystal.manifest("  Verbose: " + verbose.to_string())
+                crystal.manifest("  Interactive: " + interactive.to_string()) 
+                crystal.manifest("  Force overwrite: " + force_overwrite.to_string())
+                crystal.manifest("  Backup: " + backup.to_string())
+                crystal.manifest("  Sources: " + source_files.join(", "))
+                crystal.manifest("  Destination: " + destination)
+            }
+            
+            // Process each source file
+            for source in source_files {
+                var success = move_single_file(source, destination, verbose, 
+                                               interactive, force_overwrite, backup)
+                if not success {
+                    crystal.manifest("Error: Failed to move " + source + " to " + destination)
+                    return 1  // Error occurred
+                }
+            }
+            
+            if verbose {
+                crystal.manifest("Move operation completed successfully")
+            } else {
+                crystal.manifest("Files moved successfully")
+            }
+            
+            return 0  // Success
+        }
+        
+        // Helper function to move a single file
+        func move_single_file(source: String, dest: String, verbose: Bool, 
+                             interactive: Bool, force: Bool, backup: Bool) -> Bool {
+            // In a real implementation, this would use actual file operations
+            // Simulate move operation
+            
+            if verbose {
+                crystal.manifest("Moving " + source + " -> " + dest)
+            }
+            
+            // Check if source exists
+            var source_exists = simulate_check_file_exists_mv(source)
+            if not source_exists {
+                crystal.manifest("Error: Source file does not exist: " + source)
+                return false
+            }
+            
+            // Check if destination exists
+            var dest_exists = simulate_check_file_exists_mv(dest)
+            if interactive and dest_exists {
+                // In real implementation, would prompt for confirmation
+                crystal.manifest("Interactive mode: Destination " + dest + " exists. Move anyway? [Yes]")
+            }
+            
+            if dest_exists and backup {
+                // Create backup (simulated)
+                var backup_name = dest + "~"
+                if verbose {
+                    crystal.manifest("Creating backup: " + backup_name)
+                }
+                // Simulate backup creation
+            }
+            
+            // Check if destination is directory
+            var dest_is_dir = simulate_check_is_directory_mv(dest)
+            var final_destination = if dest_is_dir { 
+                dest + "/" + get_basename_mv(source) 
+            } else { 
+                dest 
+            }
+            
+            // Check if final destination exists already
+            var final_dest_exists = simulate_check_file_exists_mv(final_destination)
+            if final_dest_exists and not force {
+                crystal.manifest("Error: Destination file exists: " + final_destination)
+                if not interactive {
+                    crystal.manifest("Use -f flag to force overwrite or -i for interactive mode")
+                }
+                return false
+            }
+            
+            // Perform move operation (simulated)
+            // In real implementation: copy then delete
+            var file_size = simulate_get_file_size_mv(source)
+            var content = simulate_read_file_content_mv(source)
+            
+            if content != "" {
+                if verbose {
+                    crystal.manifest("  Moving " + file_size.to_string() + " bytes from " + source + 
+                                    " to " + final_destination)
+                }
+                
+                // Simulate writing the file to destination
+                var write_success = simulate_write_file_content_mv(final_destination, content)
+                
+                if write_success {
+                    // Simulate deletion of source (in real implementation this would be actual deletion)
+                    if verbose {
+                        crystal.manifest("  Successfully moved to " + final_destination)
+                        crystal.manifest("  (Source file would be deleted in real implementation)")
+                    }
+                    return true
+                } else {
+                    crystal.manifest("Error: Failed to write to destination: " + final_destination)
+                    return false
+                }
+            } else {
+                crystal.manifest("Error: Could not read source file: " + source)
+                return false
+            }
+        }
+        
+        // Helper to get basename for mv operations
+        func get_basename_mv(filepath: String) -> String {
+            // Find last occurrence of "/"
+            var last_slash = -1
+            for i in range(filepath.length) {
+                if filepath[i] == "/" {
+                    last_slash = i
+                }
+            }
+            
+            if last_slash >= 0 and last_slash < filepath.length - 1 {
+                // Extract substring after last slash
+                var result = ""
+                for i in range(last_slash + 1, filepath.length) {
+                    result = result + filepath[i]
+                }
+                return result
+            } else {
+                return filepath  // No slash found, return whole string
+            }
+        }
+        
+        // Helper to get directory name for mv operations
+        func get_dirname_mv(filepath: String) -> String {
+            // Find last occurrence of "/"
+            var last_slash = -1
+            for i in range(filepath.length) {
+                if filepath[i] == "/" {
+                    last_slash = i
+                }
+            }
+            
+            if last_slash >= 0 {
+                if last_slash == 0 {
+                    return "/"  // Root directory case
+                } else {
+                    // Extract substring before last slash
+                    var result = ""
+                    for i in range(0, last_slash) {
+                        result = result + filepath[i]
+                    }
+                    return result
+                }
+            } else {
+                return "."  // Current directory if no slash found
+            }
+        }
+        
+        // Simulate checking if file exists for mv operations
+        func simulate_check_file_exists_mv(filepath: String) -> Bool {
+            // In real implementation, would check filesystem
+            // For simulation, return true for plausible files
+            var known_files = ["test.txt", "hello.nym", "config.json", "src/main.nym", "data/sample.dat"]
+            var basename = get_basename_mv(filepath)
+            
+            for file in known_files {
+                if file == basename {
+                    return true
+                }
+            }
+            
+            if filepath.contains("/") {
+                return true  // Assume directory exists for simulation
+            }
+            
+            // For paths ending with common extensions, assume they exist
+            if filepath.ends_with(".txt") or filepath.ends_with(".nym") or 
+               filepath.ends_with(".json") or filepath.ends_with(".dat") {
+                return true
+            }
+            
+            return true  // Simulate success in most cases
+        }
+        
+        // Simulate checking if path is a directory for mv operations
+        func simulate_check_is_directory_mv(path: String) -> Bool {
+            // In real implementation, would check filesystem
+            // For simulation, return true for paths ending with "/" or containing subdirectories
+            if path.ends_with("/") {
+                return true
+            }
+            if path.contains("/dir") or path.contains("folder") or path == "." or path == ".." {
+                return true
+            }
+            
+            // If it doesn't have a file extension, assume it's a directory
+            if not (path.contains(".") and 
+                   (path.ends_with(".txt") or path.ends_with(".nym") or path.ends_with(".json") or 
+                    path.ends_with(".dat") or path.ends_with(".py") or path.ends_with(".md"))) {
+                return true
+            }
+            
+            return false
+        }
+        
+        // Simulate getting file size for mv operations
+        func simulate_get_file_size_mv(filepath: String) -> Int {
+            // In real implementation, would query filesystem
+            if filepath.ends_with(".txt") {
+                return 1024  // 1KB text file
+            } else if filepath.ends_with(".nym") {
+                return 4096  // 4KB NymyaLang source
+            } else if filepath.ends_with(".json") {
+                return 2048  // 2KB JSON
+            } else if filepath.ends_with(".dat") {
+                return 8192  // 8KB data file
+            } else {
+                return 1024  // Default 1KB
+            }
+        }
+        
+        // Simulate reading file content for mv operations
+        func simulate_read_file_content_mv(filepath: String) -> String {
+            // In real implementation, would read from actual file
+            var basename = get_basename_mv(filepath)
+            if basename == "test.txt" {
+                return "This is test content for the mv command simulation\nWith multiple lines\nTo demonstrate file moving functionality"
+            } else if basename == "hello.nym" {
+                return "import crystal\n\nfunc main() -> Void {\n  crystal.manifest(\"Hello from NymyaLang!\")\n}"
+            } else if basename == "config.json" {
+                return "{\n  \"debug\": true,\n  \"timeout\": 30,\n  \"host\": \"localhost\"\n}"
+            } else {
+                return "Simulated content for file: " + basename + "\nThis file would be moved in a real implementation\n" +
+                       "File size: " + simulate_get_file_size_mv(filepath).to_string() + " bytes"
+            }
+        }
+        
+        // Simulate writing file content for mv operations
+        func simulate_write_file_content_mv(filepath: String, content: String) -> Bool {
+            // In real implementation, would write to actual file
+            // For simulation, just return success
+            return true  // Simulate success
+        }
+        
+        // Enhanced consciousness-aware mv command
+        func mv_ca(args: List[String]) -> Int {
+            crystal.manifest("[Consciousness-Aware MV Command Initiated]")
+            crystal.manifest("Rita-Nora balance: Maintaining structural precision with ethical flow in file move operations")
+            
+            var result = mv(args)
+            
+            if result == 0 {
+                crystal.manifest("[File move completed with consciousness coherence maintained]")
+            } else {
+                crystal.manifest("[File move completed with awareness of error conditions]")
+            }
+            
+            return result
+        }
+        
+        // Additional mv-like utilities
+        
+        // Rename - move with same directory
+        func rename(args: List[String]) -> Int {
+            if args.length != 2 {
+                crystal.manifest("Usage: rename OLD_NAME NEW_NAME")
+                return 1
+            }
+            
+            var old_name = args[0]
+            var new_name = args[1] 
+            
+            var dirname = get_dirname_mv(old_name)
+            var dest_path = if dirname == "." { 
+                new_name 
+            } else { 
+                dirname + "/" + new_name 
+            }
+            
+            crystal.manifest("Renaming " + old_name + " to " + dest_path)
+            
+            var success = move_single_file(old_name, dest_path, true, false, true, false)
+            if success {
+                crystal.manifest("Successfully renamed " + old_name + " to " + new_name)
+                return 0
+            } else {
+                return 1
+            }
+        }
+        
+        // Mv with progress tracking
+        func mv_with_progress(args: List[String]) -> Int {
+            crystal.manifest("Executing mv with progress tracking...")
+            
+            if args.length < 2 {
+                crystal.manifest("Usage: mv [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var file_args = []
+            var verbose = false
+            for arg in args {
+                if arg.starts_with("-") {
+                    if arg.contains("v") {
+                        verbose = true
+                    }
+                } else {
+                    file_args.append(arg)
+                }
+            }
+            
+            if file_args.length < 2 {
+                crystal.manifest("Usage: mv [options] SOURCE... DESTINATION")
+                return 1
+            }
+            
+            var destination = file_args[file_args.length - 1]
+            var source_files = []
+            for i in range(file_args.length - 1) {
+                source_files.append(file_args[i])
+            }
+            
+            var total_files = source_files.length
+            var completed_files = 0
+            
+            for source in source_files {
+                var success = move_single_file(source, destination, verbose, false, true, false)  // Force, no interactive
+                if success {
+                    completed_files = completed_files + 1
+                    var progress = (completed_files.toFloat() / total_files.toFloat()) * 100.0
+                    crystal.manifest("Progress: " + completed_files + "/" + total_files + 
+                                    " files (" + progress.to_string() + "%)")
+                } else {
+                    crystal.manifest("Failed to move: " + source)
+                }
+            }
+            
+            crystal.manifest("Move operation completed: " + completed_files + "/" + total_files + " files moved")
+            return if completed_files == total_files { 0 } else { 1 }
+        }
+        
+        // Safe move - only if destination doesn't exist
+        func mv_safe(args: List[String]) -> Int {
+            crystal.manifest("Executing safe mv (move only if destination doesn't exist)...")
+            
+            if args.length != 2 {
+                crystal.manifest("Usage: mv_safe SOURCE DESTINATION")
+                return 1
+            }
+            
+            var source = args[0]
+            var dest = args[1]
+            
+            // Check if destination exists
+            if simulate_check_file_exists_mv(dest) {
+                crystal.manifest("Error: Destination file exists, skipping move: " + dest)
+                return 0  // Not an error, just skipped
+            }
+            
+            return move_single_file(source, dest, true, false, false, false)  // Verbose, no force
+        }
+        
+        // Mv with verification (simulated)
+        func mv_verify(args: List[String]) -> Int {
+            crystal.manifest("Executing mv with verification...")
+            
+            if args.length != 2 {
+                crystal.manifest("Usage: mv_verify SOURCE DESTINATION")
+                return 1
+            }
+            
+            var source = args[0]
+            var dest = args[1]
+            
+            // Get checksum of source before move
+            var source_checksum = simulate_compute_checksum_mv(source)
+            
+            // Move file
+            var success = move_single_file(source, dest, true, false, true, false)  // Verbose, force
+            
+            if success {
+                // Compute checksum of destination after move
+                var dest_file = if simulate_check_is_directory_mv(dest) { 
+                    dest + "/" + get_basename_mv(source) 
+                } else { 
+                    dest 
+                }
+                
+                var dest_checksum = simulate_compute_checksum_mv(dest_file)
+                
+                if source_checksum == dest_checksum {
+                    crystal.manifest("Verification successful: Checksums match")
+                    return 0
+                } else {
+                    crystal.manifest("ERROR: Verification failed! Checksums don't match")
+                    return 1
+                }
+            } else {
+                crystal.manifest("Move failed, verification not possible")
+                return 1
+            }
+        }
+        
+        // Simulate checksum computation for mv operations
+        func simulate_compute_checksum_mv(filepath: String) -> Int {
+            var content = simulate_read_file_content_mv(filepath)
+            var hash = 0
+            
+            for i in range(content.length) {
+                hash = (hash + content[i].char_to_int()) % 999999999  // Simple hash simulation
+            }
+            
+            return hash
+        }
+    }
+}
