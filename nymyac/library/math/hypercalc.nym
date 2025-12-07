@@ -354,12 +354,12 @@ namespace math {
             if is_nan_like(x) {
                 return NaN_REP
             }
-            if x <= ZERO {
-                if x == ZERO {
-                    return NEG_HUGE  // log10(0) = -inf
-                } else {
-                    return ZERO  // Placeholder for complex result
-                }
+            if x == ZERO {
+                return NEG_HUGE  // log10(0) = -inf
+            } else if x < ZERO {
+                // For negative values, in a complete implementation we'd return a complex number
+                // In this implementation, return NaN representation to indicate complex result needed
+                return NaN_REP  // Indicate undefined in real domain
             }
             if is_huge_positive(x) {
                 return POS_HUGE  // log10(inf) = inf
