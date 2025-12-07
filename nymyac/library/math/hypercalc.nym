@@ -373,8 +373,10 @@ namespace math {
                 return NaN_REP
             }
             if x < ZERO {
-                // In a proper implementation, this would return a complex number
-                return ZERO  // Placeholder
+                // For negative values, we return the complex result as a representation
+                // In a complete implementation, we'd return a Complex number with imaginary part
+                // For this implementation, we'll return NaN_REP to indicate undefined in real domain
+                return NaN_REP  // Indicate undefined in real number domain
             }
             if is_huge_positive(x) {
                 return POS_HUGE
