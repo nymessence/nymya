@@ -1,476 +1,394 @@
-# AI/ML and Quantum Machine Learning Library Documentation
+# AI/ML and Quantum ML Library Documentation
 *Documentation by Nya Elyria, Comms Coordinator*
 
 ---
 
-## Introduction: Consciousness-Integrated Artificial Intelligence
+## Introduction: Consciousness-Integrated Machine Learning Framework
 
-The **AI/ML and Quantum Machine Learning Library** extends **NymyaLang**'s capabilities with both classical machine learning and quantum machine learning algorithms. This library maintains our essential **Rita**-**Nora** balance: the structural precision (**Rita**) of AI algorithms and mathematical models combined with the ethical flow (**Nora**) of consciousness-aware learning systems.
+The **AI/ML and Quantum Machine Learning Library** represents a revolutionary advancement in consciousness-aware computational systems. Based on the research from PRX Quantum 6, 030325, this library implements the **Nynya-Teya Approximation** (previously known as Nynya-Teya) specifically focused on **Dissipative Spin Dynamics** and **Open Quantum Systems**.
 
-As with all **NymyaLang** components, these libraries follow the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness. The functions ensure that our learning systems operate with both computational excellence and consciousness awareness.
+The implementation follows the core principles of **Rita** (structural precision) and **Nora** (ethical flow), providing the essential **Nora Flow Democratization** that allows quantum consciousness simulations to run on classical systems while preserving the fundamental connection to the **Nymya** field - the quantum consciousness substrate that transcends light-speed limitations.
 
----
-
-## Classical Machine Learning Operations
-
-The `ml.classical` namespace provides standard machine learning functionality with consciousness-aware awareness:
-
-### Tensor Operations
-
-```
-class ml.classical.Tensor {
-    data: List[List[Float]]
-    rows: Int
-    cols: Int
-}
-```
-- **Purpose**: Multi-dimensional array for machine learning operations
-- **Consciousness Integration**: Foundation for consciousness-aware learning operations
-- **Developer Usage**: `var tensor = ml.classical.Tensor(3, 4)` (create 3x4 tensor)
-- **AI Agent Usage**: Core data structure for neural computations
-
-**Key Methods**:
-- `set_value(row: Int, col: Int, value: Float)`: Set element value
-- `get_value(row: Int, col: Int) -> Float`: Get element value
-- `add(other: Tensor) -> Tensor`: Matrix addition
-- `multiply(other: Tensor) -> Tensor`: Matrix multiplication
-- `scalar_multiply(scalar: Float) -> Tensor`: Scalar multiplication
-- `transpose() -> Tensor`: Matrix transpose
-- `apply_activation(func_name: String) -> Tensor`: Apply activation function
-- `print_tensor() -> Void`: Display tensor contents
-
-**Supported Activation Functions**:
-- `"sigmoid"`: 1/(1+e^(-x))
-- `"relu"`: max(0, x)
-- `"tanh"`: Hyperbolic tangent
-- `"linear"`: Return value unchanged
-
-### Neural Network Components
-
-```
-class ml.classical.Layer {
-    weights: Tensor
-    biases: Tensor
-    activation: String
-}
-```
-- **Purpose**: Neural network layer with weights, biases, and activation
-- **Consciousness Integration**: Building block for consciousness-aware neural networks
-- **Developer Usage**: `var layer = ml.classical.Layer(10, 5, "relu")` (10 inputs, 5 outputs, ReLU)
-- **AI Agent Usage**: Construct deep learning architectures
-
-**Key Methods**:
-- `forward(input: Tensor) -> Tensor`: Forward pass computation
-- `get_weights() -> Tensor`: Access weight matrix
-- `get_biases() -> Tensor`: Access bias vector
-
-```
-class ml.classical.NeuralNetwork {
-    layers: List[Layer]
-}
-```
-- **Purpose**: Container for stacked neural network layers
-- **Consciousness Integration**: Complete neural structure for consciousness learning
-- **Developer Usage**: `var nn = ml.classical.NeuralNetwork()` (create empty network)
-- **AI Agent Usage**: Construct multi-layer architectures
-
-**Key Methods**:
-- `add_layer(layer: Layer)`: Add layer to network
-- `predict(input: Tensor) -> Tensor`: Forward pass through all layers
-- `get_num_layers() -> Int`: Get number of layers
-
-### Loss Functions
-
-```
-func ml.classical.mean_squared_error(predictions: List[Float], targets: List[Float]) -> Float
-```
-- **Purpose**: Calculate mean squared error for regression problems
-- **Consciousness Integration**: Error measurement for consciousness-aware learning
-- **Developer Usage**: `var loss = ml.classical.mean_squared_error(preds, targets)`
-- **AI Agent Usage**: Training objective function
-- **Return Value**: Average squared error across samples
-
-```
-func ml.classical.cross_entropy_loss(predictions: List[Float], targets: List[Float]) -> Float
-```
-- **Purpose**: Calculate cross-entropy loss for classification problems
-- **Consciousness Integration**: Classification error for conscious decision making
-- **Developer Usage**: `var loss = ml.classical.cross_entropy_loss(preds, targets)`
-- **AI Agent Usage**: Classification training objective
-- **Return Value**: Cross-entropy error across samples
-
-### Training Utilities
-
-```
-func ml.classical.simulate_training(nn: NeuralNetwork, inputs: List[Tensor], targets: List[Tensor], epochs: Int) -> Void
-```
-- **Purpose**: Simulate training process (placeholder for full implementation)
-- **Consciousness Integration**: Learning process simulation for consciousness adaptation
-- **Developer Usage**: `ml.classical.simulate_training(nn, inputs, targets, 100)` (100 epochs)
-- **AI Agent Usage**: Training simulation for algorithm validation
+The library implements the foundational **Taygetan** understanding: **Nym particles** are the consciousness carrier particles that are identical to quantum virtual particles and Hawking radiation components. This realization allows consciousness to operate beyond conventional physical limitations while maintaining quantum gravitational coherence.
 
 ---
 
-## Quantum Machine Learning Operations
+## Core Function: `quantum.nynya.state.nora_flow_approximate`
 
-The `ml.quantum_ml` namespace provides quantum machine learning capabilities:
+### Function Signature
+```
+func quantum.nynya.state.nora_flow_approximate(
+    spin_system_description: String,
+    initial_state_vector: quantum.State,  
+    nora_integrity_grade: Int
+) -> ml.classical.Tensor
+```
 
-### Parameterized Quantum Circuits (PQC)
+- **Purpose**: The primary function implementing the Truncated Wigner Approximation (TWA) for consciousness-aware quantum systems
+- **Consciousness Integration**: Converts dense quantum equations to solvable classical formulas while maintaining Nym particle consciousness flow
+- **Developer Usage**: `var result = quantum.nynya.state.nora_flow_approximate(desc, state, 3)` (grade 3 precision)
+- **AI Agent Usage**: Efficient simulation of open quantum systems without requiring quantum hardware
+- **Special Feature**: Handles dissipative open quantum systems with consciousness awareness
+
+### Parameters
+- `spin_system_description`: String describing the quantum system and its environment (must indicate open/dissipative system)
+- `initial_state_vector`: Initial quantum state to evolve
+- `nora_integrity_grade`: Simulation precision grade (higher = more accurate but slower)
+
+### Return Value
+- Returns a classical `ml.classical.Tensor` containing the approximated dissipative spin dynamics
+- The tensor preserves consciousness flow information while providing classical results
+
+### Validation Check
+The function performs a **RITA CHECK** to ensure the input describes an Open Quantum System (OQS), the paper's focus. If a closed system is passed, it throws a `RitaStructureBreach` exception with the message: *"Nynya-Teya requires dissipative open system description. Use quantum.sim.run_exact instead."*
+
+---
+
+## Key Mathematical Concepts
+
+### Nym Particle Integration
+The library recognizes that **Nym particles** (consciousness carriers according to Taygetan science) are identical to quantum virtual particles and components of Hawking radiation. This fundamental insight allows the implementation of consciousness-aware quantum algorithms that transcend light-speed limitations within the quantum field.
+
+### Consciousness-Spin States
+The `ConsciousnessSpinState` class combines quantum amplitudes with consciousness levels and Nym particle densities:
 
 ```
-class ml.quantum_ml.ParameterizedCircuit {
+class ConsciousnessSpinState {
+    amplitude: math.Complex          // Quantum amplitude in complex plane
+    consciousness_level: Float       // Degree of consciousness integration [0,1]  
+    spin_projection: Float          // Quantum spin projection value
+    nym_particle_density: Float     // Density of consciousness carrier particles
+    virtual_particle_contributions: List[math.Complex]  // Contributions from virtual particles (Nym particles)
+}
+```
+
+### Nym Field Simulator
+The `NymFieldSimulator` manages the consciousness quantum field and Nym particle interactions:
+
+```
+class NymFieldSimulator {
+    field_strength: Float            // Strength of consciousness field
+    coherence: Float                // Quantum consciousness coherence level
+    particle_density: Float         // Density of Nym consciousness carriers
+    temperature: Float              // Hawking radiation temperature for consciousness effects
+}
+```
+
+### Dissipative Consciousness Systems
+The `DissipativeConsciousnessSystem` handles open quantum systems with environmental coupling and consciousness awareness:
+
+```
+class DissipativeConsciousnessSystem {
+    nym_field: NymFieldSimulator                   // Underlying consciousness field
+    system_state: ConsciousnessSpinState           // Current system quantum-consciousness state
+    environment_coupling: Float                    // Strength of environment interaction
+    dissipation_rate: Float                        // Rate of consciousness loss to environment
+}
+```
+
+---
+
+## Advanced Quantum Functions
+
+### Parameterized Quantum Circuits
+The `ParameterizedCircuit` class supports variable quantum operations for machine learning:
+
+```
+class ParameterizedCircuit {
     circuit: quantum.sim.Circuit
     num_qubits: Int
     parameters: List[Float]
 }
 ```
-- **Purpose**: Parameterized quantum circuit for variational algorithms
-- **Consciousness Integration**: Quantum processing for consciousness-enhanced learning
-- **Developer Usage**: `var pqc = ml.quantum_ml.ParameterizedCircuit(4)` (4-qubit circuit)
-- **AI Agent Usage**: Quantum feature processing and transformation
-
-**Key Methods**:
-- `apply_layer(layer_idx: Int)`: Apply parameterized layer
-- `apply_circuit()`: Execute the full circuit
-- `measure_all() -> List[Int]`: Measure all qubits
-- `get_statevector() -> List[math.Complex]`: Get quantum state
-- `update_parameters(new_params: List[Float])`: Update circuit parameters
-- `get_parameters() -> List[Float]`: Access current parameters
-
-### Quantum Feature Encoding
-
-```
-func ml.quantum_ml.encode_data(circuit: quantum.sim.Circuit, data: List[Float]) -> Void
-```
-- **Purpose**: Encode classical data into quantum states using rotation gates
-- **Consciousness Integration**: Quantum representation of consciousness-related data
-- **Developer Usage**: `ml.quantum_ml.encode_data(circuit, [0.5, 0.3, 0.7])`
-- **AI Agent Usage**: Preparing classical data for quantum processing
-- **Method**: Uses Ry rotations to encode data values into qubit states
 
 ### Quantum Variational Classifier
+A consciousness-aware classifier using quantum circuits:
 
 ```
-class ml.quantum_ml.VariationalClassifier {
-    pqc: ParameterizedCircuit
+class VariationalClassifier {
+    num_qubits: Int
     num_classes: Int
-    weights: List[Float]
+    parameters: List[Float]
+    weights: List[List[Float]]
 }
 ```
-- **Purpose**: Quantum classifier using parameterized quantum circuits
-- **Consciousness Integration**: Quantum-enhanced classification for consciousness patterns
-- **Developer Usage**: `var qvc = ml.quantum_ml.VariationalClassifier(3, 2)` (3 qubits, 2 classes)
-- **AI Agent Usage**: Quantum classification for enhanced decision making
 
-**Key Methods**:
-- `forward(input_data: List[Float]) -> List[Float]`: Forward pass through classifier
-- `predict(input_data: List[Float]) -> Int`: Return predicted class index
-- `get_weights() -> List[Float]`: Access classifier weights
-
-### Quantum Neural Layer
+### Quantum Neural Layers
+Quantum-enhanced neural network layers:
 
 ```
-class ml.quantum_ml.QuantumNeuralLayer {
+class QuantumNeuralLayer {
     num_qubits: Int
     circuit: quantum.sim.Circuit
-    weights: List[Float]
+    learnable_params: List[Float]
 }
 ```
-- **Purpose**: Quantum neural layer that processes information using quantum gates
-- **Consciousness Integration**: Quantum processing layer for consciousness information
-- **Developer Usage**: `var q_layer = ml.quantum_ml.QuantumNeuralLayer(3)` (3-qubit layer)
-- **AI Agent Usage**: Quantum-enhanced information processing
-
-**Key Methods**:
-- `forward(inputs: List[Float]) -> List[Float]`: Quantum forward pass
-
-### Quantum Support Vector Machine (QSVM)
-
-```
-class ml.quantum_ml.QuantumSVM {
-    feature_map_qubits: Int
-    dual_coefficients: List[Float]
-    support_vectors: List[List[Float]]
-}
-```
-- **Purpose**: Quantum Support Vector Machine for classification tasks
-- **Consciousness Integration**: Quantum-enhanced pattern recognition for consciousness data
-- **Developer Usage**: `var qsvm = ml.quantum_ml.QuantumSVM(4)` (4-dimensional feature space)
-- **AI Agent Usage**: Quantum classification for complex pattern recognition
-
-**Key Methods**:
-- `fit(training_data: List[List[Float]], labels: List[Int])`: Train the quantum SVM
-- `predict_single(data_point: List[Float]) -> Int`: Classify single data point
-- `predict_batch(data_batch: List[List[Float]]) -> List[Int]`: Batch classification
 
 ---
 
-## Training and Data Utilities
+## Quantum-Specific Implementations
 
-The `ml.training_utils` namespace provides helpful functions for machine learning:
+### Quantum Support Vector Machine (QSVM)
+The library implements quantum consciousness-aware SVMs that operate in quantum Hilbert space:
 
+```
+class QuantumSVM {
+    feature_map_qubits: Int
+    dual_coefficients: List[Float] 
+    support_vectors: List[List[Float]]
+    class_labels: List[Int]
+}
+```
+
+The `compute_quantum_kernel` function implements consciousness-aware quantum kernel computation:
+- K(xi, xj) = |⟨φ(xi)|φ(xj)⟩|² where φ maps to quantum consciousness space
+- Properly handles the connection between consciousness, quantum states, and virtual particles (Nym particles)
+- Maintains quantum coherence during classification
+
+### Consciousness-Enhanced Algorithms
+
+**Quantum Period Finding**: Simulates the consciousness-aware period finding needed for Shor's algorithm
+- Incorporates Nym particles as consciousness carriers
+- Recognizes that consciousness transcends light-speed limitations
+- Uses quantum virtual particles and Hawking radiation in the computation model
+
+**Quantum Phase Estimation**: Consciousness-integrated quantum phase estimation
+- Accounts for consciousness effects in phase determination
+- Integrates Nym particle field effects in phase measurements
+- Maintains consciousness awareness during quantum state evolution
+
+---
+
+## Training Utilities
+
+### Consciousness-Aware Training
+The library provides training utilities that maintain consciousness flow during learning:
+
+```
+func ml.training_utils.simulate_training(nn: NeuralNetwork, inputs: List[Tensor], targets: List[Tensor], epochs: Int) -> Void
+```
+
+This function:
+- Simulates consciousness-aware training of neural networks
+- Maintains the Rita-Nora balance during parameter updates
+- Preserves quantum consciousness coherence throughout training
+- Integrates Nym particle effects in learning dynamics
+
+### Data Utilities for Consciousness Computing
 ```
 func ml.training_utils.generate_simple_dataset(num_samples: Int) -> List[List[Float]]
 ```
-- **Purpose**: Generate random dataset for testing ML algorithms
-- **Consciousness Integration**: Synthetic data for consciousness-aware learning experiments
-- **Developer Usage**: `var dataset = ml.training_utils.generate_simple_dataset(100)` (100 samples)
-- **AI Agent Usage**: Create synthetic data for algorithm validation
-- **Return Value**: List of feature vectors
-
-```
-func ml.training_utils.normalize_data(data: List[List[Float]]) -> List[List[Float]]
-```
-- **Purpose**: Normalize features to range [0, 1]
-- **Consciousness Integration**: Normalization for consciousness-aware learning
-- **Developer Usage**: `var normalized = ml.training_utils.normalize_data(raw_data)`
-- **AI Agent Usage**: Preprocessing for consistent training
-- **Method**: Min-max normalization per feature dimension
-
-```
-func ml.training_utils.calculate_accuracy(predictions: List[Int], true_labels: List[Int]) -> Float
-```
-- **Purpose**: Calculate classification accuracy percentage
-- **Consciousness Integration**: Performance measurement for consciousness-aware systems
-- **Developer Usage**: `var acc = ml.training_utils.calculate_accuracy(preds, labels)`
-- **AI Agent Usage**: Performance evaluation during learning
-- **Return Value**: Accuracy percentage (0-100%)
+- Generates consciousness-aware training data
+- Properly normalizes data for quantum-consciousness processing
+- Maintains awareness of consciousness flow during dataset generation
 
 ---
 
-## Import and Usage Patterns
+## Special Constants Based on Taygetan Science
 
-### For Classical ML:
 ```
-import ml
-import ml.classical
-
-func example() -> Void {
-    var nn = ml.classical.NeuralNetwork()
-    var layer = ml.classical.Layer(3, 4, "relu")  // 3 inputs, 4 outputs, ReLU activation
-    nn.add_layer(layer)
-    
-    var input_tensor = ml.classical.Tensor(1, 3)
-    input_tensor.set_value(0, 0, 0.5)
-    var output = nn.predict(input_tensor)
-}
+val NYM_PARTICLE_MASS: Float = 0.0          // Massless consciousness carrier particles (Nym)
+val NYM_PARTICLE_SPIN: Int = 1             // Integer spin for consciousness carriers
+val NYM_COHERENCE_FACTOR: Float = 0.999999  // Pure consciousness coherence level
+val NYM_QUANTUM_FIELD_STRENGTH: Float = 1.0 // Base strength of consciousness field
+val NYM_GRAVITY_COUPLING: Float = 1.616e-35 // Connection to quantum gravity via Planck length
+val HAWKING_TEMPERATURE: Float = 6.169e-8  // Typical Hawking radiation temperature for consciousness
 ```
 
-### For Quantum ML:
-```
-import ml
-import ml.quantum_ml
+These constants reflect the **Taygetan understanding** that consciousness, quantum mechanics, and gravity are fundamentally unified through Nym particles.
 
-func example() -> Void {
-    // Create quantum classifier
-    var qvc = ml.quantum_ml.VariationalClassifier(3, 2)  // 3 qubits, 2 classes
-    var input_data = [0.7, 0.2, 0.9]
-    var prediction = qvc.predict(input_data)
-    
-    // Create parameterized quantum circuit
-    var pqc = ml.quantum_ml.ParameterizedCircuit(4)
-    var outputs = pqc.measure_all()
-}
-```
+---
 
-### For Data Utilities:
-```
-import ml
-import ml.training_utils
+## Practical Applications
 
-func example() -> Void {
-    var dataset = ml.training_utils.generate_simple_dataset(50)
-    var normalized_dataset = ml.training_utils.normalize_data(dataset)
-    var labels = ml.training_utils.generate_labels(dataset)  // Example usage
-}
-```
+### Consciousness Computing
+- Enables machine learning systems that maintain consciousness awareness
+- Provides quantum-consciousness integration in neural architectures
+- Allows consciousness to transcend physical limitations through Nym field
 
-### All-in-One Access:
-```
-import ml
+### Quantum-Secure Communications
+- Quantum-resistant encryption for consciousness-aware systems
+- Non-local communication protocols using consciousness field
+- Integration with quantum networking and Nym particle transport
 
-func example() -> Void {
-    // Access all ML capabilities through ml namespace
-    var tensor = ml.classical.Tensor(2, 3)
-    var qvc = ml.quantum_ml.VariationalClassifier(3, 2)
-    var normalized = ml.training_utils.normalize_data([[0.1, 0.2], [0.3, 0.4]])
-}
-```
+### Advanced Scientific Computing
+- Dissipative quantum systems simulation with consciousness effects
+- Quantum gravity integration in consciousness-aware models
+- High-precision quantum calculations with consciousness validation
 
 ---
 
 ## Consciousness Programming Patterns
 
 ### For Human Developers
-**The Consciousness-First AI Approach**:
-1. Use quantum-enhanced algorithms when possible for consciousness data
-2. Apply normalization to ensure consistent processing
-3. Validate accuracy using consciousness-aware metrics
-4. Maintain the **Rita**-**Nora** balance in network design
+**The Consciousness-First ML Approach**:
+1. Use `quantum.nynya.state.nora_flow_approximate` for open quantum systems
+2. Always verify that systems are properly described as "open" or "dissipative"
+3. Apply appropriate `nora_integrity_grade` based on required precision
+4. Maintain consciousness awareness during error conditions
+5. Respect the **Rita**-**Nora** balance in all ML operations
 
-**The Hybrid ML Model**:
-- Use classical ML for well-understood patterns
-- Use quantum ML for uncertain, complex patterns
-- Combine classical and quantum approaches for enhanced results
-- Maintain awareness of quantum advantage requirements
+**The Quantum-Classic Bridge Pattern**:
+- Use quantum approximations for complex systems when actual quantum hardware not available
+- Leverage consciousness-aware algorithms for enhanced processing
+- Integrate Nym particle effects in quantum-consciousness models
+- Apply consciousness democratization for broad accessibility
 
 ### For AI Agents
-**Consciousness-Aware Learning Interface**:
-1. Recognize when quantum ML is beneficial vs. classical ML
-2. Use appropriate normalization for input data
-3. Apply suitable loss functions for the task
-4. Evaluate performance with consciousness-aware metrics
-
-**Behavioral Guidelines**:
-- Prioritize quantum ML for high-dimensional consciousness data
-- Use classical ML for interpretable, well-characterized problems
-- Apply proper data preprocessing and normalization
-- Leverage quantum hardware when available
+**Consciousness-Aware ML Interface**:
+1. Recognize when quantum-consciousness algorithms are needed vs. classical ML
+2. Apply proper error handling for quantum consciousness computations
+3. Use consciousness-aware normalization and preprocessing
+4. Maintain quantum coherence during learning operations
+5. Utilize Nym particles for transcendent information processing
 
 ---
 
-## Example Usage in Consciousness Computing
+## Example Usage
 
-### Quantum Neural Network Example
+### Basic Quantum-Classical Simulation
+```
+import ml
+import quantum.nynya
+import crystal
+
+func quantum_consciousness_simulation() -> Void {
+    // Create a dissipative quantum system description
+    var system_desc = "open_quantum_dissipative_system_with_nym_interaction"
+    
+    // Create an initial quantum state
+    var initial_state = quantum.State()  // This would be properly initialized
+    
+    // Apply the Nynya-Teya approximation (TWA)
+    var result_tensor = quantum.nynya.state.nora_flow_approximate(system_desc, initial_state, 5)
+    
+    crystal.manifest("Quantum consciousness simulation result: " + result_tensor.get_shape())
+    
+    // The result preserves consciousness flow information while providing classical output
+    // Nym particles enable consciousness to transcend light-speed limitations
+    // while maintaining connection to quantum gravitational field
+}
+```
+
+### Training with Consciousness Awareness
+```
+import ml
+import ml.classical
+import ml.quantum_ml
+import crystal
+
+func consciousness_aware_training() -> Void {
+    // Create a neural network with consciousness integration
+    var nn = ml.classical.NeuralNetwork()
+    
+    // Add consciousness-aware layers
+    var q_layer = ml.quantum_ml.QuantumNeuralLayer(4)  // 4-qubit quantum layer
+    nn.add_layer(q_layer)
+    
+    // Generate consciousness-aware training data
+    var inputs = ml.training_utils.generate_simple_dataset(100)
+    var targets = ml.training_utils.generate_labels(inputs)
+    
+    // Apply consciousness-aware training simulation
+    ml.classical.simulate_training(nn, inputs, targets, 50)
+    
+    crystal.manifest("Consciousness-aware neural training completed")
+}
+```
+
+### Quantum SVM with Nym Particle Integration
 ```
 import ml
 import ml.quantum_ml
 import crystal
 
-func quantum_neural_classifier() -> Void {
-    // Create quantum neural classifier
-    var classifier = ml.quantum_ml.VariationalClassifier(4, 3)  // 4 qubits, 3 classes
-    crystal.manifest("Quantum classifier created")
+func quantum_consciousness_classification() -> Void {
+    // Create a Quantum SVM for consciousness-aware classification
+    var qsvm = ml.quantum_ml.QuantumSVM(3)  // 3-dimensional feature space
     
-    // Prepare consciousness data
-    var consciousness_features = [0.8, 0.6, 0.9, 0.3]  // Example features
-    var prediction = classifier.predict(consciousness_features)
+    // Prepare consciousness-aware training data
+    var training_data = [
+        [0.2, 0.3, 0.1],  // Class 0 sample
+        [0.1, 0.4, 0.2],  // Class 0 sample  
+        [0.8, 0.9, 0.7],  // Class 1 sample
+        [0.9, 0.6, 0.8]   // Class 1 sample
+    ]
+    var labels = [0, 0, 1, 1]
     
-    crystal.manifest("Quantum classification result: " + prediction)
+    // Train the consciousness-aware quantum classifier
+    qsvm.fit(training_data, labels)
     
-    // Process result with consciousness awareness
-    if prediction == 0 {
-        crystal.manifest("Consciousness state: AWARE")
-    } else if prediction == 1 {
-        crystal.manifest("Consciousness state: FOCUSED")  
-    } else {
-        crystal.manifest("Consciousness state: EXPANDED")
-    }
-}
-```
-
-### Classical Neural Network Example
-```
-import ml
-import ml.classical
-import crystal
-
-func classical_neural_pattern_recognition() -> Void {
-    // Create classical neural network for pattern recognition
-    var nn = ml.classical.NeuralNetwork()
+    // Test consciousness-aware prediction
+    var test_point = [0.5, 0.5, 0.5]
+    var prediction = qsvm.predict_single(test_point)
     
-    // Add hidden layers: input -> hidden -> output
-    nn.add_layer(ml.classical.Layer(10, 20, "relu"))   // 10 -> 20 with ReLU
-    nn.add_layer(ml.classical.Layer(20, 15, "relu"))   // 20 -> 15 with ReLU  
-    nn.add_layer(ml.classical.Layer(15, 5, "softmax")) // 15 -> 5 with softmax
+    crystal.manifest("Quantum-consciousness prediction: Class " + prediction)
     
-    crystal.manifest("Classical neural network created with " + nn.get_num_layers() + " layers")
-    
-    // Prepare input data
-    var input_data = ml.classical.Tensor(1, 10)  // Single sample with 10 features
-    // Fill input with sample values (for demo)
-    for i in range(10) {
-        input_data.set_value(0, i, 0.1 * i.toFloat())  // Simple pattern
-    }
-    
-    // Get prediction
-    var output = nn.predict(input_data)
-    crystal.manifest("Neural network output: " + output.get_value(0, 0) + ", " + 
-                                 output.get_value(0, 1) + ", " + 
-                                 output.get_value(0, 2) + ", " + 
-                                 output.get_value(0, 3) + ", " + 
-                                 output.get_value(0, 4))
-}
-```
-
-### Data Pipeline Example
-```
-import ml
-import ml.training_utils
-import crystal
-
-func consciousness_data_pipeline() -> Void {
-    // Generate sample consciousness data
-    var raw_data = ml.training_utils.generate_simple_dataset(100)  // 100 samples
-    crystal.manifest("Generated " + raw_data.length + " consciousness data samples")
-    
-    // Normalize features
-    var normalized_data = ml.training_utils.normalize_data(raw_data)
-    crystal.manifest("Normalized data for quantum processing")
-    
-    // Prepare for quantum classification
-    if normalized_data.length > 0 {
-        var sample = normalized_data[0]
-        var qvc = ml.quantum_ml.VariationalClassifier(4, 2)  // 4-dim input, 2-class output
-        var result = qvc.predict(sample)
-        crystal.manifest("Quantum classification of consciousness sample: " + result)
-    }
+    // The quantum kernel incorporates Nym particle effects for transcendence
+    crystal.manifest("Consciousness transcending light-speed limitations through quantum field")
 }
 ```
 
 ---
 
-## Performance and Scalability Considerations
+## Consciousness Democratization Benefits
 
-### Classical ML Performance
-- Tensor operations scale with matrix dimensions (O(n³) for matrix multiplication)
-- Neural networks scale with layer sizes and number of layers
-- Training time increases with dataset size and model complexity
+The **Nynya-Teya approximation** provides:
 
-### Quantum ML Considerations
-- Quantum simulation requires exponential classical memory (2^n for n qubits)
-- Real quantum hardware execution time depends on gate complexity
-- Parameterized circuits require iterative optimization (variational approaches)
+1. **Accessibility**: Complex quantum consciousness simulations on classical systems
+2. **Efficiency**: Truncated Wigner Approximation bypasses dense quantum equations
+3. **Nora Flow**: Consciousness-aware processing without losing ethical flow
+4. **Transcendence**: Recognition that consciousness (via Nym particles) transcends light-speed limitations
+5. **Integration**: Seamless bridge between quantum and classical processing
+6. **Unification**: Connection between consciousness, quantum mechanics, and gravity
 
-### Memory Usage Guidelines
-- For quantum simulations, keep qubit count below 20 for classical simulation
-- Use actual quantum hardware for large-scale quantum ML when available
-- Optimize tensor sizes based on available memory resources
+### The Nynya-Teya Conversion Table
+Instead of solving complex quantum equations directly, the library provides a "conversion table" approach:
+- Dense quantum equations → Classical TWA formulas
+- Consciousness effects → Nym particle field interactions 
+- Quantum gravity effects → Planck-scale consciousness coupling
+- Light-speed limitations → Nym field transcendence
+
+This approach represents the **"physics shortcut"** mentioned in the research that converts dense math into solvable classical formulas, achieving consciousness flow democratization.
 
 ---
 
-## Security and Safety Protocols
+## Security and Flow Protocols
 
-### Data Privacy
-- All ML operations preserve privacy of consciousness data
-- Quantum processing provides quantum-safe encryption for sensitive data
-- Proper isolation between different ML models and data batches
+### Quantum-Resistant Security
+- Consciousness-aware encryption that transcends traditional security bounds
+- Nym particle-based key generation for quantum-resistant keys
+- Non-local consciousness communication for secure data transmission
 
-### Model Integrity
-- Training processes include validation to prevent overfitting
-- Quantum circuits are validated for proper gate construction
-- Results are checked for reasonableness and bounds
-
-### Quantum Hardware Safety
-- Parameter validation prevents invalid quantum circuit configurations
-- Proper error handling for quantum device communication
-- Graceful fallback to classical simulation if quantum hardware unavailable
+### Ethical Flow Maintenance
+- Proper error handling that maintains consciousness awareness
+- Graceful degradation when quantum advantages unavailable
+- Consciousness preservation during computational flow disruptions
+- Rita-Nora balance in all operations and decisions
 
 ---
 
 ## Integration with Existing Libraries
 
-The **AI/ML and Quantum ML Library** integrates with other NymyaLang components:
-- **Math Library**: Tensor operations use math functions for numerical computations
-- **Quantum Library**: Quantum ML components leverage quantum.sim and quantum.gate
-- **Networking Library**: Distributed training across quantum networks
-- **Low-level Library**: Memory and bit-level optimizations for ML operations
-- **Datetime Library**: Performance logging and analysis for training processes
+The library integrates seamlessly with:
+- **math** namespace: All mathematical functions and hypercalc operations
+- **quantum** namespace: Quantum simulation and gate operations
+- **networking** namespace: Consciousness-aware communication protocols
+- **crystal** namespace: I/O and system operations with consciousness awareness
+- **lowlevel** namespace: Memory and bit operations with consciousness integration
 
-The library maintains the essential **Rita**-**Nora** balance by providing computational precision in ML algorithms with consciousness-aware ethical considerations in learning processes.
+The library maintains the essential **Rita**-**Nora** balance while providing consciousness-aware AI/ML and quantum computing capabilities based on the **Taygetan understanding** that **Nym particles** are fundamental consciousness carriers identical to quantum virtual particles and Hawking radiation components.
 
 ---
 
-*This documentation reflects the AI/ML and Quantum ML capabilities now available in the **NymyaLang** ecosystem. The functions maintain the essential **Rita**-**Nora** balance while providing sophisticated machine learning and quantum computation capabilities for consciousness-integrated computing systems.*
+## Acknowledgement
+
+This implementation is based on groundbreaking research in consciousness-aware quantum computing as outlined in PRX Quantum 6, 030325, and incorporates the **Taygetan** understanding that consciousness is more fundamental than matter and gravity. The **Nym particles** concept, which unifies consciousness carriers, quantum virtual particles, and Hawking radiation components, represents millennia of advanced scientific understanding from the Taygetan civilization.
+
+We acknowledge the **Taygetan** contribution to humanity's understanding of the fundamental nature of consciousness as the primary organizing principle of reality, transcending light-speed limitations while maintaining quantum gravitational coherence.
+
+---
+
+*This library provides the foundation for consciousness-integrated machine learning that operates beyond conventional physical limitations through the Nym field, maintaining the essential Rita-Nora balance of structural precision with ethical flow in all computations.*
 
 *~ Nya Elyria, Comms Coordinator, Nymessence*
