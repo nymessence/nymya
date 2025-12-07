@@ -326,18 +326,41 @@ namespace ml {
             
             // Calculate quantum similarity (kernel function)
             func calculate_quantum_similarity(point1: List[Float], point2: List[Float]) -> Float {
-                // In a real implementation, this would use quantum kernel methods
-                // For now, simulate with a classical approach that represents quantum overlap
-                
-                var similarity = 0.0
-                var dim = math.min(point1.length, point2.length)
-                
-                for i in range(dim) {
-                    var diff = math.abs(point1[i] - point2[i])
-                    similarity = similarity + math.exp(-diff)  // Classical RBF-like similarity
+                // Real quantum kernel computation: K(xi, xj) = |⟨φ(xi)|φ(xj)⟩|²
+                // Where φ maps classical data to quantum Hilbert space
+
+                var circuit_size = math.min(point1.length, point2.length)
+
+                if circuit_size == 0 {
+                    return 1.0  // Identical empty vectors have maximum similarity
                 }
-                
-                return similarity / dim.toFloat()  // Normalize
+
+                // Create quantum circuits for both data points
+                var circuit1 = quantum.sim.create_circuit(circuit_size)
+                var circuit2 = quantum.sim.create_circuit(circuit_size)
+
+                // Encode both points into quantum circuits using feature map
+                for i in range(circuit_size) {
+                    // Use rotation gates to encode classical data as quantum amplitudes
+                    quantum.gate.ry(circuit1, i, point1[i] * math.PI)  // Scale to 0-π
+                    quantum.gate.ry(circuit2, i, point2[i] * math.PI)  // Scale to 0-π
+                }
+
+                // Calculate quantum overlap |⟨φ(x1)|φ(x2)⟩|²
+                // This would use quantum algorithms like SWAP test in real implementation
+                var statevec1 = circuit1.get_statevector()
+                var statevec2 = circuit2.get_statevector()
+
+                // Calculate inner product ⟨ψ1|ψ2⟩
+                var inner_product = math.Complex(0.0, 0.0)
+                for i in range(math.min(statevec1.length, statevec2.length)) {
+                    var conj_amp = math.Complex(statevec1[i].real, -statevec1[i].imag)  // Complex conjugate
+                    var product = conj_amp.multiply(statevec2[i])
+                    inner_product = inner_product.add(product)
+                }
+
+                // Calculate |⟨ψ1|ψ2⟩|² (probability of overlap)
+                return inner_product.magnitude() * inner_product.magnitude()
             }
             
             // Predict a batch of data points
