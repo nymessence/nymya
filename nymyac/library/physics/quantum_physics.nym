@@ -367,7 +367,9 @@ namespace physics {
             if exponent > 700.0 {  // Prevent overflow
                 return 0.0  // Approaches 0 for large exponent
             } else if exponent < -700.0 {  // Prevent underflow issues
-                return math.max(0.0, -1.0)  // Should be energy dependent in real implementation
+                // For very negative exponents, the result approaches 0
+                // The energy dependence would be handled in a real implementation
+                return 0.0  // Approaches 0 for very negative exponent
             }
             
             var exp_value = math.exp(exponent)

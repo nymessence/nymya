@@ -201,13 +201,8 @@ namespace system {
             return 0
         }
         
-        // Simple utility functions
-        func String.char_to_int() -> Int {
-            // This would need proper implementation based on NymyaLang's capabilities
-            return 65  // Placeholder for 'A'
-        }
     }
-    
+
     // System utilities namespace
     namespace sysutils {
         

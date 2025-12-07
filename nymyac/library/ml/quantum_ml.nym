@@ -362,7 +362,7 @@ namespace ml {
                 // Calculate |⟨ψ1|ψ2⟩|² (probability of overlap)
                 return inner_product.magnitude() * inner_product.magnitude()
             }
-            
+
             // Predict a batch of data points
             func predict_batch(batch: List[List[Float]]) -> List[Int] {
                 var predictions = []

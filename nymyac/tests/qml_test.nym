@@ -60,7 +60,7 @@ func test_simple_qml_circuit() -> Void {
     
     for run in range(num_runs) {
         var temp_circuit = quantum.sim.create_circuit(2)
-        
+
         // Rebuild the circuit with same operations for this run
         quantum.gate.ry(temp_circuit, 0, input_data[0])
         quantum.gate.ry(temp_circuit, 1, input_data[1])
@@ -68,18 +68,18 @@ func test_simple_qml_circuit() -> Void {
         quantum.gate.rz(temp_circuit, 1, parameters[1])
         quantum.gate.cx(temp_circuit, 0, 1)
         quantum.gate.ry(temp_circuit, 0, parameters[2])
-        
+
         var run_results = quantum.sim.measure_all(temp_circuit)
         var state_index = run_results[0] * 2 + run_results[1]  // Convert 2-bit result to index
         counts[state_index] = counts[state_index] + 1
     }
-    
+
     // Calculate probabilities
     var probs = []
     for i in range(4) {
         var prob = counts[i].toFloat() / num_runs.toFloat()
         probs.append(prob)
-        crystal.manifest("State |" + i.to_binary_string(2) + "> probability: " + prob + 
+        crystal.manifest("State |" + i.to_binary_string(2) + "> probability: " + prob +
                         " (" + counts[i] + "/" + num_runs + " runs)")
     }
     
