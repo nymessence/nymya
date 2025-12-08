@@ -8,7 +8,7 @@ echo "=== NymyaLang Package Build System ==="
 echo "Building .deb packages for multiple architectures: amd64, arm64, armhf"
 echo ""
 
-VERSION=${1:-"0.1.1"}
+VERSION=${1:-"0.1.2"}
 DEV_STAGE="alpha"
 BUILD_DIR="nymya-build-${VERSION}"
 
@@ -82,22 +82,27 @@ EOF
     mkdir -p "${pkg_dir}/usr/lib/nymya/crystal"
     mkdir -p "${pkg_dir}/usr/lib/nymya/physics"
     
-    # Copy top-level .nym library files
-    for file in math.nym hypercalc.nym functions.nym ai_ml.nym quantum_ml.nym networking.nym quantum.nym sim.nym alg.nym lowlevel.nym datetime.nym crystal.nym physics.nym hypercalc.nym; do
-        if [ -f "../library/$file" ]; then
-            cp "../library/$file" "${pkg_dir}/usr/lib/nymya/" 2>/dev/null || true
+    # Create main category directories
+    mkdir -p "${pkg_dir}/usr/lib/nymya/math"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/ml"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/networking"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/quantum"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/lowlevel"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/datetime"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/crystal"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/physics"
+    mkdir -p "${pkg_dir}/usr/lib/nymya/system"
+
+    # Copy all subdirectories with their contents
+    for subdir in math math/gmp math/hypercalc math/functions ml ml/classical ml/quantum_ml networking networking/classical networking/quantum quantum quantum/gate quantum/sim quantum/alg datetime crystal crystal/io lowlevel physics physics/quantum system; do
+        if [ -d "nymyac/library/$subdir" ]; then
+            mkdir -p "${pkg_dir}/usr/lib/nymya/$subdir"
+            find "nymyac/library/$subdir" -name "*.nym" -type f -exec cp {} "${pkg_dir}/usr/lib/nymya/$subdir/" \; -exec echo "  Copied: {}" \;
         fi
     done
-    
-    # Deep library tree copy
-    for subdir in math/ml math/hypercalc math/functions ml/classical ml/quantum_ml networking/classical networking/quantum quantum/gate quantum/sim quantum/alg lowlevel bitwise memory register utils datetime crystal/io physics/quantum; do
-        mkdir -p "${pkg_dir}/usr/lib/nymya/$subdir"
-        for file in $(find "../../library/$subdir" -name "*.nym" -type f 2>/dev/null || echo ""); do
-            if [ -f "$file" ]; then
-                cp "$file" "${pkg_dir}/usr/lib/nymya/$subdir/" 2>/dev/null || true
-            fi
-        done
-    done
+
+    # Special handling for individual files in top-level directories (if any exist)
+
     
     # Example files
     cat > "${pkg_dir}/usr/share/nymya/examples/hello_quantum.nym" << 'EOF'
