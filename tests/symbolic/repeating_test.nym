@@ -1,0 +1,101 @@
+// Symbolic Subsystem Tests - Repeating Numbers
+// Tests for the repeating number classifier
+
+import symbolic
+import crystal
+
+namespace test_repeating {
+
+    func test_repeated_digits() -> Void {
+        crystal.manifest("Testing repeated digit classification...")
+        
+        var test_cases = [[111, true], [222, true], [333, true], [444, true], 
+                         [555, true], [666, true], [777, true], [888, true], 
+                         [999, true], [123, false], [121, false]]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected = test_case[1]
+            var is_repeated = symbolic.classify_repeating(n).type == "repeated"
+            crystal.manifest("Number " + n + " is repeated: " + is_repeated)
+            
+            if is_repeated == expected {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected)
+            }
+        }
+    }
+
+    func test_palindromes() -> Void {
+        crystal.manifest("\nTesting palindrome classification...")
+        
+        var test_cases = [[121, true], [1221, true], [12321, true], [1234321, true],
+                         [123, false], [1234, false], [1223, false]]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected = test_case[1]
+            var is_palindrome = symbolic.classify_repeating(n).type == "palindromic"
+            crystal.manifest("Number " + n + " is palindromic: " + is_palindrome)
+            
+            if is_palindrome == expected {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected)
+            }
+        }
+    }
+
+    func test_special_sequences() -> Void {
+        crystal.manifest("\nTesting special sequences...")
+        
+        // Test Fibonacci numbers
+        var fib_test_cases = [[0, true], [1, true], [2, true], [3, true], [5, true], 
+                             [8, true], [13, true], [21, true], [34, true], [55, true], 
+                             [89, true], [144, true], [10, false], [12, false]]
+        
+        crystal.manifest("Fibonacci detection:")
+        for test_case in fib_test_cases {
+            var n = test_case[0]
+            var expected = test_case[1]
+            var is_fib = symbolic.is_fibonacci(n)
+            crystal.manifest("  " + n + " is fibonacci: " + is_fib)
+            
+            if is_fib == expected {
+                crystal.manifest("    ✓ PASS")
+            } else {
+                crystal.manifest("    ✗ FAIL - Expected: " + expected)
+            }
+        }
+        
+        // Test Lucas numbers
+        var lucas_test_cases = [[2, true], [1, true], [3, true], [4, true], [7, true], 
+                               [11, true], [18, true], [29, true], [47, true], 
+                               [76, true], [10, false], [14, false]]
+        
+        crystal.manifest("\nLucas detection:")
+        for test_case in lucas_test_cases {
+            var n = test_case[0]
+            var expected = test_case[1]
+            var is_lucas = symbolic.repeating.is_lucas(n)
+            crystal.manifest("  " + n + " is lucas: " + is_lucas)
+            
+            if is_lucas == expected {
+                crystal.manifest("    ✓ PASS")
+            } else {
+                crystal.manifest("    ✗ FAIL - Expected: " + expected)
+            }
+        }
+    }
+
+    func run_tests() -> Void {
+        crystal.manifest("=== REPEATING NUMBER SUBSYSTEM TESTS ===")
+        test_repeated_digits()
+        test_palindromes()
+        test_special_sequences()
+        crystal.manifest("=== REPEATING NUMBER TESTS COMPLETE ===\n")
+    }
+}
+
+test_repeating.run_tests()

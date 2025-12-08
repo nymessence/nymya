@@ -1,0 +1,91 @@
+// Symbolic Subsystem Tests - Numerology
+// Tests for the numerology subsystem
+
+import symbolic
+import crystal
+
+namespace test_numerology {
+
+    func test_base_meanings() -> Void {
+        crystal.manifest("Testing base numerology meanings...")
+        
+        var test_cases = [[1, "unity, origin, will, individuality"], 
+                         [2, "duality, relational balance"],
+                         [3, "creativity, expression, synthesis"],
+                         [4, "structure, stability, grounded systems"],
+                         [5, "movement, curiosity, life force"],
+                         [6, "harmony, nurturing, cohesion"],
+                         [7, "introspection, hidden insight, analysis"],
+                         [8, "manifestation, power, continuity"],
+                         [9, "completion, universality, transcendence"]]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected_meaning = test_case[1]
+            var result = symbolic.get_meaning(n)
+            crystal.manifest("Number " + n + ": " + result.meaning)
+            
+            if result.meaning.contains(expected_meaning) {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected_meaning)
+            }
+        }
+    }
+
+    func test_master_numbers() -> Void {
+        crystal.manifest("\nTesting master numbers...")
+        
+        var test_cases = [[11, "illumination, intuition"], 
+                         [22, "large-scale builder, architect"],
+                         [33, "teacher archetype"],
+                         [44, "structural force, system resonance"],
+                         [55, "transformation cycles"],
+                         [66, "harmonic stability"],
+                         [77, "deep analysis"],
+                         [88, "infinite flow"],
+                         [99, "universal expansion"]]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected_meaning = test_case[1]
+            var result = symbolic.get_meaning(n)
+            crystal.manifest("Master number " + n + ": " + result.meaning)
+            
+            if result.meaning.contains(expected_meaning) {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected_meaning)
+            }
+        }
+    }
+
+    func test_reduction() -> Void {
+        crystal.manifest("\nTesting number reduction...")
+        
+        var test_cases = [[11, 11], [22, 22], [33, 33], [44, 44], [55, 10], [12, 3], [23, 5], [49, 4]]
+        
+        for test_case in test_cases {
+            var input = test_case[0]
+            var expected = test_case[1]
+            var result = symbolic.reduce_to_base(input)
+            crystal.manifest("Reducing " + input + ": " + result)
+            
+            if result == expected {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected)
+            }
+        }
+    }
+
+    func run_tests() -> Void {
+        crystal.manifest("=== NUMEROLOGY SUBSYSTEM TESTS ===")
+        test_base_meanings()
+        test_master_numbers()
+        test_reduction()
+        crystal.manifest("=== NUMEROLOGY TESTS COMPLETE ===\n")
+    }
+}
+
+test_numerology.run_tests()

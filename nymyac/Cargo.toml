@@ -1,6 +1,6 @@
 [package]
 name = "nymyac"
-version = "0.2.0"
+version = "0.2.0-alpha2"
 edition = "2021"
 description = "NymyaLang Compiler"
 

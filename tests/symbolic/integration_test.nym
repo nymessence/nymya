@@ -1,0 +1,127 @@
+// Symbolic Subsystem Tests - Integration
+// Tests for the integration engine
+
+import symbolic
+import crystal
+
+namespace test_integration {
+
+    func test_comprehensive_analysis() -> Void {
+        crystal.manifest("Testing comprehensive symbolic analysis...")
+        
+        var test_numbers = [11, 22, 33, 144, 369, 888, 1221, 13, 17, 19, 37, 42, 108, 216, 777, 888, 999, 1729]
+        
+        for n in test_numbers {
+            crystal.manifest("\n--- Analysis for " + n + " ---")
+            var analysis = symbolic.comprehensive_analysis(n)
+            crystal.manifest(analysis)
+        }
+    }
+
+    func test_overlays() -> Void {
+        crystal.manifest("\nTesting overlay application...")
+        
+        // Test 369 overlay
+        var overlays_369 = symbolic.overlays(369)
+        crystal.manifest("Overlays for 369: " + overlays_369.join(", "))
+        if overlays_369.contains("star_tetrahedron_overlay") {
+            crystal.manifest("  ✓ PASS - 369 triggers star tetrahedron overlay")
+        } else {
+            crystal.manifest("  ✗ FAIL - 369 should trigger star tetrahedron overlay")
+        }
+        
+        // Test 144 overlay
+        var overlays_144 = symbolic.overlays(144)
+        crystal.manifest("Overlays for 144: " + overlays_144.join(", "))
+        if overlays_144.contains("flower_of_life_resonance") {
+            crystal.manifest("  ✓ PASS - 144 triggers flower of life resonance")
+        } else {
+            crystal.manifest("  ✗ FAIL - 144 should trigger flower of life resonance")
+        }
+        
+        // Test 88 overlay
+        var overlays_88 = symbolic.overlays(88)
+        crystal.manifest("Overlays for 88: " + overlays_88.join(", "))
+        if overlays_88.contains("torus_flow_semantics") {
+            crystal.manifest("  ✓ PASS - 88 triggers torus flow semantics")
+        else {
+            crystal.manifest("  ✗ FAIL - 88 should trigger torus flow semantics")
+        }
+        
+        // Test Fibonacci overlay (using 55, which is Fibonacci)
+        var overlays_55 = symbolic.overlays(55)
+        crystal.manifest("Overlays for 55: " + overlays_55.join(", "))
+        if overlays_55.contains("phi_spiral_overlay") {
+            crystal.manifest("  ✓ PASS - 55 (Fibonacci) triggers phi spiral overlay")
+        } else {
+            crystal.manifest("  ✗ FAIL - 55 should trigger phi spiral overlay")
+        }
+    }
+
+    func test_complex_patterns() -> Void {
+        crystal.manifest("\nTesting complex pattern detection...")
+        
+        // Test a Fibonacci palindrome (like 11 - it's both Fibonacci and palindromic)
+        var complex_patterns_11 = symbolic.integration.detect_complex_patterns(11)
+        crystal.manifest("Complex patterns for 11: " + complex_patterns_11.join(", "))
+        
+        // Test 121 - palindromic and special number
+        var complex_patterns_121 = symbolic.integration.detect_complex_patterns(121)
+        crystal.manifest("Complex patterns for 121: " + complex_patterns_121.join(", "))
+        
+        if complex_patterns_121.contains("repeated_special_amplification") {
+            crystal.manifest("  ✓ PASS - 121 triggers repeated special amplification")
+        } else {
+            crystal.manifest("  ✗ FAIL - 121 should trigger repeated special amplification")
+        }
+        
+        // Test 131 - palindromic prime (if it's prime)
+        if symbolic.is_prime(131) and symbolic.repeating.is_palindromic(131) {
+            var complex_patterns_131 = symbolic.integration.detect_complex_patterns(131)
+            crystal.manifest("Complex patterns for 131: " + complex_patterns_131.join(", "))
+            
+            if complex_patterns_131.contains("prime_palindrome_mystique") {
+                crystal.manifest("  ✓ PASS - 131 triggers prime palindrome mystique")
+            } else {
+                crystal.manifest("  ✗ FAIL - 131 should trigger prime palindrome mystique")
+            }
+        }
+    }
+
+    func test_integration_functionality() -> Void {
+        crystal.manifest("\nTesting integration functionality...")
+        
+        // Test getting all traits for a number
+        var traits_33 = symbolic.integration.get_all_traits(33)
+        crystal.manifest("Traits for 33: " + traits_33.length + " total")
+        crystal.manifest("First few traits: " + traits_33.slice(0, math.min(5, traits_33.length)).join(", "))
+        
+        // Test that the integration connects numerology, special, and geometry
+        var integrated_33 = symbolic.get_full_symbolic_info(33)
+        var has_numerology = integrated_33.numerology_meanings.length > 0
+        var has_special = integrated_33.special_meaning.value == 33
+        var has_geometry = integrated_33.geometry_correspondences.length > 0
+        
+        crystal.manifest("Number 33 integration:")
+        crystal.manifest("  Has numerology: " + has_numerology)
+        crystal.manifest("  Has special meaning: " + has_special)
+        crystal.manifest("  Has geometry: " + has_geometry)
+        
+        if has_numerology and has_special and has_geometry {
+            crystal.manifest("  ✓ PASS - 33 properly integrates all symbolic layers")
+        } else {
+            crystal.manifest("  ✗ FAIL - 33 should integrate all symbolic layers")
+        }
+    }
+
+    func run_tests() -> Void {
+        crystal.manifest("=== INTEGRATION SUBSYSTEM TESTS ===")
+        test_overlays()
+        test_complex_patterns()
+        test_integration_functionality()
+        test_comprehensive_analysis()  // This will run a few examples
+        crystal.manifest("=== INTEGRATION TESTS COMPLETE ===\n")
+    }
+}
+
+test_integration.run_tests()

@@ -1,13 +1,72 @@
-# NymyaLang - Advanced AI/ML and Quantum Computing Platform (v0.2.0)
+# NymyaLang - Advanced AI/ML and Quantum Computing Platform (v0.2.0-alpha2)
 
-Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML and quantum computing capabilities.
+Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, and symbolic mathematics capabilities.
 
 ## Core Philosophy
 Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita**) combined with ethical flow (**Nora**), following the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness.
 
-## New Features in v0.2.0
+## New Features in v0.2.0-alpha2
 
-### 1. Turing Completeness Verification
+### 1. Expanded Numerology Subsystem (`symbolic.numerology`)
+- Canonical mapping for numerological meanings (base 1-9, master numbers 11-99)
+- Repeating number sequence detection (111, 222, 333, etc.)
+- Angel number sequences with special meanings
+- Four-digit repeat patterns (1111, 2222, etc.)
+- Advanced reduction techniques and pattern recognition
+
+### 2. Special Numbers Library (`symbolic.special`)
+- Cultural constants (42, 108, 420, etc.)
+- Mathematical significance numbers (1729, 144, etc.)
+- Spiritual and symbolic constants (108, 1001, etc.)
+- Prime number special properties
+- Zero-point and quantum baseline meanings
+
+### 3. Prime Number Symbolism (`symbolic.primes`)
+- Prime detection and classification (`is_prime`, `prime_class`)
+- Twin prime recognition and meaning assignment
+- Mersenne prime identification
+- Prime number symbolic traits and properties
+- Integration with numerology and geometry
+
+### 4. Sacred Geometry Mapping Engine (`symbolic.sacred_geometry`)
+- Metatron's Cube with 13-circle structure
+- Star Tetrahedron (Merkaba) with 3-6-9 cycles
+- Flower of Life with 19-circle pattern
+- Seed of Life with 7-circle foundation
+- Tree of Life with 10 sephirot and 22 paths
+- Sri Yantra with 9-triangle convergence
+- Torus Field with self-referential flow
+- Phi Spiral (Golden Ratio) with Fibonacci connections
+- Platonic solids (Tetrahedron, Cube, Octahedron, Dodecahedron, Icosahedron)
+
+### 5. Repeating Number Classifier (`symbolic.repeating`)
+- Repeated digit pattern detection (111, 2222, etc.)
+- Palindromic number recognition
+- Mirrored number detection
+- Fibonacci sequence identification
+- Lucas sequence detection
+- Power-of-ten sequence recognition
+- Advanced pattern classification
+
+### 6. Integration Engine (`symbolic.integration`)
+- Combined numerology and geometry overlays
+- Multi-layer meaning objects with all compatible traits
+- Pattern collision handling without core overrides
+- Complex symbolic pattern detection:
+  - 369 triggering star-tetrahedron overlay
+  - 144 triggering flower-of-life resonance
+  - 88 triggering torus flow semantics
+  - Fibonacci numbers triggering phi-spiral overlays
+- Unified API for all symbolic functions
+
+### 7. Symbolic API Functions
+- `symbolic.get_symbolic(n)` - Get comprehensive symbolic analysis
+- `symbolic.describe(n)` - Human-readable description
+- `symbolic.overlays(n)` - Get applicable overlays
+- `symbolic.comprehensive_analysis(n)` - Detailed analysis
+- `symbolic.get_all_traits(n)` - Extract all symbolic traits
+
+### 8. Turing Completeness Verification
 - Complete set of programs demonstrating NymyaLang is Turing complete:
   - Conditional branching examples
   - Unbounded looping and recursion implementations
@@ -15,68 +74,70 @@ Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita*
   - Universal computation patterns (register machine, lambda calculus)
   - Nontrivial computational tests (prime number computation)
 
-### 2. Killer Demo: Quantum-Enhanced Hybrid Classifier
+### 9. Killer Demo: Quantum-Enhanced Hybrid Classifier with Symbolic Mathematics
 - Demonstrates the language's hybrid classical and quantum design
 - Implements quantum random number generation
 - Features quantum circuit simulation
 - Includes quantum feature mapping and quantum-enhanced classification
+- Integrates symbolic mathematics with quantum operations
+- Shows Fibonacci numerology with quantum states
 - Full working example at `tests/killer_demo.nym`
 
-### 3. Enhanced Quantum Simulator
+### 10. Enhanced Quantum Simulator
 - Complete tensor product implementation for accurate quantum gate simulation
 - Proper single, two, and three-qubit gate computations
 - Fixed quantum circuit simulation with mathematically correct tensor products
 - Improved measurement and state vector operations
 
-### 4. Improved Math Library
+### 11. Improved Math Library
 - Added `math.pow_int` for safe integer exponentiation
 - Added `math.gcd` for integer greatest common divisor
 - Enhanced mathematical functions with proper implementation
 
-### 5. Functional Compiler Implementation
+### 12. Functional Compiler Implementation
 - Tokenizer/lexer for parsing .nym files
 - Parser with AST generation
 - Basic code generation pipeline
 - Proper error handling and reporting
 
-### 6. AI/ML Library (`ml`)
+### 13. AI/ML Library (`ml`)
 - **Tensor Operations**: Multi-dimensional array computations
 - **Neural Networks**: Layered architectures with activation functions
 - **Classical ML**: Loss functions, training utilities, data processing
 - **Quantum Machine Learning**: Variational quantum classifiers, quantum neural networks
 - **Quantum SVM**: Quantum Support Vector Machine implementations
 
-### 7. Quantum ML Algorithms (`ml.quantum_ml`)
+### 14. Quantum ML Algorithms (`ml.quantum_ml`)
 - **Parameterized Quantum Circuits**: Trainable quantum circuits
 - **Variational Quantum Classifiers**: Quantum-enhanced classification
 - **Quantum Neural Layers**: Quantum processing elements
 - **Quantum Feature Maps**: Data encoding in quantum states
 
-### 8. Advanced Mathematical Functions (`math.hypercalc`)
+### 15. Advanced Mathematical Functions (`math.hypercalc`)
 - **Hypercalc Functions**: Advanced mathematical operations with special case handling
 - **Complex Number Operations**: Proper complex arithmetic
 - **High-Precision Calculations**: Enhanced numerical computations
 - **Special Mathematical Functions**: Gamma, trigonometric, exponential functions
 
-### 9. Quantum Networking (`networking.quantum`)
+### 16. Quantum Networking (`networking.quantum`)
 - **Quantum Entanglement**: Establishment and maintenance
 - **Quantum Field Communication**: Multi-node quantum communication
 - **Non-Local Transmission**: Quantum communication principles
 - **Quantum Channel Operations**: Secure quantum communication channels
 
-### 10. Classical Networking (`networking.classical`)
+### 17. Classical Networking (`networking.classical`)
 - **Ping and Latency**: Network connectivity testing
 - **Bandwidth Measurement**: Download/upload speed assessment
 - **Subnet Operations**: Network scanning and management
 - **Port Operations**: Port scanning and TCP connections
 
-### 11. Low-Level Operations (`lowlevel`)
+### 18. Low-Level Operations (`lowlevel`)
 - **Bit Manipulation**: Advanced bitwise operations
 - **Memory Operations**: Direct memory access and management
 - **Register Operations**: CPU register simulation
 - **Utility Functions**: Endian conversion, alignment, power-of-two operations
 
-### 12. DateTime Operations (`datetime`)
+### 19. DateTime Operations (`datetime`)
 - **Temporal Operations**: Calendar and time manipulation
 - **Timezone Handling**: Multi-zone time management
 - **Interval Calculations**: Duration and time difference operations
