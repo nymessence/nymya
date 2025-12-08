@@ -1,0 +1,272 @@
+# Enhanced Dockerfile for NymyaLang Cross-Compilation Environment
+# Supports Windows (mingw-w64), macOS (Apple Clang), and Linux targets
+
+FROM ubuntu:22.04
+
+LABEL maintainer="Erick"
+LABEL description="Complete cross-compilation environment for NymyaLang supporting Windows, macOS, and Linux targets"
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install essential build tools and cross-compilation toolchains
+RUN apt-get update && \
+    apt-get install -y \
+    # Essential build tools
+    build-essential \
+    gcc \
+    g++ \
+    clang \
+    cmake \
+    make \
+    pkg-config \
+    # Linux cross-compilation toolchains
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    gcc-x86-64-linux-gnu \
+    g++-x86-64-linux-gnu \
+    gcc-riscv64-linux-gnu \
+    g++-riscv64-linux-gnu \
+    # Windows cross-compilation (mingw-w64)
+    gcc-mingw-w64 \
+    g++-mingw-w64 \
+    gcc-mingw-w64-i686 \
+    g++-mingw-w64-i686 \
+    gcc-mingw-w64-x86-64 \
+    g++-mingw-w64-x86-64 \
+    # Additional tools for cross-compilation
+    curl \
+    wget \
+    git \
+    rustc \
+    cargo \
+    rust-src \
+    # Libraries including GMP for NymyaLang
+    libgmp-dev \
+    libgmp10 \
+    libgmp10-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    llvm \
+    # Utilities
+    gdb-multiarch \
+    binutils-dev \
+    file \
+    unzip \
+    zip \
+    tar \
+    rsync \
+    # Cross-compilation dependencies (only relevant ones for current architecture)
+    libc6-dev-amd64-cross \
+    libc6-dev-arm64-cross \
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install osxcross for macOS cross-compilation (this is complex and requires downloading SDK)
+RUN apt-get update && \
+    apt-get install -y \
+    xz-utils \
+    cpio \
+    python3 \
+    python3-pip \
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set up Rust for macOS targets (will install later after osxcross setup)
+ENV OSX_VERSION_MIN=10.7
+ENV OSX_SDK=MacOSX10.11.sdk
+ENV X_OSXCROSS=/opt/osxcross
+
+# Install osxcross and macOS SDK
+RUN git clone https://github.com/tpoechtrager/osxcross.git /opt/osxcross && \
+    # For this example, I'll set up the environment but not complete full osxcross setup
+    # which typically requires macOS SDK
+    echo "# macOS cross-compilation setup" > /opt/osxcross/README.md && \
+    echo "# Note: Full macOS cross-compilation requires a macOS SDK" >> /opt/osxcross/README.md && \
+    echo "# which must be extracted from a macOS installation or Xcode" >> /opt/osxcross/README.md
+
+# Install Rust using rustup for better target management
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Set up Rust for cross-compilation to multiple targets
+RUN rustup target add \
+    aarch64-unknown-linux-gnu \
+    x86_64-unknown-linux-gnu \
+    riscv64gc-unknown-linux-gnu \
+    i686-unknown-linux-gnu \
+    # Windows targets (mingw-w64)
+    x86_64-pc-windows-gnu \
+    i686-pc-windows-gnu \
+    # macOS targets (will be added after osxcross is set up)
+    x86_64-apple-darwin \
+    aarch64-apple-darwin \
+    && rustup component add rust-src rust-analysis rust-analyzer
+
+# Create a script to set up osxcross (will need to be run manually with SDK)
+RUN echo '#!/bin/bash' > /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "To complete macOS cross-compilation setup:"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "1. Obtain a macOS SDK (from a macOS system or Xcode)"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "2. Copy the SDK to this container"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "3. Run: tar -C /tmp -xf /path/to/MacOSX*.sdk.tar.xz"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "4. Run: /opt/osxcross/tools/gen_sdk_package_pbz2.py /tmp/MacOSX*.sdk"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "5. Run: mv *.tar.xz /opt/osxcross/tarballs/"' >> /opt/nymya/setup_osxcross.sh && \
+    echo 'echo "6. Run: UNATTENDED=1 OSX_VERSION_MIN=10.7 /opt/osxcross/build.sh"' >> /opt/nymya/setup_osxcross.sh && \
+    chmod +x /opt/nymya/setup_osxcross.sh
+
+# Create directory structure for the NymyaLang project
+WORKDIR /opt/nymya
+
+# Copy the nymyac source code
+COPY ./nymyac /opt/nymya/nymyac
+
+# Install cross-compilation configurations for targets
+RUN mkdir -p ~/.cargo && \
+    echo '[build]' > ~/.cargo/config.toml && \
+    echo 'target-dir = "/opt/nymya/target"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    # Linux targets
+    echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.x86_64-unknown-linux-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "x86_64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.riscv64gc-unknown-linux-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "riscv64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    # Windows targets
+    echo '[target.x86_64-pc-windows-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "x86_64-w64-mingw32-gcc"' >> ~/.cargo/config.toml && \
+    echo 'ar = "x86_64-w64-mingw32-ar"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.i686-pc-windows-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "i686-w64-mingw32-gcc"' >> ~/.cargo/config.toml && \
+    echo 'ar = "i686-w64-mingw32-ar"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml
+
+# Install QEMU for emulation support  
+RUN apt-get update && \
+    apt-get install -y \
+    qemu-user-static \
+    qemu-system-aarch64 \
+    qemu-system-x86 \
+    qemu-system-x86-64 \
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add GMP library support for all targets
+# For Windows, we'll need to handle GMP differently since it's not available in standard mingw
+RUN mkdir -p /opt/nymya/gmp && \
+    echo "#include <gmp.h>" > /opt/nymya/gmp/gmp_test.c && \
+    echo "int main() { mpz_t n; mpz_init(n); mpz_clear(n); return 0; }" >> /opt/nymya/gmp/gmp_test.c && \
+    # Test GMP installation
+    gcc /opt/nymya/gmp/gmp_test.c -lgmp -o /opt/nymya/gmp/gmp_test_linux && \
+    x86_64-linux-gnu-gcc /opt/nymya/gmp/gmp_test.c -lgmp -o /opt/nymya/gmp/gmp_test_x86_64 && \
+    aarch64-linux-gnu-gcc /opt/nymya/gmp/gmp_test.c -lgmp -o /opt/nymya/gmp/gmp_test_aarch64
+
+# Create build scripts for different targets
+RUN echo '#!/bin/bash' > /opt/nymya/build_linux.sh && \
+    echo '# Build for Linux targets' >> /opt/nymya/build_linux.sh && \
+    echo 'cd /opt/nymya/nymyac' >> /opt/nymya/build_linux.sh && \
+    echo 'echo "Building for x86_64-linux..." && cargo build --target x86_64-unknown-linux-gnu --release' >> /opt/nymya/build_linux.sh && \
+    echo 'echo "Building for aarch64-linux..." && cargo build --target aarch64-unknown-linux-gnu --release' >> /opt/nymya/build_linux.sh && \
+    echo 'echo "Building for riscv64-linux..." && cargo build --target riscv64gc-unknown-linux-gnu --release' >> /opt/nymya/build_linux.sh && \
+    chmod +x /opt/nymya/build_linux.sh
+
+RUN echo '#!/bin/bash' > /opt/nymya/build_windows.sh && \
+    echo '# Build for Windows targets using mingw-w64' >> /opt/nymya/build_windows.sh && \
+    echo 'cd /opt/nymya/nymyac' >> /opt/nymya/build_windows.sh && \
+    echo 'echo "Building for x86_64-windows..." && cargo build --target x86_64-pc-windows-gnu --release' >> /opt/nymya/build_windows.sh && \
+    echo 'echo "Building for i686-windows..." && cargo build --target i686-pc-windows-gnu --release' >> /opt/nymya/build_windows.sh && \
+    chmod +x /opt/nymya/build_windows.sh
+
+RUN echo '#!/bin/bash' > /opt/nymya/build_macos.sh && \
+    echo '# Build for macOS targets (requires osxcross setup) using fallback approach' >> /opt/nymya/build_macos.sh && \
+    echo 'cd /opt/nymya/nymyac' >> /opt/nymya/build_macos.sh && \
+    echo 'echo "Note: macOS cross-compilation requires osxcross with SDK."' >> /opt/nymya/build_macos.sh && \
+    echo 'echo "Run /opt/nymya/setup_osxcross.sh first, then build macOS targets:"' >> /opt/nymya/build_macos.sh && \
+    echo 'echo "cargo build --target x86_64-apple-darwin --release"' >> /opt/nymya/build_macos.sh && \
+    echo 'echo "cargo build --target aarch64-apple-darwin --release"' >> /opt/nymya/build_macos.sh && \
+    chmod +x /opt/nymya/build_macos.sh && \
+    echo '#!/bin/bash' > /opt/nymya/build_all.sh && \
+    echo '#!/bin/bash' >> /opt/nymya/build_all.sh && \
+    echo 'echo "Building for all targets..."' >> /opt/nymya/build_all.sh && \
+    echo '/opt/nymya/build_linux.sh' >> /opt/nymya/build_all.sh && \
+    echo '/opt/nymya/build_windows.sh' >> /opt/nymya/build_all.sh && \
+    echo '/opt/nymya/build_macos.sh' >> /opt/nymya/build_all.sh && \
+    chmod +x /opt/nymya/build_all.sh
+
+# Test script to verify builds
+RUN echo '#!/bin/bash' > /opt/nymya/test_builds.sh && \
+    echo 'echo "Testing Linux builds..."' >> /opt/nymya/test_builds.sh && \
+    echo 'if [ -f "/opt/nymya/nymyac/target/x86_64-unknown-linux-gnu/release/nymyac" ]; then' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "x86_64-linux binary exists: $(file /opt/nymya/nymyac/target/x86_64-unknown-linux-gnu/release/nymyac)"' >> /opt/nymya/test_builds.sh && \
+    echo 'else' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "ERROR: x86_64-linux binary not found!"' >> /opt/nymya/test_builds.sh && \
+    echo 'fi' >> /opt/nymya/test_builds.sh && \
+    echo '' >> /opt/nymya/test_builds.sh && \
+    echo 'if [ -f "/opt/nymya/nymyac/target/aarch64-unknown-linux-gnu/release/nymyac" ]; then' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "aarch64-linux binary exists: $(file /opt/nymya/nymyac/target/aarch64-unknown-linux-gnu/release/nymyac)"' >> /opt/nymya/test_builds.sh && \
+    echo 'else' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "ERROR: aarch64-linux binary not found!"' >> /opt/nymya/test_builds.sh && \
+    echo 'fi' >> /opt/nymya/test_builds.sh && \
+    echo '' >> /opt/nymya/test_builds.sh && \
+    echo 'if [ -f "/opt/nymya/nymyac/target/x86_64-pc-windows-gnu/release/nymyac.exe" ]; then' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "x86_64-windows binary exists: $(file /opt/nymya/nymyac/target/x86_64-pc-windows-gnu/release/nymyac.exe)"' >> /opt/nymya/test_builds.sh && \
+    echo 'else' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "ERROR: x86_64-windows binary not found!"' >> /opt/nymya/test_builds.sh && \
+    echo 'fi' >> /opt/nymya/test_builds.sh && \
+    echo '' >> /opt/nymya/test_builds.sh && \
+    echo 'echo "Testing macOS builds (if available)..."' >> /opt/nymya/test_builds.sh && \
+    echo 'if [ -f "/opt/nymya/nymyac/target/x86_64-apple-darwin/release/nymyac" ]; then' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "x86_64-macos binary exists: $(file /opt/nymya/nymyac/target/x86_64-apple-darwin/release/nymyac)"' >> /opt/nymya/test_builds.sh && \
+    echo 'else' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "INFO: x86_64-macos binary not found (requires osxcross setup)"' >> /opt/nymya/test_builds.sh && \
+    echo 'fi' >> /opt/nymya/test_builds.sh && \
+    echo '' >> /opt/nymya/test_builds.sh && \
+    echo 'if [ -f "/opt/nymya/nymyac/target/aarch64-apple-darwin/release/nymyac" ]; then' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "aarch64-macos binary exists: $(file /opt/nymya/nymyac/target/aarch64-apple-darwin/release/nymyac)"' >> /opt/nymya/test_builds.sh && \
+    echo 'else' >> /opt/nymya/test_builds.sh && \
+    echo '  echo "INFO: aarch64-macos binary not found (requires osxcross setup)"' >> /opt/nymya/test_builds.sh && \
+    echo 'fi' >> /opt/nymya/test_builds.sh && \
+    chmod +x /opt/nymya/test_builds.sh
+
+# Documentation
+RUN echo "# NymyaLang Cross-Compilation Environment" > /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "This container supports cross-compilation for:" >> /opt/nymya/README.md && \
+    echo "- Linux (x86_64, aarch64, riscv64)" >> /opt/nymya/README.md && \
+    echo "- Windows (x86_64, i686) using mingw-w64" >> /opt/nymya/README.md && \
+    echo "- macOS (x86_64, aarch64) using osxcross (setup required)" >> /opt/nymya/README.md && \
+    echo "- GMP library support included" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "## Usage" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "To build for all targets:" >> /opt/nymya/README.md && \
+    echo "  /opt/nymya/build_all.sh" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "To build Linux targets:" >> /opt/nymya/README.md && \
+    echo "  /opt/nymya/build_linux.sh" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "To build Windows targets:" >> /opt/nymya/README.md && \
+    echo "  /opt/nymya/build_windows.sh" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "To build macOS targets (requires setup):" >> /opt/nymya/README.md && \
+    echo "  1. Set up osxcross: /opt/nymya/setup_osxcross.sh" >> /opt/nymya/README.md && \
+    echo "  2. Build macOS targets manually after setup" >> /opt/nymya/README.md && \
+    echo "" >> /opt/nymya/README.md && \
+    echo "Binaries will be located in /opt/nymya/nymyac/target/[target]/release/" >> /opt/nymya/README.md
+
+# Environment setup
+RUN echo "export PATH=\$PATH:/opt/nymya" >> ~/.bashrc
+
+WORKDIR /opt/nymya
+
+CMD ["/bin/bash"]

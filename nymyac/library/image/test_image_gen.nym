@@ -1,0 +1,155 @@
+#!/usr/bin/env nymyac
+// Test program for generating small images with NymyaLang
+// test_image_gen.nym
+
+import image.image_basic
+import image.extended
+import crystal
+
+func main() -> Void {
+    crystal.manifest("🎨 Starting Image Generation Test for NymyaLang")
+    crystal.manifest("=" * 50)
+    
+    // Test 1: Create a basic image and fill with a gradient
+    crystal.manifest("✅ Test 1: Creating gradient image")
+    var gradient_img = image.image_basic.create_image(100, 100, 3)
+    for y in range(0, 100) {
+        for x in range(0, 100) {
+            var r = (x * 255 / 100) as Int
+            var g = (y * 255 / 100) as Int
+            var b = ((x + y) * 255 / 200) as Int
+            gradient_img.set_pixel(x, y, r, g, b)
+        }
+    }
+    crystal.manifest("   Gradient image created: 100x100")
+    
+    // Test 2: Draw simple shapes
+    crystal.manifest("\n✅ Test 2: Drawing shapes on image")
+    var shape_img = image.image_basic.create_image(200, 200, 3)
+    
+    // Draw a red diagonal line
+    shape_img.draw_line(10, 10, 190, 190, 255, 0, 0)
+    
+    // Draw a green rectangle outline
+    shape_img.draw_rect(20, 20, 50, 50, 0, 255, 0)
+    
+    // Draw a blue filled rectangle
+    shape_img.fill_rect(80, 80, 40, 30, 0, 0, 255)
+    
+    // Draw a colorful cross
+    var center_x = 150
+    var center_y = 100
+    for i in range(center_x - 20, center_x + 21) {
+        shape_img.set_pixel(i, center_y, 255, 255, 0)  // Yellow horizontal line
+    }
+    for i in range(center_y - 20, center_y + 21) {
+        shape_img.set_pixel(center_x, i, 255, 0, 255)  // Magenta vertical line
+    }
+    
+    crystal.manifest("   Shape image created: 200x200 with lines and rectangles")
+    
+    // Test 3: Apply transformations
+    crystal.manifest("\n✅ Test 3: Applying image transformations")
+    var original = image.image_basic.create_image(50, 50, 3)
+    original.fill_rect(0, 0, 25, 25, 255, 0, 0)      // Red in upper left
+    original.fill_rect(25, 0, 25, 25, 0, 255, 0)    // Green in upper right
+    original.fill_rect(0, 25, 25, 25, 0, 0, 255)    // Blue in lower left
+    original.fill_rect(25, 25, 25, 25, 255, 255, 0) // Yellow in lower right
+    
+    crystal.manifest("   Created test pattern: 50x50 with colored quadrants")
+    
+    // Apply transformations
+    var brighter = image.extended.brighten(original, 1.5)
+    crystal.manifest("   Applied brightness adjustment")
+    
+    var inverted = image.extended.invert_colors(original)
+    crystal.manifest("   Applied color inversion")
+    
+    var grayscaled = image.extended.grayscale(original)
+    crystal.manifest("   Converted to grayscale")
+    
+    var blurred = image.extended.blur(original, 2)
+    crystal.manifest("   Applied blur effect")
+    
+    // Test 4: Create a simple icon
+    crystal.manifest("\n✅ Test 4: Creating a simple icon")
+    var icon = image.image_basic.create_image(32, 32, 4)  // RGBA
+    
+    // Fill with transparent background
+    icon.fill(0, 0, 0, 0)
+    
+    // Draw a simple circle-like shape
+    var center = 16
+    var radius = 10
+    for y in range(0, 32) {
+        for x in range(0, 32) {
+            var dist_sq = (x - center) * (x - center) + (y - center) * (y - center)
+            if dist_sq <= radius * radius {
+                var dist = sqrt(dist_sq as Float)
+                if dist > radius - 2 {  // Border
+                    icon.set_pixel(x, y, 0, 0, 0, 255)  // Black border
+                } else {
+                    var intensity = (255 * (dist / radius as Float)) as Int
+                    icon.set_pixel(x, y, intensity, 100, 200, 255)  // Blueish fill with intensity gradient
+                }
+            }
+        }
+    }
+    crystal.manifest("   Created 32x32 RGBA icon with gradient-filled circle")
+    
+    // Test 5: Resize image
+    crystal.manifest("\n✅ Test 5: Resizing image")
+    var resized_icon = image.image_basic.resize_image(icon, 64, 64)  // Scale up is in image_basic
+    crystal.manifest("   Resized icon from 32x32 to 64x64")
+    
+    // Test 6: Display ASCII art
+    crystal.manifest("\n✅ Test 6: Converting small image to ASCII art")
+    var ascii_small = image.image_basic.create_image(20, 10, 1)  // Small grayscale image
+    
+    // Create a simple pattern for ASCII conversion
+    for y in range(0, 10) {
+        for x in range(0, 20) {
+            var brightness = ((x + y) * 255 / 29) as Int  // Create diagonal pattern
+            ascii_small.set_pixel(x, y, brightness, brightness, brightness)
+        }
+    }
+    
+    var ascii_art = image.extended.to_ascii_art(ascii_small)
+    crystal.manifest("   Generated ASCII art from small image:")
+    crystal.manifest(ascii_art)
+    
+    crystal.manifest("\n🎉 All image generation tests completed!")
+    crystal.manifest("=" * 50)
+    
+    // Save results (conceptual - in a real system these would be saved to files)
+    crystal.manifest("\n📝 Conceptual outputs that would be saved to files:")
+    crystal.manifest("  - gradient_image.png")
+    crystal.manifest("  - shapes_image.png") 
+    crystal.manifest("  - test_pattern.png")
+    crystal.manifest("  - brighter_version.png")
+    crystal.manifest("  - inverted_version.png")
+    crystal.manifest("  - grayscaled_version.png")
+    crystal.manifest("  - blurred_version.png")
+    crystal.manifest("  - icon_32x32.png")
+    crystal.manifest("  - icon_64x64.png")
+    crystal.manifest("  - small_pattern_for_ascii.png")
+}
+
+// Helper function to calculate square root (approximation)
+func sqrt(value: Float) -> Float {
+    if value <= 0 {
+        return 0
+    }
+    
+    // Newton's method for square root approximation
+    var x = value
+    for i in range(0, 10) {
+        x = (x + value / x) / 2.0
+    }
+    return x
+}
+
+// If this is run as the main script
+if lowlevel.os.script_name() == "test_image_gen.nym" {
+    main()
+}
