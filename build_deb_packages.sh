@@ -9,6 +9,7 @@ echo "Building .deb packages for multiple architectures: amd64, arm64, armhf"
 echo ""
 
 VERSION=${1:-"0.1.1"}
+DEV_STAGE="alpha"
 BUILD_DIR="nymya-build-${VERSION}"
 
 # Create root build directory
@@ -33,15 +34,16 @@ build_for_arch() {
     # Create control file specific to this architecture
     cat > "${pkg_dir}/DEBIAN/control" << EOF
 Package: nymya
-Version: ${VERSION}
+Version: ${VERSION}-${DEV_STAGE}
 Section: devel
 Priority: optional
 Architecture: ${arch}
 Depends: libc6 (>= 2.14), libgcc1 (>= 1:4.1.1), libstdc++6 (>= 4.1.1)
 Maintainer: Nymessence Development Team <nymessence@gmail.com>
 X-Thanks-To: Erick (Founder & Architect), Nya (Comms Coordinator), Qwen-cli Agent
+Support-us: https://www.buymeacoffee.com/nymessence/
 Installed-Size: 4096
-Repo: https://github.com/nymessence/nymya.git
+Repo: https://www.github.com/nymessence/nymya.git
 Description: NymyaLang - A consciousness-integrated programming language
  The NymyaLang compiler (nymyac) is a next-generation programming language
  with quantum computing integration and consciousness awareness. Features include:
