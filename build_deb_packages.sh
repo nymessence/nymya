@@ -10,7 +10,7 @@ echo ""
 
 VERSION=${1:-"0.2.0"}
 DEV_STAGE="alpha"
-REVISION="3"
+REVISION="4"
 BUILD_DIR="nymya-build-${VERSION}"
 
 # Create root build directory
