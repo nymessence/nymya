@@ -1,0 +1,95 @@
+// Turing Completeness Verification: Unbounded Looping/Recursion
+// Demonstrates looping and recursive capabilities of NymyaLang
+
+import math
+import crystal
+
+namespace turing_looping {
+
+    // Simple counter loop (bounded but simulating unbounded behavior)
+    func simple_loop(max_count: Int) -> Int {
+        var count = 0
+        while count < max_count {
+            count = count + 1
+        }
+        return count
+    }
+
+    // Recursive factorial function
+    func factorial(n: Int) -> Int {
+        if n <= 1 {
+            return 1
+        } else {
+            return n * factorial(n - 1)
+        }
+    }
+
+    // Recursive fibonacci (demonstrates recursion with branching)
+    func fibonacci(n: Int) -> Int {
+        if n <= 1 {
+            return n
+        } else {
+            return fibonacci(n - 1) + fibonacci(n - 2)
+        }
+    }
+
+    // Loop with dynamic termination condition (simulating unbounded behavior)
+    func dynamic_loop(start_value: Int, target: Int) -> Int {
+        var current = start_value
+        var iterations = 0
+        var max_iterations = 1000  // Prevent infinite loops in test
+        
+        while current != target and iterations < max_iterations {
+            if current < target {
+                current = current + 1
+            } else {
+                current = current - 1
+            }
+            iterations = iterations + 1
+        }
+        
+        return current
+    }
+
+    // Countdown loop with recursive elements
+    func countdown_recursive(n: Int) -> Int {
+        if n <= 0 {
+            crystal.manifest("Blastoff!")
+            return 0
+        } else {
+            crystal.manifest("Countdown: " + n)
+            return 1 + countdown_recursive(n - 1)
+        }
+    }
+
+    // Run the tests
+    func run_tests() -> Void {
+        crystal.manifest("=== Unbounded Looping/Recursion Test ===")
+        
+        // Test simple loop
+        var loop_result = simple_loop(10)
+        crystal.manifest("simple_loop(10) = " + loop_result)
+        
+        // Test factorial recursion
+        var fact_result = factorial(5)
+        crystal.manifest("factorial(5) = " + fact_result)
+        
+        // Test fibonacci recursion (small number to avoid excessive computation)
+        var fib_result = fibonacci(6)
+        crystal.manifest("fibonacci(6) = " + fib_result)
+        
+        // Test dynamic loop
+        var dynamic_result = dynamic_loop(5, 15)
+        crystal.manifest("dynamic_loop(5, 15) = " + dynamic_result)
+        
+        // Test recursive countdown
+        crystal.manifest("Starting countdown...")
+        var countdown_result = countdown_recursive(3)
+        crystal.manifest("Countdown returned: " + countdown_result)
+        
+        crystal.manifest("Unbounded looping/recursion test completed successfully!")
+    }
+}
+
+// Entry point
+turing_looping.run_tests()

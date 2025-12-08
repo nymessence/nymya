@@ -1,0 +1,139 @@
+// Turing Completeness Verification: Tape/Memory Simulation
+// Demonstrates memory manipulation capabilities of NymyaLang
+
+import math
+import crystal
+
+namespace turing_tape {
+
+    // Simple tape implementation using a list
+    class Tape {
+        data: List[Int]
+        head_position: Int
+        
+        init() {
+            this.data = [0]  // Initialize with one cell containing 0
+            this.head_position = 0
+        }
+        
+        func move_right() -> Void {
+            this.head_position = this.head_position + 1
+            // Extend tape if needed
+            if this.head_position >= this.data.length {
+                this.data.append(0)
+            }
+        }
+        
+        func move_left() -> Void {
+            if this.head_position > 0 {
+                this.head_position = this.head_position - 1
+            } else {
+                // Prepend a new cell if at the beginning
+                this.data.insert(0, 0)
+                this.head_position = 0
+            }
+        }
+        
+        func write_value(value: Int) -> Void {
+            if this.head_position < this.data.length {
+                this.data[this.head_position] = value
+            }
+        }
+        
+        func read_value() -> Int {
+            if this.head_position < this.data.length {
+                return this.data[this.head_position]
+            } else {
+                return 0
+            }
+        }
+        
+        func get_position() -> Int {
+            return this.head_position
+        }
+        
+        func get_data() -> List[Int] {
+            return this.data.copy()
+        }
+        
+        func to_string() -> String {
+            var result = "["
+            for i in range(this.data.length) {
+                if i > 0 {
+                    result = result + ", "
+                }
+                if i == this.head_position {
+                    result = result + "*" + this.data[i].to_string() + "*"
+                } else {
+                    result = result + this.data[i].to_string()
+                }
+            }
+            result = result + "]"
+            return result
+        }
+    }
+
+    // Simple counter using the tape
+    func tape_counter(tape: Tape, steps: Int) -> Void {
+        tape.write_value(0)  // Initialize counter
+        for i in range(steps) {
+            var current = tape.read_value()
+            tape.write_value(current + 1)
+            tape.move_right()
+            tape.write_value(current + 1)
+            tape.move_left()
+        }
+    }
+
+    // Copy data using the tape
+    func tape_copy(tape: Tape, value: Int, dest_pos: Int) -> Void {
+        // Write initial value
+        tape.write_value(value)
+        
+        // Move to destination, copying the value
+        for i in range(dest_pos) {
+            tape.move_right()
+        }
+        tape.write_value(value)
+        
+        // Return to original position
+        for i in range(dest_pos) {
+            tape.move_left()
+        }
+    }
+
+    // Run the tests
+    func run_tests() -> Void {
+        crystal.manifest("=== Tape/Memory Simulation Test ===")
+        
+        // Test basic tape operations
+        var tape1 = Tape()
+        crystal.manifest("Initial tape: " + tape1.to_string())
+        
+        tape1.write_value(42)
+        crystal.manifest("After writing 42: " + tape1.to_string())
+        
+        tape1.move_right()
+        tape1.write_value(24)
+        crystal.manifest("After moving right and writing 24: " + tape1.to_string())
+        
+        tape1.move_left()
+        var read_val = tape1.read_value()
+        crystal.manifest("Value at position 0: " + read_val)
+        
+        // Test counter functionality
+        var tape2 = Tape()
+        tape_counter(tape2, 5)
+        crystal.manifest("Tape after counter (5 steps): " + tape2.to_string())
+        
+        // Test copy functionality
+        var tape3 = Tape()
+        tape_copy(tape3, 99, 3)
+        crystal.manifest("Tape after copying 99 to position 3: " + tape3.to_string())
+        
+        crystal.manifest("Tape/memory simulation test completed successfully!")
+    }
+}
+
+// Entry point
+turing_tape.run_tests()

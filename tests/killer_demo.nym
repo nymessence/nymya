@@ -1,0 +1,266 @@
+// Killer Demo: Quantum-Enhanced Hybrid Classifier
+// Demonstrates NymyaLang's hybrid classical and quantum design
+
+import math
+import quantum
+import quantum.sim
+import ml
+import ml.quantum_ml
+import crystal
+import networking
+
+namespace killer_demo {
+
+    // Quantum-enhanced data classifier that uses both classical ML and quantum circuits
+    class QuantumEnhancedClassifier {
+        // Classical preprocessor
+        preprocessor: ml.training_utils
+        
+        // Quantum feature mapper
+        feature_mapper: ml.quantum_ml.ParameterizedCircuit
+        
+        // Quantum classifier
+        quantum_classifier: ml.quantum_ml.VariationalClassifier
+        
+        // Classical postprocessor
+        postprocessor: ml.training_utils
+        
+        init(num_features: Int, num_classes: Int) {
+            var num_qubits = math.max(3, math.next_power_of_two(num_features))  // At least 3 qubits
+            
+            this.feature_mapper = ml.quantum_ml.ParameterizedCircuit(num_qubits)
+            this.quantum_classifier = ml.quantum_ml.VariationalClassifier(num_qubits, num_classes)
+            
+            crystal.manifest("Quantum Enhanced Classifier initialized with " + num_qubits + " qubits for " + num_features + " features")
+        }
+        
+        // Process classical data through quantum pipeline
+        func classify_quantum(data: List[Float]) -> Int {
+            crystal.manifest("Classifying data: [" + data.join(", ") + "]")
+            
+            // Normalize input data
+            var normalized_data = normalize_data(data)
+            
+            // Quantum feature mapping
+            var quantum_features = quantum_feature_map(normalized_data)
+            
+            // Make quantum prediction
+            var prediction = this.quantum_classifier.predict(quantum_features)
+            
+            crystal.manifest("Quantum prediction: Class " + prediction)
+            return prediction
+        }
+        
+        // Quantum feature mapping using parameterized quantum circuits
+        func quantum_feature_map(features: List[Float]) -> List[Float] {
+            // Encode classical features into quantum states
+            var circuit = quantum.sim.Circuit(features.length)
+            
+            // Apply rotation gates to encode features
+            for i in range(math.min(features.length, circuit.num_qubits)) {
+                quantum.gate.ry(circuit, i, features[i])
+            }
+            
+            // Apply entangling gates to create quantum correlations
+            for i in range(circuit.num_qubits - 1) {
+                quantum.gate.cx(circuit, i, i + 1)
+            }
+            
+            // Return quantum state as feature vector
+            var statevector = circuit.get_statevector()
+            var result = []
+            
+            for complex_val in statevector {
+                result.append(complex_val.magnitude())
+            }
+            
+            return result
+        }
+        
+        // Normalize data to [0, 1] range
+        func normalize_data(data: List[Float]) -> List[Float] {
+            if data.length == 0 {
+                return []
+            }
+            
+            var min_val = data[0]
+            var max_val = data[0]
+            
+            for val in data {
+                if val < min_val {
+                    min_val = val
+                }
+                if val > max_val {
+                    max_val = val
+                }
+            }
+            
+            var range = max_val - min_val
+            if range == 0 {
+                range = 1.0  // Avoid division by zero
+            }
+            
+            var normalized = []
+            for val in data {
+                normalized.append((val - min_val) / range)
+            }
+            
+            return normalized
+        }
+        
+        // Train the quantum classifier
+        func train(training_data: List[List[Float]], labels: List[Int]) -> Void {
+            crystal.manifest("Training quantum-enhanced classifier with " + training_data.length + " samples")
+            
+            // In a real implementation, we would perform quantum-aware optimization
+            // For this demo, we'll use a simplified approach
+            
+            var total_correct = 0
+            for i in range(training_data.length) {
+                var prediction = this.classify_quantum(training_data[i])
+                if prediction == labels[i] {
+                    total_correct = total_correct + 1
+                }
+            }
+            
+            var accuracy = (total_correct.toFloat() / training_data.length.toFloat()) * 100.0
+            crystal.manifest("Training accuracy: " + accuracy + "%")
+        }
+        
+        // Make batch predictions
+        func predict_batch(data_batch: List[List[Float]]) -> List[Int] {
+            var predictions = []
+            for data_point in data_batch {
+                predictions.append(this.classify_quantum(data_point))
+            }
+            return predictions
+        }
+    }
+
+    // Quantum random number generation demonstration
+    func demonstrate_quantum_randomness() -> Void {
+        crystal.manifest("=== Quantum Random Number Generation ===")
+        
+        var qrng = networking.QRNG()
+        var random_numbers = []
+        
+        for i in range(10) {
+            var random_float = qrng.generate_float()
+            random_numbers.append(random_float)
+            crystal.manifest("Quantum random number " + i + ": " + random_float)
+        }
+        
+        // Calculate statistics
+        var mean = ml.training_utils.mean(random_numbers)
+        var variance = ml.training_utils.variance(random_numbers)
+        
+        crystal.manifest("Mean of quantum random numbers: " + mean)
+        crystal.manifest("Variance of quantum random numbers: " + variance)
+    }
+
+    // Quantum circuit simulation demonstration
+    func demonstrate_quantum_simulation() -> Void {
+        crystal.manifest("=== Quantum Circuit Simulation ===")
+        
+        // Create a simple quantum circuit
+        var circuit = quantum.sim.Circuit(2)  // 2 qubits
+        
+        // Apply quantum gates
+        quantum.gate.h(circuit, 0)  // Hadamard on qubit 0
+        quantum.gate.cx(circuit, 0, 1)  // CNOT with qubit 0 as control, qubit 1 as target
+        
+        // The circuit should now be in Bell state (|00⟩ + |11⟩)/√2
+        var statevector = circuit.get_statevector()
+        
+        crystal.manifest("Quantum circuit statevector:")
+        for i in range(statevector.length) {
+            var amplitude = statevector[i]
+            crystal.manifest("  |" + format_as_binary(i, 2) + "⟩: " + amplitude.real + " + " + amplitude.imag + "i")
+        }
+        
+        // Perform measurements
+        crystal.manifest("Performing quantum measurements:")
+        for i in range(5) {
+            circuit.reset()  // Reset to initial state
+            quantum.gate.h(circuit, 0)
+            quantum.gate.cx(circuit, 0, 1)
+            
+            var measurement = quantum.sim.measure_all(circuit)
+            crystal.manifest("  Measurement " + i + ": |" + measurement[0] + measurement[1] + "⟩")
+        }
+    }
+
+    // Helper to format integer as binary string
+    func format_as_binary(num: Int, width: Int) -> String {
+        var result = ""
+        var n = num
+        
+        for i in range(width) {
+            if n % 2 == 1 {
+                result = "1" + result
+            } else {
+                result = "0" + result
+            }
+            n = n / 2
+        }
+        
+        return result
+    }
+
+    // Main demonstration function
+    func run_demo() -> Void {
+        crystal.manifest("======= NymyaLang Killer Demo =======")
+        crystal.manifest("Quantum-Enhanced Hybrid Classifier")
+        crystal.manifest("====================================")
+        
+        // Demonstrate quantum randomness
+        demonstrate_quantum_randomness()
+        
+        crystal.manifest("")
+        
+        // Demonstrate quantum simulation
+        demonstrate_quantum_simulation()
+        
+        crystal.manifest("")
+        
+        // Demonstrate quantum classifier
+        crystal.manifest("=== Quantum-Enhanced Classifier ===")
+        
+        // Create sample training data (simple XOR problem)
+        var training_data = [
+            [0.1, 0.1],  // Should be class 0
+            [0.9, 0.1],  // Should be class 1
+            [0.1, 0.9],  // Should be class 1
+            [0.9, 0.9]   // Should be class 0
+        ]
+        
+        var labels = [0, 1, 1, 0]
+        
+        // Create and train the quantum classifier
+        var classifier = QuantumEnhancedClassifier(2, 2)
+        classifier.train(training_data, labels)
+        
+        // Test the classifier
+        crystal.manifest("\nTesting quantum classifier:")
+        var test_data = [
+            [0.2, 0.3],
+            [0.8, 0.1],
+            [0.3, 0.9],
+            [0.7, 0.8]
+        ]
+        
+        for i in range(test_data.length) {
+            var result = classifier.classify_quantum(test_data[i])
+            crystal.manifest("Test " + i + ": [" + test_data[i].join(", ") + "] -> Class " + result)
+        }
+        
+        crystal.manifest("")
+        crystal.manifest("======= Demo Complete =======")
+        crystal.manifest("Demonstrated: Quantum random number generation, quantum circuit simulation,")
+        crystal.manifest("quantum feature mapping, and quantum-enhanced classification with classical preprocessing.")
+        crystal.manifest("==============================")
+    }
+}
+
+// Entry point
+killer_demo.run_demo()

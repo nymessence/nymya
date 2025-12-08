@@ -69,27 +69,60 @@ namespace quantum {
             
             // Helper function to compute full gate matrix
             func compute_full_gate_matrix(target_qubit: Int, gate_matrix: List[List[math.Complex]], total_qubits: Int) -> List[List[math.Complex]] {
-                // Create the full 2^n x 2^n matrix by tensoring with identity matrices
+                // Create the full 2^n x 2^n matrix by tensoring the gate with identity matrices for other qubits
                 var size = 1 << total_qubits
-                var full_matrix = create_identity_matrix(size)
-                
-                // Apply the gate to the specific qubit
-                // This is a simplified approach - in practice would use proper tensor product
-                for state_index in range(size) {
-                    // Determine if this affects our target qubit
-                    var bit_set = (state_index >> target_qubit) & 1
-                    if bit_set == 1 {
-                        // Apply gate to |1⟩ component
-                        // This is a simplified representation
-                    } else {
-                        // Apply gate to |0⟩ component
-                        // This is a simplified representation
+                var full_matrix = create_zero_matrix(size, size)  // Initialize to zero matrix
+
+                // For single-qubit gate, we tensor the gate with identity matrices for all other qubits
+                // We need to calculate how the gate maps each basis state to another
+                for row in range(size) {
+                    for col in range(size) {
+                        // Determine if this entry is affected by the target qubit gate
+                        // Get the bit values of target qubit in both row and column basis states
+                        var row_target_bit = (row >> target_qubit) & 1
+                        var col_target_bit = (col >> target_qubit) & 1
+
+                        // If other qubits are different, the amplitude is 0
+                        var other_qubits_same = true
+                        for qubit in range(total_qubits) {
+                            if qubit != target_qubit {
+                                var row_bit = (row >> qubit) & 1
+                                var col_bit = (col >> qubit) & 1
+                                if row_bit != col_bit {
+                                    other_qubits_same = false
+                                    break
+                                }
+                            }
+                        }
+
+                        if other_qubits_same {
+                            // Get the corresponding entry from the single-qubit gate matrix
+                            var gate_row = row_target_bit
+                            var gate_col = col_target_bit
+                            full_matrix[row][col] = gate_matrix[gate_row][gate_col]
+                        } else {
+                            // Other qubits are different, so this amplitude is 0
+                            full_matrix[row][col] = math.Complex(0.0, 0.0)
+                        }
                     }
                 }
-                
+
                 return full_matrix
             }
             
+            // Helper to create zero matrix
+            func create_zero_matrix(rows: Int, cols: Int) -> List[List[math.Complex]] {
+                var matrix = []
+                for i in range(rows) {
+                    var row = []
+                    for j in range(cols) {
+                        row.append(math.Complex(0.0, 0.0))
+                    }
+                    matrix.append(row)
+                }
+                return matrix
+            }
+
             // Helper to create identity matrix
             func create_identity_matrix(size: Int) -> List[List[math.Complex]] {
                 var matrix = []
@@ -110,23 +143,50 @@ namespace quantum {
             // Compute full two-qubit matrix
             func compute_full_two_qubit_matrix(control: Int, target: Int, gate_matrix: List[List[math.Complex]], total_qubits: Int) -> List[List[math.Complex]] {
                 var size = 1 << total_qubits
-                var matrix = create_identity_matrix(size)
-                
-                // This is a simplified implementation for CNOT-like gates
-                // In practice, this would involve more complex tensor product calculations
-                for state_index in range(size) {
-                    // Compute which computational basis state this is
-                    var control_bit = (state_index >> control) & 1
-                    var target_bit = (state_index >> target) & 1
-                    
-                    if control_bit == 1 {  // If control qubit is |1⟩
-                        // Apply the gate to the target qubit
-                        // For CNOT: flip the target qubit
-                        var new_state_index = state_index ^ (1 << target)
-                        // This is a simplified CNOT implementation
+                var matrix = create_zero_matrix(size, size)  // Initialize to zero matrix
+
+                // For two-qubit gate, we need to map basis states correctly
+                // The 4x4 gate_matrix operates on the control and target qubits
+                for row in range(size) {
+                    for col in range(size) {
+                        // Check if the other qubits (non-control, non-target) are the same
+                        var other_qubits_same = true
+                        for qubit in range(total_qubits) {
+                            if qubit != control and qubit != target {
+                                var row_bit = (row >> qubit) & 1
+                                var col_bit = (col >> qubit) & 1
+                                if row_bit != col_bit {
+                                    other_qubits_same = false
+                                    break
+                                }
+                            }
+                        }
+
+                        if other_qubits_same {
+                            // Extract control and target bits from row and col
+                            var row_control_bit = (row >> control) & 1
+                            var row_target_bit = (row >> target) & 1
+                            var col_control_bit = (col >> control) & 1
+                            var col_target_bit = (col >> target) & 1
+
+                            // Map 2-bit representation to 4x4 matrix indices
+                            // Standard computational basis: |control,target⟩
+                            var gate_row_idx = row_control_bit * 2 + row_target_bit
+                            var gate_col_idx = col_control_bit * 2 + col_target_bit
+
+                            // Check bounds to avoid accessing out-of-bounds
+                            if gate_row_idx < gate_matrix.length and gate_col_idx < gate_matrix[0].length {
+                                matrix[row][col] = gate_matrix[gate_row_idx][gate_col_idx]
+                            } else {
+                                matrix[row][col] = math.Complex(0.0, 0.0)
+                            }
+                        } else {
+                            // Other qubits differ, so amplitude is 0
+                            matrix[row][col] = math.Complex(0.0, 0.0)
+                        }
                     }
                 }
-                
+
                 return matrix
             }
             
@@ -186,22 +246,48 @@ namespace quantum {
             // Compute full three-qubit matrix
             func compute_full_three_qubit_matrix(control1: Int, control2: Int, target: Int, gate_matrix: List[List[math.Complex]], total_qubits: Int) -> List[List[math.Complex]] {
                 var size = 1 << total_qubits
-                var matrix = create_identity_matrix(size)
+                var matrix = create_zero_matrix(size, size)  // Initialize to zero matrix
 
-                // For three-qubit gates like Toffoli (CCX)
-                // When both controls are |1⟩, flip the target
-                for state_index in range(size) {
-                    var ctrl1_bit = (state_index >> control1) & 1
-                    var ctrl2_bit = (state_index >> control2) & 1
-                    var target_bit = (state_index >> target) & 1
+                // For three-qubit gate, we map the 8x8 gate matrix to the appropriate basis states
+                for row in range(size) {
+                    for col in range(size) {
+                        // Check if the other qubits (non-control, non-target) are the same
+                        var other_qubits_same = true
+                        for qubit in range(total_qubits) {
+                            if qubit != control1 and qubit != control2 and qubit != target {
+                                var row_bit = (row >> qubit) & 1
+                                var col_bit = (col >> qubit) & 1
+                                if row_bit != col_bit {
+                                    other_qubits_same = false
+                                    break
+                                }
+                            }
+                        }
 
-                    if ctrl1_bit == 1 and ctrl2_bit == 1 {
-                        // This is a simplified implementation for CCX/Toffoli
-                        // Flip the target bit
-                        var new_state_index = state_index ^ (1 << target)
-                        // In a full implementation, we would properly apply the 8x8 gate matrix
-                        // to the relevant 8 computational basis states that differ only in the
-                        // control1, control2, and target qubit positions
+                        if other_qubits_same {
+                            // Extract the three relevant bits from row and col
+                            var row_ctrl1_bit = (row >> control1) & 1
+                            var row_ctrl2_bit = (row >> control2) & 1
+                            var row_target_bit = (row >> target) & 1
+                            var col_ctrl1_bit = (col >> control1) & 1
+                            var col_ctrl2_bit = (col >> control2) & 1
+                            var col_target_bit = (col >> target) & 1
+
+                            // Map 3-bit representation to 8x8 matrix indices
+                            // Standard computational basis: |ctrl1,ctrl2,target⟩
+                            var gate_row_idx = row_ctrl1_bit * 4 + row_ctrl2_bit * 2 + row_target_bit
+                            var gate_col_idx = col_ctrl1_bit * 4 + col_ctrl2_bit * 2 + col_target_bit
+
+                            // Check bounds to avoid accessing out-of-bounds
+                            if gate_row_idx < gate_matrix.length and gate_col_idx < gate_matrix[0].length {
+                                matrix[row][col] = gate_matrix[gate_row_idx][gate_col_idx]
+                            } else {
+                                matrix[row][col] = math.Complex(0.0, 0.0)
+                            }
+                        } else {
+                            // Other qubits differ, so amplitude is 0
+                            matrix[row][col] = math.Complex(0.0, 0.0)
+                        }
                     }
                 }
 

@@ -1,50 +1,82 @@
-# NymyaLang - Advanced AI/ML and Quantum Computing Platform
+# NymyaLang - Advanced AI/ML and Quantum Computing Platform (v0.2.0)
 
 Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML and quantum computing capabilities.
 
 ## Core Philosophy
 Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita**) combined with ethical flow (**Nora**), following the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness.
 
-## New Features
+## New Features in v0.2.0
 
-### 1. AI/ML Library (`ml`)
+### 1. Turing Completeness Verification
+- Complete set of programs demonstrating NymyaLang is Turing complete:
+  - Conditional branching examples
+  - Unbounded looping and recursion implementations
+  - Tape/memory-simulated structures
+  - Universal computation patterns (register machine, lambda calculus)
+  - Nontrivial computational tests (prime number computation)
+
+### 2. Killer Demo: Quantum-Enhanced Hybrid Classifier
+- Demonstrates the language's hybrid classical and quantum design
+- Implements quantum random number generation
+- Features quantum circuit simulation
+- Includes quantum feature mapping and quantum-enhanced classification
+- Full working example at `tests/killer_demo.nym`
+
+### 3. Enhanced Quantum Simulator
+- Complete tensor product implementation for accurate quantum gate simulation
+- Proper single, two, and three-qubit gate computations
+- Fixed quantum circuit simulation with mathematically correct tensor products
+- Improved measurement and state vector operations
+
+### 4. Improved Math Library
+- Added `math.pow_int` for safe integer exponentiation
+- Added `math.gcd` for integer greatest common divisor
+- Enhanced mathematical functions with proper implementation
+
+### 5. Functional Compiler Implementation
+- Tokenizer/lexer for parsing .nym files
+- Parser with AST generation
+- Basic code generation pipeline
+- Proper error handling and reporting
+
+### 6. AI/ML Library (`ml`)
 - **Tensor Operations**: Multi-dimensional array computations
 - **Neural Networks**: Layered architectures with activation functions
 - **Classical ML**: Loss functions, training utilities, data processing
 - **Quantum Machine Learning**: Variational quantum classifiers, quantum neural networks
 - **Quantum SVM**: Quantum Support Vector Machine implementations
 
-### 2. Quantum ML Algorithms (`ml.quantum_ml`)
+### 7. Quantum ML Algorithms (`ml.quantum_ml`)
 - **Parameterized Quantum Circuits**: Trainable quantum circuits
 - **Variational Quantum Classifiers**: Quantum-enhanced classification
 - **Quantum Neural Layers**: Quantum processing elements
 - **Quantum Feature Maps**: Data encoding in quantum states
 
-### 3. Advanced Mathematical Functions (`math.hypercalc`)
+### 8. Advanced Mathematical Functions (`math.hypercalc`)
 - **Hypercalc Functions**: Advanced mathematical operations with special case handling
 - **Complex Number Operations**: Proper complex arithmetic
 - **High-Precision Calculations**: Enhanced numerical computations
 - **Special Mathematical Functions**: Gamma, trigonometric, exponential functions
 
-### 4. Quantum Networking (`networking.quantum`)
+### 9. Quantum Networking (`networking.quantum`)
 - **Quantum Entanglement**: Establishment and maintenance
 - **Quantum Field Communication**: Multi-node quantum communication
 - **Non-Local Transmission**: Quantum communication principles
 - **Quantum Channel Operations**: Secure quantum communication channels
 
-### 5. Classical Networking (`networking.classical`)
+### 10. Classical Networking (`networking.classical`)
 - **Ping and Latency**: Network connectivity testing
 - **Bandwidth Measurement**: Download/upload speed assessment
 - **Subnet Operations**: Network scanning and management
 - **Port Operations**: Port scanning and TCP connections
 
-### 6. Low-Level Operations (`lowlevel`)
+### 11. Low-Level Operations (`lowlevel`)
 - **Bit Manipulation**: Advanced bitwise operations
 - **Memory Operations**: Direct memory access and management
 - **Register Operations**: CPU register simulation
 - **Utility Functions**: Endian conversion, alignment, power-of-two operations
 
-### 7. DateTime Operations (`datetime`)
+### 12. DateTime Operations (`datetime`)
 - **Temporal Operations**: Calendar and time manipulation
 - **Timezone Handling**: Multi-zone time management
 - **Interval Calculations**: Duration and time difference operations

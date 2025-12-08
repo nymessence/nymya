@@ -774,6 +774,41 @@ func trunc(x: Float) -> Float {
     return cpp.cmath.trunc(x)
 }
 
+// Integer power function for handling large exponentiation safely
+func pow_int(base: Int, exp: Int) -> Int {
+    if exp <= 0 {
+        return 1
+    }
+
+    var result: Int = 1
+    var b: Int = base
+    var e: Int = exp
+
+    while e > 0 {
+        if e % 2 == 1 {
+            result = result * b
+        }
+        b = b * b
+        e = e / 2
+    }
+
+    return result
+}
+
+// Greatest Common Divisor for integers
+func gcd(a: Int, b: Int) -> Int {
+    var x = math.abs_int(a)
+    var y = math.abs_int(b)
+
+    while y != 0 {
+        var temp = y
+        y = x % y
+        x = temp
+    }
+
+    return x
+}
+
 // Constants
 val PI: Float = 3.141592653589793
 val E: Float = 2.718281828459045

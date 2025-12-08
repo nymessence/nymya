@@ -1,0 +1,70 @@
+// Turing Completeness Verification: Conditional Branching
+// Demonstrates conditional execution capabilities of NymyaLang
+
+import math
+import crystal
+
+namespace turing_branching {
+
+    // Function to test conditional branching
+    func test_conditional(x: Int) -> String {
+        if x > 0 {
+            return "positive"
+        } else if x < 0 {
+            return "negative"
+        } else {
+            return "zero"
+        }
+    }
+
+    // More complex conditional with nested logic
+    func complex_conditional(value: Int) -> Int {
+        var result = 0
+        
+        if value % 2 == 0 {
+            if value > 10 {
+                result = value * 2
+            } else {
+                result = value + 5
+            }
+        } else {
+            if value < 0 {
+                result = value * -1
+            } else {
+                result = value * 3
+            }
+        }
+        
+        return result
+    }
+
+    // Run the tests
+    func run_tests() -> Void {
+        crystal.manifest("=== Conditional Branching Test ===")
+        
+        // Test simple conditional
+        var result1 = test_conditional(5)
+        crystal.manifest("test_conditional(5) = " + result1)
+        
+        var result2 = test_conditional(-3)
+        crystal.manifest("test_conditional(-3) = " + result2)
+        
+        var result3 = test_conditional(0)
+        crystal.manifest("test_conditional(0) = " + result3)
+        
+        // Test complex conditional
+        var result4 = complex_conditional(12)
+        crystal.manifest("complex_conditional(12) = " + result4)
+        
+        var result5 = complex_conditional(4)
+        crystal.manifest("complex_conditional(4) = " + result5)
+        
+        var result6 = complex_conditional(-7)
+        crystal.manifest("complex_conditional(-7) = " + result6)
+        
+        crystal.manifest("Conditional branching test completed successfully!")
+    }
+}
+
+// Entry point
+turing_branching.run_tests()

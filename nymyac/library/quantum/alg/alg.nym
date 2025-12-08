@@ -339,27 +339,6 @@ namespace quantum {
             return period
         }
 
-        // Integer power function for handling large exponentiation safely
-        func math.pow_int(base: Int, exp: Int) -> Int {
-            if exp <= 0 {
-                return 1
-            }
-
-            var result: Int = 1
-            var b: Int = base
-            var e: Int = exp
-
-            while e > 0 {
-                if e % 2 == 1 {
-                    result = result * b
-                }
-                b = b * b
-                e = e / 2
-            }
-
-            return result
-        }
-
         // Grover's Algorithm
         func grovers(circuit: quantum.sim.Circuit, n_qubits: Int, oracle_func: Func[quantum.sim.Circuit, List[Int], Void]) -> Int {
             // Grover's algorithm searches an unstructured database (or an unordered list) with N entries
