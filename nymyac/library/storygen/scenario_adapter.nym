@@ -1,0 +1,150 @@
+// Scenario adaptation with AI-driven message modification
+// scenario_adapter.nym
+
+import storygen.api_client
+import storygen.config
+import lowlevel.string
+
+namespace storygen.scenario_adapter
+
+// Ensure defaults are initialized at module load
+storygen.config.init_defaults()
+
+func adapt_character_message(character: Dict, scenario: String, turn: Int = 1) -> String {
+    // Adapt a character's message (typically greeting) based on a custom scenario using AI
+    try {
+        // Build context for adaptation
+        var character_name = character.get('name', 'Unknown Character')
+        var original_greeting = character.get('greeting', '')
+        var persona = character.get('persona', '')
+        
+        // Create adaptation prompt
+        var adaptation_prompt = "Adapt the character's greeting to fit the custom scenario while maintaining their core personality.\n\nCHARACTER:\nName: " + character_name + "\nPersona: \"" + persona[:300] + "\"\nOriginal Greeting: \"" + original_greeting + "\"\n\nCUSTOM SCENARIO:\n" + scenario + "\n\nADAPTATION REQUIREMENTS:\n1. Keep the character's core personality and voice intact\n2. Adapt the greeting to fit the scenario context meaningfully\n3. Make the scenario relevant and integrated into the response\n4. Maintain the same length and structure as the original\n5. Add scenario-specific details that make sense for the character\n6. Keep it natural and in-character\n\nRESPONSE FORMAT:\nReturn ONLY the adapted greeting message. No explanations, no quotes, just the message.\n\nAdapted greeting:"
+        
+        // Make API call to adapt the message
+        var adapted_message = storygen.api_client.make_api_call(
+            adaptation_prompt,
+            200,
+            0.7,
+            [],
+            False
+        )
+        
+        // Clean up the response
+        var cleaned_message = adapted_message.strip()
+        
+        // Remove any prefix/suffix artifacts
+        cleaned_message = lowlevel.string.replace_all(cleaned_message, ["Adapted greeting:", "Adapted greeting:\\n", "\\nAdapted greeting:"], "")
+        cleaned_message = lowlevel.string.remove_prefix(cleaned_message, ["\""], "")
+        cleaned_message = lowlevel.string.remove_suffix(cleaned_message, ["\""], "")
+        
+        // Validate the adapted message
+        if cleaned_message.strip().length() < 10 {
+            crystal.manifest("⚠️  Adapted message too short, using original: " + cleaned_message)
+            return original_greeting
+        }
+        
+        return cleaned_message
+        
+    } catch error {
+        crystal.manifest("⚠️  Message adaptation failed: " + error.to_string())
+        return character.get('greeting', 'Hello, I am ' + character.get('name', 'Unknown'))
+    }
+}
+
+func enforce_scenario_constraints(system_prompt: String, scenario: String, character_name: String) -> String {
+    // Add scenario enforcement constraints to the system prompt
+    var scenario_enforcement = "\n\nSCENARIO ENFORCEMENT (ABSOLUTE):\nYou are in the scenario: \"" + scenario + "\"\n- EVERY response must be consistent with this scenario\n- React to scenario elements and incorporate them into your dialogue\n- Maintain scenario-appropriate knowledge and awareness\n- Do not contradict or ignore scenario context\n- If the scenario involves specific locations, technologies, or situations, acknowledge them\n- Keep the conversation grounded in the scenario reality\n\nCHARACTER-SPECIFIC SCENARIO ROLE:\nAs " + character_name + " in this scenario:\n- Your responses should reflect your understanding of the scenario context\n- Incorporate scenario-specific elements that are relevant to your character\n- Maintain consistency with both your personality and the scenario\n"
+    
+    return system_prompt + scenario_enforcement
+}
+
+func check_scenario_consistency(response: String, scenario: String, character_name: String) -> Dict {
+    // Check if a response is consistent with the custom scenario
+    try {
+        var consistency_prompt = "Check if this character response is consistent with the custom scenario.\n\nSCENARIO:\n" + scenario + "\n\nCHARACTER RESPONSE:\n" + response + "\n\nANALYSIS REQUIREMENTS:\n1. Does the response acknowledge or reference elements from the scenario?\n2. Is the response consistent with the scenario context?\n3. Does the character's reaction make sense within the scenario?\n4. Are there any contradictions with the scenario?\n\nReturn analysis in this format:\nScenario Consistency: [CONSISTENT/NEUTRAL/INCONSISTENT]\nIssues: [List any issues, or \"None\" if consistent]\nScenario Elements Referenced: [List scenario elements mentioned, or \"None\"]\n\nAnalysis:"
+        
+        var analysis = storygen.api_client.make_api_call(
+            consistency_prompt,
+            150,
+            0.3,
+            [],
+            False
+        )
+        
+        // Parse the analysis
+        var result = {
+            'consistent': True,
+            'issues': [],
+            'elements_referenced': []
+        }
+        
+        if 'Scenario Consistency: INCONSISTENT' in analysis.to_lower() {
+            result['consistent'] = False
+        } else if 'Scenario Consistency: NEUTRAL' in analysis.to_lower() {
+            result['consistent'] = True  // Neutral is still acceptable
+        }
+        
+        // Extract issues
+        if 'Issues:' in analysis {
+            var issues_part = analysis.split('Issues:')[1].split('\n')[0].strip()
+            if issues_part != 'None' {
+                var temp_issues = issues_part.split(',')
+                for issue in temp_issues {
+                    result['issues'].append(issue.strip())
+                }
+            }
+        }
+        
+        // Extract referenced elements
+        if 'Scenario Elements Referenced:' in analysis {
+            var elements_part = analysis.split('Scenario Elements Referenced:')[1].split('\n')[0].strip()
+            if elements_part != 'None' {
+                var temp_elements = elements_part.split(',')
+                for elem in temp_elements {
+                    result['elements_referenced'].append(elem.strip())
+                }
+            }
+        }
+        
+        return result
+        
+    } catch error {
+        crystal.manifest("⚠️  Scenario consistency check failed: " + error.to_string())
+        return {'consistent': True, 'issues': [], 'elements_referenced': []}
+    }
+}
+
+func generate_scenario_guidance(scenario: String, character_name: String) -> String {
+    // Generate scenario-specific guidance for a character
+    try {
+        var guidance_prompt = "Generate scenario-specific guidance for this character in the given scenario.\n\nSCENARIO:\n" + scenario + "\n\nCHARACTER:\n" + character_name + "\n\nGenerate 2-3 specific guidance points that would help this character respond appropriately in this scenario. Focus on:\n1. What the character should be aware of in this scenario\n2. How the character should typically react to scenario elements\n3. Any scenario-specific knowledge or context they should have\n\nReturn in this format:\nScenario Guidance:\n- [Guidance point 1]\n- [Guidance point 2]\n- [Guidance point 3]\n\nGuidance:"
+        
+        var guidance = storygen.api_client.make_api_call(
+            guidance_prompt,
+            150,
+            0.5,
+            [],
+            False
+        )
+        
+        // Extract guidance points
+        var guidance_points = []
+        if 'Scenario Guidance:' in guidance {
+            var guidance_part = guidance.split('Scenario Guidance:')[1]
+            var lines = guidance_part.strip().split('\n')
+            for line in lines {
+                line = line.strip()
+                if line.startswith('-') and line.length() > 1 {
+                    guidance_points.append(line[1:].strip())
+                }
+            }
+        }
+        
+        return "\n".join(guidance_points) if guidance_points.length() > 0 else ""
+        
+    } catch error {
+        crystal.manifest("⚠️  Scenario guidance generation failed: " + error.to_string())
+        return ""
+    }
+}
