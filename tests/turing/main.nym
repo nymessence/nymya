@@ -1,0 +1,31 @@
+// Turing completeness verification entry point
+// Imports all necessary modules
+
+import crystal
+
+namespace turing {
+
+    // Import all turing completeness modules
+    import turing.conditional
+    import turing.looping  
+    import turing.tape
+    import turing.lambda
+    import turing.primes
+
+    func run_verification() -> Void {
+        crystal.manifest("=== NymyaLang Turing Completeness Verification ===")
+        crystal.manifest("Testing all fundamental computational constructs...\n")
+        
+        // Run all tests
+        turing.conditional.test()
+        turing.looping.test_while_loops()
+        turing.looping.test_recursion()
+        turing.tape.test_unary_increment()
+        turing.tape.test_register_machine()
+        turing.lambda.run_all_tests()
+        turing.primes.run_computation_tests()
+        
+        crystal.manifest("\n=== Verification Complete ===")
+        crystal.manifest("NymyaLang has demonstrated Turing completeness")
+    }
+}

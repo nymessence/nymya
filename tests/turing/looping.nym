@@ -1,0 +1,106 @@
+// Unbounded Looping Example - Turing completeness demonstration
+import crystal
+
+namespace turing.looping {
+
+    // Test unbounded while loops
+    func test_while_loops() -> Void {
+        crystal.manifest("=== Unbounded While Loop Test ===")
+
+        // Count up to a number (bounded but demonstrates while loop)
+        var counter = 0
+        while counter < 10 {
+            crystal.manifest("Counter: " + counter)
+            counter = counter + 1
+        }
+
+        // Fibonacci sequence (demonstrates unbounded computation)
+        var a = 0
+        var b = 1
+        var count = 0
+        while count < 15 {
+            crystal.manifest("Fibonacci(" + count + "): " + a)
+            var temp = a + b
+            a = b
+            b = temp
+            count = count + 1
+        }
+
+        // Simple prime checker using loops
+        var num = 2
+        var primes_found = 0
+        while primes_found < 10 {
+            if is_prime(num) {
+                crystal.manifest("Prime #" + (primes_found + 1) + ": " + num)
+                primes_found = primes_found + 1
+            }
+            num = num + 1
+        }
+    }
+
+    // Test recursion (another form of unbounded computation)
+    func test_recursion() -> Void {
+        crystal.manifest("=== Recursive Function Test ===")
+
+        // Calculate factorial recursively
+        var result = factorial(10)
+        crystal.manifest("10! = " + result)
+
+        // Calculate fibonacci recursively
+        var fib_result = fibonacci(10)
+        crystal.manifest("Fibonacci(10) = " + fib_result)
+
+        // Demonstrate recursive countdown
+        countdown_recursive(5)
+    }
+
+    // Helper function to check if a number is prime
+    func is_prime(n: Int) -> Bool {
+        if n <= 1 {
+            return false
+        }
+        if n <= 3 {
+            return true
+        }
+        if n % 2 == 0 or n % 3 == 0 {
+            return false
+        }
+
+        var i = 5
+        while i * i <= n {
+            if n % i == 0 or n % (i + 2) == 0 {
+                return false
+            }
+            i = i + 6
+        }
+
+        return true
+    }
+
+    // Recursive factorial function
+    func factorial(n: Int) -> Int {
+        if n <= 1 {
+            return 1
+        }
+        return n * factorial(n - 1)
+    }
+
+    // Recursive fibonacci function
+    func fibonacci(n: Int) -> Int {
+        if n <= 1 {
+            return n
+        }
+        return fibonacci(n - 1) + fibonacci(n - 2)
+    }
+
+    // Recursive countdown function
+    func countdown_recursive(n: Int) -> Void {
+        if n <= 0 {
+            crystal.manifest("Blast off!")
+            return
+        }
+        crystal.manifest("Countdown: " + n)
+        countdown_recursive(n - 1)
+    }
+    
+}

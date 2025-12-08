@@ -1,0 +1,50 @@
+// Turing Completeness Verification Programs for NymyaLang
+// This directory contains programs that demonstrate NymyaLang is Turing complete
+
+// Program 1: Conditional Branching Example
+import crystal
+
+namespace turing.conditional {
+
+    func test() -> Void {
+        crystal.manifest("=== Conditional Branching Test ===")
+        
+        var x = 10
+        var y = 5
+        
+        if x > y {
+            crystal.manifest("Branch 1: x is greater than y")
+        } else {
+            crystal.manifest("Branch 2: x is not greater than y")
+        }
+        
+        // More complex conditional
+        var values = [1, 2, 3, 4, 5]
+        for val in values {
+            if val % 2 == 0 {
+                crystal.manifest(val + " is even")
+            } else {
+                crystal.manifest(val + " is odd")
+            }
+        }
+        
+        // Nested conditionals
+        var a = 7
+        var b = 3
+        var c = 12
+        
+        if a > b {
+            if a > c {
+                crystal.manifest("a is the largest")
+            } else {
+                crystal.manifest("c is the largest")
+            }
+        } else {
+            if b > c {
+                crystal.manifest("b is the largest")
+            } else {
+                crystal.manifest("c is the largest")
+            }
+        }
+    }
+}

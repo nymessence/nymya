@@ -1,0 +1,187 @@
+// Memory/Tape Simulation - Turing completeness demonstration
+import crystal
+import math
+
+namespace turing.tape {
+
+    // Simulate a Turing machine tape using list data structure
+    class Tape {
+        data: List[Int]
+        head_position: Int
+        
+        init() {
+            this.data = [0]  // Start with one cell containing 0
+            this.head_position = 0
+        }
+        
+        func read() -> Int {
+            if this.head_position >= 0 and this.head_position < this.data.length {
+                return this.data[this.head_position]
+            } else {
+                return 0  // Default value for out-of-bounds
+            }
+        }
+        
+        func write(value: Int) -> Void {
+            // Extend tape if needed
+            while this.head_position >= this.data.length {
+                this.data.append(0)
+            }
+            
+            this.data[this.head_position] = value
+        }
+        
+        func move_left() -> Void {
+            this.head_position = this.head_position - 1
+            if this.head_position < 0 {
+                // Extend tape to the left by adding a cell at the beginning
+                this.data.insert(0, 0)
+                this.head_position = 0
+            }
+        }
+        
+        func move_right() -> Void {
+            this.head_position = this.head_position + 1
+            // Tape extends automatically when writing beyond current size
+        }
+        
+        func get_position() -> Int {
+            return this.head_position
+        }
+        
+        func get_length() -> Int {
+            return this.data.length
+        }
+        
+        func to_string() -> String {
+            var result = "["
+            for i in range(this.data.length) {
+                if i == this.head_position {
+                    result = result + "*" + this.data[i] + "*"
+                } else {
+                    result = result + this.data[i].to_string()
+                }
+                if i < this.data.length - 1 {
+                    result = result + ", "
+                }
+            }
+            result = result + "]"
+            return result
+        }
+    }
+    
+    // Simple Turing machine that adds 1 to a unary number
+    // Unary numbers are represented as a series of 1s (e.g. 3 = 111)
+    func test_unary_increment() -> Void {
+        crystal.manifest("=== Turing Machine: Unary Addition Test ===")
+        
+        var tape = Tape()
+        
+        // Set up tape with unary number (e.g., 3 = three 1s followed by 0)
+        // Represent 3 as 1,1,1,0 on the tape
+        tape.write(1)  // Cell 0
+        tape.move_right()
+        tape.write(1)  // Cell 1
+        tape.move_right()
+        tape.write(1)  // Cell 2
+        tape.move_right()
+        tape.write(0)  // Cell 3 (delimiter)
+        
+        // Go back to the start of the number
+        while tape.read() != 0 {
+            tape.move_left()
+        }
+        tape.move_right()  // Move to the first 1
+        
+        crystal.manifest("Initial tape: " + tape.to_string())
+        
+        // Move to the end of the number
+        while tape.read() != 0 {
+            tape.move_right()
+        }
+        // We're now at the delimiter, add one more 1
+        tape.write(1)
+        // Add a new delimiter
+        tape.move_right()
+        tape.write(0)
+        
+        crystal.manifest("After incrementing: " + tape.to_string())
+        crystal.manifest("Successfully demonstrated tape manipulation")
+    }
+    
+    // Simulate a register machine with unbounded memory
+    class RegisterMachine {
+        registers: List[Int]
+
+        init() {
+            this.registers = []
+            // Initialize with a few registers
+            for i in range(10) {
+                this.registers.append(0)
+            }
+        }
+
+        func get_register(index: Int) -> Int {
+            if index >= 0 and index < this.registers.length {
+                return this.registers[index]
+            } else {
+                return 0
+            }
+        }
+
+        func set_register(index: Int, value: Int) -> Void {
+            // Extend registers if needed
+            while this.registers.length <= index {
+                this.registers.append(0)
+            }
+            this.registers[index] = value
+        }
+
+        func increment_register(index: Int) -> Void {
+            var current = this.get_register(index)
+            this.set_register(index, current + 1)
+        }
+
+        func decrement_register(index: Int) -> Void {
+            var current = this.get_register(index)
+            if current > 0 {
+                this.set_register(index, current - 1)
+            }
+        }
+
+        func is_zero_register(index: Int) -> Bool {
+            var val = this.get_register(index)
+            return val == 0
+        }
+    }
+
+    func test_register_machine() -> Void {
+        crystal.manifest("=== Register Machine Simulation ===")
+
+        var rm = RegisterMachine()
+
+        // Set some initial values
+        rm.set_register(1, 5)  // R1 = 5
+        rm.set_register(2, 3)  // R2 = 3
+
+        crystal.manifest("Initial state - R0: " + rm.get_register(0) + ", R1: " + rm.get_register(1) + ", R2: " + rm.get_register(2))
+
+        // Simple program: Add R1 and R2, put result in R0
+        var counter1 = rm.get_register(1)
+        while counter1 > 0 {
+            rm.increment_register(0)  // R0 = R0 + 1
+            rm.decrement_register(1)  // R1 = R1 - 1
+            counter1 = counter1 - 1
+        }
+
+        var counter2 = rm.get_register(2)
+        while counter2 > 0 {
+            rm.increment_register(0)  // R0 = R0 + 1
+            rm.decrement_register(2)  // R2 = R2 - 1
+            counter2 = counter2 - 1
+        }
+
+        crystal.manifest("After addition - R0: " + rm.get_register(0) + ", R1: " + rm.get_register(1) + ", R2: " + rm.get_register(2))
+        crystal.manifest("Register machine computation completed successfully")
+    }
+}

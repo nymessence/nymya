@@ -1,0 +1,312 @@
+#!/usr/bin/env bash
+
+# The nymya executable
+# Compiles NymyaLang code and executes it from a temporary directory
+# Handles cross-platform compatibility and proper architecture compilation
+
+# Define colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+show_help() {
+    echo "nymya - NymyaLang Executable Compiler"
+    echo ""
+    echo "Usage:"
+    echo "  nymya [OPTIONS] <file.nym>"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help     Show this help message"
+    echo "  -o, --output   Specify output executable name (optional)"
+    echo "  -v, --verbose  Enable verbose output"
+    echo ""
+    echo "Description:"
+    echo "  Compiles a .nym file using the NymyaLang compiler (nymyac)"
+    echo "  and runs the resulting executable in a temporary directory."
+    echo "  Ensures proper architecture compatibility and cross-platform execution."
+}
+
+# Default values
+VERBOSE=false
+OUTPUT_NAME=""
+SOURCE_FILE=""
+
+# Function to detect the current architecture
+get_architecture() {
+    case "$(uname -m)" in
+        x86_64)
+            echo "x86_64-unknown-linux-gnu"
+            ;;
+        aarch64|arm64)
+            echo "aarch64-unknown-linux-gnu"
+            ;;
+        riscv64*)
+            echo "riscv64gc-unknown-linux-gnu"
+            ;;
+        *)
+            # Fallback to a generic target
+            echo "$(uname -m)-unknown-linux-gnu"
+            ;;
+    esac
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -o|--output)
+            OUTPUT_NAME="$2"
+            shift 2
+            ;;
+        -*)
+            echo -e "${RED}Error: Unknown option $1${NC}" >&2
+            show_help
+            exit 1
+            ;;
+        *)
+            if [ -z "$SOURCE_FILE" ]; then
+                SOURCE_FILE="$1"
+            else
+                echo -e "${RED}Error: Too many arguments. Only one source file is allowed.${NC}" >&2
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+# Check if source file is provided
+if [ -z "$SOURCE_FILE" ]; then
+    echo -e "${RED}Error: No source file provided.${NC}" >&2
+    show_help
+    exit 1
+fi
+
+# Check if source file exists
+if [ ! -f "$SOURCE_FILE" ]; then
+    echo -e "${RED}Error: Source file '$SOURCE_FILE' does not exist.${NC}" >&2
+    exit 1
+fi
+
+# Validate file extension
+if [[ ! "$SOURCE_FILE" =~ \.nym$ ]]; then
+    echo -e "${RED}Error: Source file must have .nym extension.${NC}" >&2
+    exit 1
+fi
+
+# Determine output name
+if [ -z "$OUTPUT_NAME" ]; then
+    OUTPUT_NAME=$(basename "$SOURCE_FILE" .nym)
+fi
+
+# Create temporary directory
+TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'nymyatemp')
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to create temporary directory.${NC}" >&2
+    exit 1
+fi
+
+# Cleanup function to remove temp directory on exit
+cleanup() {
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${YELLOW}Cleaning up temporary directory: $TEMP_DIR${NC}"
+    fi
+    rm -rf "$TEMP_DIR"
+}
+trap cleanup EXIT
+
+if [ "$VERBOSE" = true ]; then
+    echo -e "${BLUE}Using temporary directory: $TEMP_DIR${NC}"
+    echo -e "${BLUE}Detected architecture: $(get_architecture)${NC}"
+fi
+
+# Change to temporary directory
+cd "$TEMP_DIR" || exit 1
+
+# Copy source file to temp directory
+if [ -f "$SOURCE_FILE" ]; then
+    ABSOLUTE_SOURCE_PATH=$(realpath "$SOURCE_FILE")
+    cp "$ABSOLUTE_SOURCE_PATH" "./$(basename "$SOURCE_FILE")"
+else
+    echo -e "${RED}Error: Source file does not exist: $SOURCE_FILE${NC}" >&2
+    exit 1
+fi
+
+# Compile the source file using nymyac with proper target architecture
+if [ "$VERBOSE" = true ]; then
+    echo -e "${BLUE}Compiling $SOURCE_FILE for $(get_architecture)...${NC}"
+fi
+
+# Execute the compilation targeting the correct architecture
+COMPILER_OUTPUT=$(nymyac "./$(basename "$SOURCE_FILE")" -o "$OUTPUT_NAME" 2>&1)
+COMPILER_EXIT_CODE=$?
+
+if [ $COMPILER_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}Compilation failed:${NC}"
+    echo "$COMPILER_OUTPUT"
+    exit 1
+elif [ "$VERBOSE" = true ]; then
+    echo -e "${GREEN}Compilation successful!${NC}"
+fi
+
+# Verify the executable was created
+if [ ! -f "$OUTPUT_NAME" ]; then
+    echo -e "${RED}Error: Compilation succeeded but executable '$OUTPUT_NAME' was not created.${NC}" >&2
+    exit 1
+fi
+
+# Make the executable readable/writeable for security
+chmod +x "$OUTPUT_NAME"
+
+# Check if the file is an executable and determine how to run it
+FILE_TYPE=$(file "$OUTPUT_NAME" 2>/dev/null || echo "unknown")
+
+if [[ "$FILE_TYPE" == *"ELF"*"executable"* ]]; then
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${BLUE}Detected ELF executable: $FILE_TYPE${NC}"
+    fi
+
+    # Check if the architecture matches or if we need to emulate
+    if [[ "$FILE_TYPE" == *"x86-64"* ]]; then
+        if [ "$(uname -m)" = "x86_64" ]; then
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Try using QEMU if available for cross-architecture execution
+            if command -v qemu-x86_64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-x86_64-static ./$OUTPUT_NAME"
+            elif command -v qemu-x86_64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-x86_64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is x86_64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    elif [[ "$FILE_TYPE" == *"aarch64"* ]] || [[ "$FILE_TYPE" == *"ARM aarch64"* ]]; then
+        if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Try using QEMU if available for cross-architecture execution
+            if command -v qemu-aarch64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-aarch64-static ./$OUTPUT_NAME"
+            elif command -v qemu-aarch64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-aarch64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is aarch64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    elif [[ "$FILE_TYPE" == *"riscv64"* ]]; then
+        if [ "$(uname -m)" = "riscv64"* ]; then
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Try using QEMU if available for cross-architecture execution
+            if command -v qemu-riscv64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-riscv64-static ./$OUTPUT_NAME"
+            elif command -v qemu-riscv64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-riscv64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is riscv64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    else
+        # Generic case - try direct execution first
+        EXEC_CMD="./$OUTPUT_NAME"
+    fi
+else
+    # If not an ELF executable, treat as a different format (could be C source, etc)
+    echo -e "${RED}Error: Generated file is not a recognized executable format: $FILE_TYPE${NC}"
+    exit 1
+fi
+
+if [ "$VERBOSE" = true ]; then
+    echo -e "${BLUE}Executing with command: $EXEC_CMD${NC}"
+fi
+
+# Execute the compiled program with proper architecture handling
+if [ -f "$OUTPUT_NAME" ]; then
+    # Check the architecture of the generated executable
+    FILE_TYPE=$(file "$OUTPUT_NAME" 2>/dev/null || echo "not found")
+
+    if [[ "$FILE_TYPE" == *"aarch64"* ]] || [[ "$FILE_TYPE" == *"ARM aarch64"* ]]; then
+        if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then
+            # Native execution on ARM64
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Cross-execution - use QEMU if available
+            if command -v qemu-aarch64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-aarch64-static ./$OUTPUT_NAME"
+            elif command -v qemu-aarch64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-aarch64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is aarch64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    elif [[ "$FILE_TYPE" == *"x86-64"* ]] || [[ "$FILE_TYPE" == *"x86_64"* ]]; then
+        if [ "$(uname -m)" = "x86_64" ]; then
+            # Native execution on x86_64
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Cross-execution - use QEMU if available
+            if command -v qemu-x86_64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-x86_64-static ./$OUTPUT_NAME"
+            elif command -v qemu-x86_64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-x86_64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is x86_64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    elif [[ "$FILE_TYPE" == *"riscv64gc"* ]]; then
+        if [[ "$(uname -m)" == *"riscv64"* ]]; then
+            # Native execution on RISC-V
+            EXEC_CMD="./$OUTPUT_NAME"
+        else
+            # Cross-execution - use QEMU if available
+            if command -v qemu-riscv64-static >/dev/null 2>&1; then
+                EXEC_CMD="qemu-riscv64-static ./$OUTPUT_NAME"
+            elif command -v qemu-riscv64 >/dev/null 2>&1; then
+                EXEC_CMD="qemu-riscv64 ./$OUTPUT_NAME"
+            else
+                echo -e "${YELLOW}Warning: Binary is riscv64 but host is $(uname -m). Attempting direct execution...${NC}"
+                EXEC_CMD="./$OUTPUT_NAME"
+            fi
+        fi
+    else
+        # For unknown architectures, try direct execution
+        EXEC_CMD="./$OUTPUT_NAME"
+    fi
+
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${BLUE}Executing with command: $EXEC_CMD${NC}"
+        echo -e "${BLUE}File type: $FILE_TYPE${NC}"
+    fi
+
+    # Actually execute the command
+    eval $EXEC_CMD
+    EXECUTION_EXIT_CODE=$?
+else
+    echo -e "${RED}Error: Expected executable $OUTPUT_NAME was not created${NC}" >&2
+    exit 1
+fi
+
+if [ $EXECUTION_EXIT_CODE -ne 0 ]; then
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${YELLOW}Program exited with code: $EXECUTION_EXIT_CODE${NC}"
+    fi
+    exit $EXECUTION_EXIT_CODE
+elif [ "$VERBOSE" = true ]; then
+    echo -e "${GREEN}Execution completed successfully!${NC}"
+fi
+
+exit 0

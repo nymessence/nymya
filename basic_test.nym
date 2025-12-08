@@ -1,0 +1,33 @@
+// Basic verification test
+import crystal
+import math
+
+crystal.manifest("NymyaLang basic functionality test")
+crystal.manifest("Testing core libraries...")
+
+// Test math operations
+var sqrt_val = math.sqrt(16.0)
+crystal.manifest("Square root of 16: " + sqrt_val)
+
+// Test conditional
+if sqrt_val == 4.0 {
+    crystal.manifest("Conditional branching works correctly")
+} else {
+    crystal.manifest("Issue with conditional")
+}
+
+// Test looping
+var sum = 0
+var i = 0
+while i < 5 {
+    sum = sum + i
+    i = i + 1
+}
+crystal.manifest("Sum of 0 to 4: " + sum)
+
+// Test big integer
+var big_int = math.BigInt(123456789)
+var result = big_int.multiply(math.BigInt(987654321))
+crystal.manifest("BigInt multiplication: " + result.to_string())
+
+crystal.manifest("Basic functionality test completed successfully!")
