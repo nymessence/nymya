@@ -8,8 +8,9 @@ echo "=== NymyaLang Package Build System ==="
 echo "Building .deb packages for multiple architectures: amd64, arm64, armhf"
 echo ""
 
-VERSION=${1:-"0.1.5"}
+VERSION=${1:-"0.2.0"}
 DEV_STAGE="alpha"
+REVISION="2"
 BUILD_DIR="nymya-build-${VERSION}"
 
 # Create root build directory
@@ -34,7 +35,7 @@ build_for_arch() {
     # Create control file specific to this architecture
     cat > "${pkg_dir}/DEBIAN/control" << EOF
 Package: nymya
-Version: ${VERSION}-${DEV_STAGE}
+Version: ${VERSION}-${DEV_STAGE}~${REVISION}
 Section: devel
 Priority: optional
 Architecture: ${arch}
