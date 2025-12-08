@@ -99,7 +99,7 @@ func main() -> Void {
     
     // Test 5: Resize image
     crystal.manifest("\n✅ Test 5: Resizing image")
-    var resized_icon = image.image_basic.resize_image(icon, 64, 64)  // Scale up
+    var resized_icon = image.image_basic.resize_image(icon, 64, 64)  // Scale up is in image_basic
     crystal.manifest("   Resized icon from 32x32 to 64x64")
     
     // Test 6: Display ASCII art
