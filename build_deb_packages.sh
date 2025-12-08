@@ -8,7 +8,7 @@ echo "=== NymyaLang Package Build System ==="
 echo "Building .deb packages for multiple architectures: amd64, arm64, armhf"
 echo ""
 
-VERSION=${1:-"0.1.2"}
+VERSION=${1:-"0.1.5"}
 DEV_STAGE="alpha"
 BUILD_DIR="nymya-build-${VERSION}"
 
