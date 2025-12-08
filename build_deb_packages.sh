@@ -144,6 +144,40 @@ func main() -> Void {
 }
 EOF
     
+    # Copy syntax highlighting files
+    if [ -d "syntax_highlighter" ]; then
+        mkdir -p "${pkg_dir}/usr/share/nymya/syntax_highlighter"
+        cp -r syntax_highlighter/* "${pkg_dir}/usr/share/nymya/syntax_highlighter/"
+
+        # Also install syntax highlighting in appropriate system locations
+        mkdir -p "${pkg_dir}/usr/share/vim/vimfiles/syntax"
+        mkdir -p "${pkg_dir}/usr/share/nano"
+        mkdir -p "${pkg_dir}/usr/share/gtksourceview-4/language-specs"
+        mkdir -p "${pkg_dir}/usr/share/highlight/langDefs"
+
+        # Copy to Vim syntax directory if available
+        if [ -f "syntax_highlighter/nym.vim" ]; then
+            cp "syntax_highlighter/nym.vim" "${pkg_dir}/usr/share/vim/vimfiles/syntax/"
+        fi
+
+        # Copy to Nano syntax directory if available
+        if [ -f "syntax_highlighter/nym.nanorc" ]; then
+            cp "syntax_highlighter/nym.nanorc" "${pkg_dir}/usr/share/nano/"
+        fi
+
+        # Copy to GTKSourceView language specs if available
+        if [ -f "syntax_highlighter/nymya.lang" ]; then
+            cp "syntax_highlighter/nymya.lang" "${pkg_dir}/usr/share/gtksourceview-4/language-specs/"
+        fi
+
+        # Copy to highlight language definitions if available
+        if [ -f "syntax_highlighter/nymya.xml" ]; then
+            cp "syntax_highlighter/nymya.xml" "${pkg_dir}/usr/share/highlight/langDefs/"
+        fi
+
+        echo "  Copied: syntax highlighting files"
+    fi
+
     # Documentation
     cat > "${pkg_dir}/usr/share/doc/nymya/README.txt" << EOF
 NymyaLang Programming Environment v${VERSION} (${arch})
@@ -151,6 +185,7 @@ NymyaLang Programming Environment v${VERSION} (${arch})
 Includes:
 - nymyac compiler
 - Nymya standard library
+- Syntax highlighting for editors
 - Examples and documentation
 
 Rita-Nora balance in computing.
