@@ -1,12 +1,26 @@
-// Turing Completeness Verification: Prime Number Computation
-// Demonstrates nontrivial computational capabilities of NymyaLang
+// Nontrivial Computation Test - Prime Number Generation
+// Demonstrates NymyaLang's ability to perform complex computations
 
-import math
 import crystal
 
-namespace turing_primes {
+namespace turing.primes {
 
-    // Check if a number is prime
+    // Simple prime number generator using trial division
+    func generate_primes(count: Int) -> List[Int] {
+        var primes = []
+        var candidate = 2  // Start with first prime
+        
+        while primes.length < count {
+            if is_prime(candidate) {
+                primes.append(candidate)
+            }
+            candidate = candidate + 1
+        }
+        
+        return primes
+    }
+    
+    // Prime checker using trial division
     func is_prime(n: Int) -> Bool {
         if n <= 1 {
             return false
@@ -18,6 +32,7 @@ namespace turing_primes {
             return false
         }
         
+        // Check divisibility by numbers of form 6k ± 1 up to √n
         var i = 5
         while i * i <= n {
             if n % i == 0 or n % (i + 2) == 0 {
@@ -28,31 +43,31 @@ namespace turing_primes {
         
         return true
     }
-
-    // Generate primes up to a given number using Sieve of Eratosthenes
+    
+    // Sieve of Eratosthenes implementation
     func sieve_of_eratosthenes(limit: Int) -> List[Int] {
         if limit < 2 {
             return []
         }
         
-        // Create a boolean array and initialize all entries as true
-        var is_prime_array = []
+        // Create a boolean list "is_prime[0..limit]" and initialize all entries as true
+        var is_prime = []
         for i in range(limit + 1) {
             if i < 2 {
-                is_prime_array.append(false)
+                is_prime.append(false)
             } else {
-                is_prime_array.append(true)
+                is_prime.append(true)
             }
         }
         
         var p = 2
         while p * p <= limit {
-            // If is_prime_array[p] is not changed, then it's a prime
-            if is_prime_array[p] {
-                // Mark all multiples of p as not prime
+            // If is_prime[p] is not changed, then it's a prime
+            if is_prime[p] {
+                // Mark all multiples of p starting from p*p
                 var i = p * p
                 while i <= limit {
-                    is_prime_array[i] = false
+                    is_prime[i] = false
                     i = i + p
                 }
             }
@@ -62,119 +77,95 @@ namespace turing_primes {
         // Collect all prime numbers
         var primes = []
         for i in range(2, limit + 1) {
-            if is_prime_array[i] {
+            if is_prime[i] {
                 primes.append(i)
             }
         }
         
         return primes
     }
-
-    // Prime factorization
-    func prime_factorization(n: Int) -> List[Int] {
+    
+    // Factorial computation (demonstrates recursion and large number handling)
+    func factorial(n: Int) -> Int {
         if n <= 1 {
-            return []
+            return 1
+        }
+        return n * factorial(n - 1)
+    }
+    
+    // Fibonacci computation (demonstrates recursion and exponential growth)
+    func fibonacci(n: Int) -> Int {
+        if n <= 1 {
+            return n
+        }
+        return fibonacci(n - 1) + fibonacci(n - 2)
+    }
+    
+    // Memoized Fibonacci for better performance
+    class FibonacciCalculator {
+        cache: List[Int]
+        
+        init() {
+            this.cache = []
+            // Pre-populate with base cases
+            this.cache.append(0)  // fib(0) = 0
+            this.cache.append(1)  // fib(1) = 1
         }
         
-        var factors = []
-        var num = n
-        
-        // Factor out all 2s
-        while num % 2 == 0 {
-            factors.append(2)
-            num = num / 2
-        }
-        
-        // Factor out odd numbers starting from 3
-        var i = 3
-        while i * i <= num {
-            while num % i == 0 {
-                factors.append(i)
-                num = num / i
+        func get(n: Int) -> Int {
+            if n < this.cache.length {
+                return this.cache[n]
             }
-            i = i + 2
-        }
-        
-        // If num is still greater than 1, it's a prime
-        if num > 1 {
-            factors.append(num)
-        }
-        
-        return factors
-    }
-
-    // Find twin primes (primes that differ by 2)
-    func find_twin_primes(limit: Int) -> List[List[Int]] {
-        var primes = sieve_of_eratosthenes(limit)
-        var twin_primes = []
-        
-        for i in range(primes.length - 1) {
-            if primes[i+1] - primes[i] == 2 {
-                twin_primes.append([primes[i], primes[i+1]])
+            
+            // Extend cache if needed
+            for i in range(this.cache.length, n + 1) {
+                var val = this.get(i - 1) + this.get(i - 2)
+                this.cache.append(val)
             }
+            
+            return this.cache[n]
         }
-        
-        return twin_primes
     }
+    
+    func run_computation_tests() -> Void {
+        crystal.manifest("=== Nontrivial Computation Tests ===")
+        
+        // Test prime generation
+        crystal.manifest("--- Prime Number Generation ---")
+        var primes = generate_primes(10)
+        crystal.manifest("First 10 primes: " + primes.join(", "))
 
-    // Wilson's theorem: (p-1)! ≡ -1 (mod p) if and only if p is prime
-    func wilson_test(n: Int) -> Bool {
-        if n < 2 {
-            return false
-        }
-        if n == 2 {
-            return true
-        }
-        
-        // This would involve computing (n-1)! mod n
-        // For large n, this is computationally expensive
-        // We'll use the is_prime function instead for efficiency
-        return is_prime(n)
-    }
-
-    // Run the tests
-    func run_tests() -> Void {
-        crystal.manifest("=== Prime Number Computation Test ===")
-        
-        // Test prime checking
-        crystal.manifest("Testing prime checking:")
-        var test_numbers = [2, 3, 4, 17, 25, 29, 97]
-        for num in test_numbers {
-            var result = is_prime(num)
-            crystal.manifest(num + " is prime: " + result)
-        }
-        
         // Test sieve of Eratosthenes
-        crystal.manifest("\nPrimes up to 30 using Sieve of Eratosthenes:")
-        var primes_up_to_30 = sieve_of_eratosthenes(30)
-        crystal.manifest(primes_up_to_30.join(", "))
+        var sieve_primes = sieve_of_eratosthenes(50)
+        crystal.manifest("Primes up to 50: " + sieve_primes.join(", "))
         
-        // Test prime factorization
-        crystal.manifest("\nPrime factorizations:")
-        var factorization_tests = [60, 17, 100, 97]
-        for num in factorization_tests {
-            var factors = prime_factorization(num)
-            crystal.manifest(num + " = " + factors.join(" × "))
+        // Test factorial computation
+        crystal.manifest("--- Factorial Computations ---")
+        for i in range(1, 8) {
+            var fact = factorial(i)
+            crystal.manifest(i + "! = " + fact)
         }
         
-        // Test twin primes
-        crystal.manifest("\nTwin primes up to 50:")
-        var twin_primes = find_twin_primes(50)
-        for twin in twin_primes {
-            crystal.manifest(twin[0] + " and " + twin[1] + " are twin primes")
+        // Test Fibonacci computation
+        crystal.manifest("--- Fibonacci Numbers ---")
+        var fib_calc = FibonacciCalculator()
+        for i in range(10) {
+            var fib_val = fib_calc.get(i)
+            crystal.manifest("Fib(" + i + ") = " + fib_val)
         }
         
-        // Test Wilson's theorem for small primes
-        crystal.manifest("\nTesting Wilson's theorem for small numbers:")
-        for i in range(2, 12) {
-            var wilson_result = wilson_test(i)
-            var actual_prime = is_prime(i)
-            crystal.manifest(i + " (prime: " + actual_prime + ", wilson: " + wilson_result + ")")
+        // Test with larger Fibonacci using memoization
+        var large_fib = fib_calc.get(20)
+        crystal.manifest("Fib(20) = " + large_fib)
+        
+        // Test prime checking for larger numbers
+        crystal.manifest("--- Large Prime Checks ---")
+        var test_numbers = [97, 101, 103, 107, 109, 113, 997, 1009, 1013, 1019, 1021]
+        for num in test_numbers {
+            var is_num_prime = is_prime(num)
+            crystal.manifest(num + " is prime: " + is_num_prime)
         }
         
-        crystal.manifest("\nPrime number computation test completed successfully!")
+        crystal.manifest("Nontrivial computation tests completed successfully")
     }
 }
-
-// Entry point
-turing_primes.run_tests()

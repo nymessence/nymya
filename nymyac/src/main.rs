@@ -800,31 +800,54 @@ fn compile_file(input_file: &str, output_name: &Option<String>) {
         Ok(ast) => {
             println!("Successfully parsed AST with {} statements", ast.statements.len());
             
-            // Generate intermediate representation
-            let ir = generate_ir(ast);
-
-            // Generate target code
-            let target_code = generate_target(ir);
+            // Generate target code directly from AST
+            let cpp_code = generate_target(ast);
 
             // Write output
             let output_filename_str;
             let output_filename = if let Some(name) = output_name {
                 name.as_str()
             } else {
-                // Default output: replace .nym with executable extension
+                // Default output: replace .nym with .cpp extension for generated code
                 let base_name = input_file.trim_end_matches(".nym");
-                output_filename_str = if cfg!(windows) {
-                    format!("{}.exe", base_name)
-                } else {
-                    base_name.to_string()
-                };
+                output_filename_str = format!("{}.cpp", base_name);
                 output_filename_str.as_str()
             };
 
-            fs::write(output_filename, target_code)
+            fs::write(output_filename, cpp_code)
                 .expect("Should have been able to write the output file");
 
-            println!("Compiled successfully to: {}", output_filename);
+            // Compile the generated C++ code to executable
+            let exe_filename = if cfg!(windows) {
+                format!("{}.exe", input_file.trim_end_matches(".nym"))
+            } else {
+                input_file.trim_end_matches(".nym").to_string()
+            };
+
+            // Compile using g++
+            use std::process::Command;
+            let compile_result = Command::new("g++")
+                .arg(output_filename)
+                .arg("-o")
+                .arg(&exe_filename)
+                .arg("-std=c++17")
+                .output();
+
+            match compile_result {
+                Ok(output) => {
+                    if output.status.success() {
+                        println!("Compiled successfully to: {}", exe_filename);
+                    } else {
+                        eprintln!("Compilation error:");
+                        eprintln!("{}", String::from_utf8_lossy(&output.stderr).to_string());
+                        std::process::exit(1);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Failed to run g++: {}. Creating only .cpp file.", e);
+                    println!("Generated C++ code saved to: {}", output_filename);
+                }
+            }
         },
         Err(error) => {
             eprintln!("Parse error: {}", error);
@@ -832,14 +855,360 @@ fn compile_file(input_file: &str, output_name: &Option<String>) {
     }
 }
 
-// IR generator
+// IR generator - kept for compatibility but not used in new implementation
 fn generate_ir(ast: AST) -> String {
     // For now, just return a representation of the AST
     format!("IR: {:?}", ast.statements.len())
 }
 
-// Target code generator
-fn generate_target(ir: String) -> String {
-    // For now, return a simple C++ stub
-    format!("#include <iostream>\n\nint main() {{\n    std::cout << \"Hello from NymyaLang! AST has statements\" << std::endl;\n    return 0;\n}}\n\n// Generated from: {}", ir)
+// Enhanced target code generator - generates C++ code from AST
+fn generate_target(ir: AST) -> String {
+    // Generate a proper C++ program based on the actual AST structure
+    let header = r#"/*
+ * NymyaLang to C++ generated code
+ */
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <cmath>
+#include <complex>
+#include <stdexcept>
+#include <sstream>
+
+// Basic types and utility functions
+typedef long long Int;
+typedef double Float;
+typedef bool Bool;
+typedef std::string String;
+typedef std::vector<double> List;
+
+// BigInt implementation using primitive integers (for now)
+class BigInt {
+private:
+    long long value;
+public:
+    BigInt(long long v) : value(v) {}
+    BigInt operator+(const BigInt& other) const { return BigInt(value + other.value); }
+    BigInt operator-(const BigInt& other) const { return BigInt(value - other.value); }
+    BigInt operator*(const BigInt& other) const { return BigInt(value * other.value); }
+    BigInt operator/(const BigInt& other) const {
+        if (other.value == 0) throw std::runtime_error("Division by zero");
+        return BigInt(value / other.value);
+    }
+    BigInt operator%(const BigInt& other) const {
+        if (other.value == 0) throw std::runtime_error("Modulo by zero");
+        return BigInt(value % other.value);
+    }
+    friend std::ostream& operator<<(std::ostream& os, const BigInt& bi) {
+        os << bi.value;
+        return os;
+    }
+    long long get_value() const { return value; }
+};
+
+// Complex number implementation
+class Complex {
+private:
+    double real, imag;
+public:
+    Complex(double r = 0, double i = 0) : real(r), imag(i) {}
+    Complex operator+(const Complex& other) const { return Complex(real + other.real, imag + other.imag); }
+    Complex operator-(const Complex& other) const { return Complex(real - other.real, imag - other.imag); }
+    Complex operator*(const Complex& other) const {
+        return Complex(real * other.real - imag * other.imag,
+                      real * other.imag + imag * other.real);
+    }
+    Complex operator/(const Complex& other) const {
+        double denom = other.real * other.real + other.imag * other.imag;
+        if (denom == 0) throw std::runtime_error("Division by complex zero");
+        return Complex((real * other.real + imag * other.imag) / denom,
+                      (imag * other.real - real * other.imag) / denom);
+    }
+    double magnitude() const { return std::sqrt(real * real + imag * imag); }
+    double phase() const { return std::atan2(imag, real); }
+    Complex conjugate() const { return Complex(real, -imag); }
+    friend std::ostream& operator<<(std::ostream& os, const Complex& c) {
+        os << c.real;
+        if (c.imag >= 0) os << "+";
+        os << c.imag << "i";
+        return os;
+    }
+};
+
+// Vector implementations
+class Vec2 {
+public:
+    Float x, y;
+    Vec2(Float x_val, Float y_val) : x(x_val), y(y_val) {}
+    Float magnitude() const { return std::sqrt(x*x + y*y); }
+    Vec2 normalize() const {
+        Float mag = magnitude();
+        if (mag == 0) return Vec2(0, 0);
+        return Vec2(x/mag, y/mag);
+    }
+    Vec2 operator+(const Vec2& other) const { return Vec2(x + other.x, y + other.y); }
+    Vec2 operator-(const Vec2& other) const { return Vec2(x - other.x, y - other.y); }
+    Float dot(const Vec2& other) const { return x*other.x + y*other.y; }
+};
+
+class Vec3 {
+public:
+    Float x, y, z;
+    Vec3(Float x_val, Float y_val, Float z_val) : x(x_val), y(y_val), z(z_val) {}
+    Float magnitude() const { return std::sqrt(x*x + y*y + z*z); }
+    Vec3 normalize() const {
+        Float mag = magnitude();
+        if (mag == 0) return Vec3(0, 0, 0);
+        return Vec3(x/mag, y/mag, z/mag);
+    }
+    Vec3 operator+(const Vec3& other) const { return Vec3(x + other.x, y + other.y, z + other.z); }
+    Vec3 operator-(const Vec3& other) const { return Vec3(x - other.x, y - other.y, z - other.z); }
+    Float dot(const Vec3& other) const { return x*other.x + y*other.y + z*other.z; }
+    Vec3 cross(const Vec3& other) const {
+        return Vec3(y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x);
+    }
+};
+
+// Math utilities
+namespace math {
+    Float abs(Float x) { return x < 0 ? -x : x; }
+    Int abs_int(Int x) { return x < 0 ? -x : x; }
+    Float min(Float a, Float b) { return a < b ? a : b; }
+    Float max(Float a, Float b) { return a > b ? a : b; }
+    Int min_int(Int a, Int b) { return a < b ? a : b; }
+    Int max_int(Int a, Int b) { return a > b ? a : b; }
+    Float clamp(Float value, Float min_val, Float max_val) {
+        return math::min(math::max(value, min_val), max_val);
+    }
+    Float sign(Float x) { return x > 0 ? 1.0 : (x < 0 ? -1.0 : 0.0); }
+
+    // Trigonometric functions
+    Float sin(Float x) { return std::sin(x); }
+    Float cos(Float x) { return std::cos(x); }
+    Float tan(Float x) { return std::tan(x); }
+    Float asin(Float x) { return std::asin(x); }
+    Float acos(Float x) { return std::acos(x); }
+    Float atan(Float x) { return std::atan(x); }
+    Float atan2(Float y, Float x) { return std::atan2(y, x); }
+
+    // Hyperbolic functions
+    Float sinh(Float x) { return std::sinh(x); }
+    Float cosh(Float x) { return std::cosh(x); }
+    Float tanh(Float x) { return std::tanh(x); }
+
+    // Exponential/logarithmic
+    Float sqrt(Float x) { return std::sqrt(x); }
+    Float cbrt(Float x) { return std::cbrt(x); }
+    Float pow(Float base, Float exp) { return std::pow(base, exp); }
+    Float exp(Float x) { return std::exp(x); }
+    Float exp2(Float x) { return std::exp2(x); }
+    Float log(Float x) { return std::log(x); }
+    Float log2(Float x) { return std::log2(x); }
+    Float log10(Float x) { return std::log10(x); }
+    Float log1p(Float x) { return std::log1p(x); }
+
+    // Rounding functions
+    Float ceil(Float x) { return std::ceil(x); }
+    Float floor(Float x) { return std::floor(x); }
+    Float round(Float x) { return std::round(x); }
+    Float trunc(Float x) { return std::trunc(x); }
+
+    // Constants
+    const Float PI = M_PI;
+    const Float E = M_E;
+    const Float TAU = 2 * M_PI;
+    const Float PHI = 1.618033988749895;
+    const Float SQRT2 = 1.4142135623730951;
+    const Float SQRT3 = 1.7320508075688772;
+    const Float INV_SQRT2 = 0.7071067811865476;
+
+    // Integer power function
+    Int pow_int(Int base, Int exp) {
+        if (exp <= 0) return 1;
+        Int result = 1;
+        Int b = base;
+        Int e = exp;
+        while (e > 0) {
+            if (e % 2 == 1) result *= b;
+            b *= b;
+            e /= 2;
+        }
+        return result;
+    }
+
+    // GCD function
+    Int gcd(Int a, Int b) {
+        a = abs_int(a);
+        b = abs_int(b);
+        while (b != 0) {
+            Int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+}
+
+// Crystal utilities (console output)
+namespace crystal {
+    void manifest(const std::string& msg) {
+        std::cout << msg << std::endl;
+    }
+
+    void print(const std::string& msg) {
+        std::cout << msg;
+    }
+}
+
+// Low-level utilities
+namespace lowlevel {
+    namespace bitwise {
+        Int and_op(Int a, Int b) { return a & b; }
+        Int or_op(Int a, Int b) { return a | b; }
+        Int xor_op(Int a, Int b) { return a ^ b; }
+        Int not_op(Int a) { return ~a; }
+        Int left_shift(Int a, Int b) { return a << b; }
+        Int right_shift(Int a, Int b) { return a >> b; }
+    }
+}
+
+// Conversion utilities
+namespace conversions {
+    String int_to_string(Int val) {
+        return std::to_string(val);
+    }
+
+    String float_to_string(Float val) {
+        return std::to_string(val);
+    }
+
+    String bool_to_string(Bool val) {
+        return val ? "true" : "false";
+    }
+}
+
+// Main program entry point
+int main() {
+    try {
+        crystal::manifest("NymyaLang runtime initialized");
+
+"#;
+
+    let footer = r#"
+        crystal::manifest("Program execution completed");
+    } catch (const std::exception& e) {
+        std::cerr << "Runtime error: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+"#;
+
+    // Convert AST statements to C++ code
+    let mut statements_code = String::new();
+    for stmt in ir.statements {
+        statements_code.push_str(&ast_to_cpp(&stmt));
+        statements_code.push('\n');
+    }
+
+    format!("{}{}{}", header, statements_code, footer)
+}
+
+// Convert AST statement to C++ code
+fn ast_to_cpp(stmt: &Statement) -> String {
+    match stmt {
+        Statement::Expression(expr) => format!("        {};", expression_to_cpp(expr)),
+        Statement::VariableDeclaration { name, value } => {
+            format!("        auto {} = {};", name, expression_to_cpp(value))
+        },
+        Statement::Assignment { variable, value } => {
+            format!("        {} = {};", variable, expression_to_cpp(value))
+        },
+        Statement::If { condition, then_branch, else_branch } => {
+            let cond_cpp = expression_to_cpp(condition);
+            let mut then_cpp = String::new();
+            for stmt in then_branch {
+                then_cpp.push_str(&format!("            {}\n", ast_to_cpp(stmt).trim()));
+            }
+
+            if let Some(else_stmts) = else_branch {
+                let mut else_cpp = String::new();
+                for stmt in else_stmts {
+                    else_cpp.push_str(&format!("            {}\n", ast_to_cpp(stmt).trim()));
+                }
+                format!(
+                    r#"        if ({}) {{
+{}
+        }} else {{
+{}
+        }}"#,
+                    cond_cpp, then_cpp, else_cpp
+                )
+            } else {
+                format!(
+                    r#"        if ({}) {{
+{}
+        }}"#,
+                    cond_cpp, then_cpp
+                )
+            }
+        },
+        Statement::While { condition, body } => {
+            let cond_cpp = expression_to_cpp(condition);
+            let mut body_cpp = String::new();
+            for stmt in body {
+                body_cpp.push_str(&format!("            {}\n", ast_to_cpp(stmt).trim()));
+            }
+            format!(
+                r#"        while ({}) {{
+{}
+        }}"#,
+                cond_cpp, body_cpp
+            )
+        },
+    }
+}
+
+// Convert AST expression to C++ code
+fn expression_to_cpp(expr: &Expression) -> String {
+    match expr {
+        Expression::Integer(val) => val.to_string(),
+        Expression::Float(val) => {
+            if val.fract() == 0.0 {
+                format!("{}.", val)  // Force float representation
+            } else {
+                val.to_string()
+            }
+        },
+        Expression::String(val) => format!("\"{}\"", val.escape_default()),
+        Expression::Boolean(val) => if *val { "true" } else { "false" }.to_string(),
+        Expression::Variable(name) => name.clone(),
+        Expression::BinaryOp { left, operator, right } => {
+            let left_cpp = expression_to_cpp(left);
+            let right_cpp = expression_to_cpp(right);
+
+            let op_str = match operator {
+                BinaryOperator::Add => "+",
+                BinaryOperator::Sub => "-",
+                BinaryOperator::Mul => "*",
+                BinaryOperator::Div => "/",
+                BinaryOperator::Eq => "==",
+                BinaryOperator::Ne => "!=",
+                BinaryOperator::Lt => "<",
+                BinaryOperator::Le => "<=",
+                BinaryOperator::Gt => ">",
+                BinaryOperator::Ge => ">=",
+                BinaryOperator::And => "&&",
+                BinaryOperator::Or => "||",
+            };
+
+            format!("({} {} {})", left_cpp, op_str, right_cpp)
+        },
+        Expression::FunctionCall { name, args } => {
+            let arg_strings: Vec<String> = args.iter().map(expression_to_cpp).collect();
+            format!("{}({})", name, arg_strings.join(", "))
+        },
+    }
 }

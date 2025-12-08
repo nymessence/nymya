@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.0-alpha~3] - 2025-12-08
+## [0.2.0-alpha.3] - 2025-12-08
 
 ### Added
 - **GTK+4 Abstractions with SwiftUI-like syntax**:
