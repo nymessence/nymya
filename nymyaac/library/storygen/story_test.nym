@@ -1,0 +1,459 @@
+#!/usr/bin/env nymyac
+// Story Generator Test for NymyaLang
+// story_test.nym
+
+import storygen.config
+import storygen.character_loader
+import storygen.response_generator
+import storygen.repitition_detector
+import storygen.scenario_adapter
+import storygen.scenario_progression
+import storygen.context_builder
+import storygen.utils
+import storygen.api_client
+import storygen.environmental_triggers
+import lowlevel.args
+import lowlevel.os
+import lowlevel.json
+import lowlevel.time
+import lowlevel.string
+
+// Initialize the configuration variables
+var API_KEY = None
+var BASE_URL = "https://api.llm7.io/v1"
+var MODEL_NAME = "glm-4.5-flash"
+var MAX_TURNS = 100
+var DELAY_SECONDS = 40
+var DEFAULT_SIMILARITY_THRESHOLD = 0.45
+var CRITICAL_REPETITION_THRESHOLD = 0.75
+var EMERGENCY_REPETITION_THRESHOLD = 0.9
+var MAX_ACTION_DESCRIPTIONS = 1
+
+func main() -> Void {
+    crystal.manifest("🚀 Starting Enhanced Character Conversation System (Anti-Repetition Edition)...")
+
+    // Parse command line arguments
+    var args = parse_arguments()
+    
+    // Validate and set API configuration
+    var api_key = validate_api_key(args)
+    storygen.config.set_api_config(api_key, args.get("api_endpoint", BASE_URL), args.get("model", MODEL_NAME))
+    
+    // Update global config
+    storygen.config.set_conversation_config(
+        args.get("max_turns", MAX_TURNS), 
+        args.get("delay", DELAY_SECONDS), 
+        args.get("similarity", DEFAULT_SIMILARITY_THRESHOLD)
+    )
+    storygen.config.set_thresholds(
+        args.get("critical_threshold", CRITICAL_REPETITION_THRESHOLD), 
+        args.get("emergency_threshold", EMERGENCY_REPETITION_THRESHOLD)
+    )
+    storygen.config.set_context_limits(
+        32000, 1024, 12288, 8198  // Using standard values
+    )
+    
+    // Validate files
+    validate_character_files(args)
+    
+    // Load characters
+    crystal.manifest("📖 Loading characters (adapting to ANY format)...")
+    var characters = []
+    for char_file in args["characters"] {
+        var char = storygen.character_loader.load_character_generic(char_file)
+        characters.append(char)
+        crystal.manifest("")
+    }
+    
+    // Validate minimum characters
+    if characters.length() < 2 {
+        crystal.manifest("❌ ERROR: At least 2 characters are required")
+        return
+    }
+    
+    crystal.manifest("=" * 80)
+    crystal.manifest("📋 CONVERSATION SETUP")
+    for i, char in enumerate(characters) {
+        var letter = chr(65 + i)  // Convert index to letter (A, B, C, ...)
+        crystal.manifest("  Character " + letter + ": " + char['name'])
+        crystal.manifest("    Private Agenda: " + char['private_agenda'])
+        crystal.manifest("    Voice: " + char['voice_analysis']['formality'] + ", " + char['voice_analysis']['style'])
+        if i < characters.length() - 1 {
+            crystal.manifest("")
+        }
+    }
+    
+    if args.contains("scenario") and args["scenario"] {
+        crystal.manifest("\n  Custom Scenario: " + args["scenario"])
+    }
+    crystal.manifest("=" * 80 + "\n")
+    
+    // Setup output
+    var character_names = [char['name'] for char in characters]
+    var output_file = setup_output_file(character_names, args.get("output", None))
+    crystal.manifest("💾 Output: " + output_file + "\n")
+    
+    // Initialize conversation
+    var history = []
+    var start_turn = 1
+    
+    if args.get("resume", None) and lowlevel.os.file_exists(args["resume"]) {
+        crystal.manifest("🔄 Loading conversation from " + args["resume"] + "...")
+        history = load_conversation_from_file(args["resume"])
+        var turn_offset = history.length() if history.length() > 0 else 0
+        crystal.manifest("✅ Loaded " + turn_offset + " turns from saved conversation")
+        
+        // Adjust start turn if specified
+        start_turn = max(args.get("start_turn", 1), turn_offset + 1)
+        crystal.manifest("📊 Starting from turn " + start_turn)
+    } else {
+        // Initialize conversation normally
+        var adapted_greeting = characters[0]["greeting"]
+        // Adapt the first character's greeting if a custom scenario is provided
+        if args.get("scenario", None) {
+            crystal.manifest("🔄 Adapting " + characters[0]['name'] + "'s greeting to scenario...")
+            adapted_greeting = storygen.scenario_adapter.adapt_character_message(characters[0], args["scenario"], 1)
+            crystal.manifest("✅ Adapted greeting generated")
+        }
+        
+        history = [{'name': characters[0]['name'], 'content': adapted_greeting}]
+        crystal.manifest("[TURN 1] " + characters[0]['name'] + ":")
+        crystal.manifest(adapted_greeting + "\n")
+        start_turn = 2  // Start from turn 2 since turn 1 is already loaded
+    }
+    
+    // Initialize scenario progressor
+    var scenario_progressor = None
+    if args.get("scenario", None) {
+        scenario_progressor = storygen.scenario_progression.ScenarioProgressor(args["scenario"])
+        crystal.manifest("🚀 Scenario progression initialized: " + scenario_progressor.get_current_stage_description())
+    }
+    
+    var current_char_index = 1 if history.length() == 0 else history.length() % characters.length()
+    var other_char_index = 0 if history.length() == 0 else (history.length() - 1) % characters.length()
+    
+    // Main conversation loop
+    for turn in range(start_turn, args.get("max_turns", MAX_TURNS) + 1) {
+        crystal.manifest("\n" + "=" * 80)
+        crystal.manifest("[TURN " + turn + "] " + characters[current_char_index]['name'])
+        crystal.manifest("=" * 80)
+        
+        try {
+            // Get current and other characters
+            var current_char = characters[current_char_index]
+            var other_char = characters[other_char_index]
+            
+            // Determine current scenario context (default to args.scenario or enhanced if progression exists)
+            var current_scenario = args.get("scenario", None)
+            if scenario_progressor {
+                // Always use the latest scenario context from progressor if available
+                current_scenario = scenario_progressor.get_scenario_context_for_stage()
+            }
+            
+            // Check for scenario progression
+            var scenario_progression_message = ""
+            if scenario_progressor {
+                scenario_progression_message = storygen.scenario_progression.check_scenario_progression(scenario_progressor, history, turn)
+                if scenario_progression_message {
+                    crystal.manifest("🚀 SCENARIO PROGRESSION: " + scenario_progression_message)
+                    // Add scenario progression to history as a narrative element
+                    history.append({'name': 'Narrator', 'content': scenario_progression_message})
+                    // Update the scenario context for this turn and for future turns
+                    current_scenario = scenario_progressor.get_scenario_context_for_stage()
+                    args["scenario"] = current_scenario  // Update the main scenario for future use
+                    crystal.manifest("📊 Updated scenario context: " + scenario_progressor.get_current_stage_description())
+            }
+            
+            // Extract lorebook entries based on scenario keywords
+            var lorebook_entries = []
+            if current_scenario {  // Use current_scenario which may be updated by progression
+                var extract_func = storygen.character_loader.extract_lorebook_entries
+                // Search for keywords in scenario that match character lorebooks
+                var scenario_keywords = current_scenario.to_lower().split(" ")
+                for char in characters {
+                    var entries = extract_func(char.get('raw_data', {}), history, 2)  // max_entries=2
+                    // Filter entries by scenario relevance
+                    var relevant_entries = []
+                    for entry in entries {
+                        if any_keyword_in_list(scenario_keywords, entry.to_lower(), 3) {  // keyword must be > 3 chars
+                            relevant_entries.append(entry)
+                        }
+                    }
+                    lorebook_entries.extend(relevant_entries[:1])  // Add at most 1 relevant entry per character
+                }
+            }
+            
+            var resp = storygen.response_generator.generate_response_adaptive(
+                current_char,
+                characters[other_char_index],  // other_char
+                history,
+                turn,
+                not args.get("no_environmental", False),  // enable_environmental
+                args.get("similarity", DEFAULT_SIMILARITY_THRESHOLD),
+                args.get("verbose", False),
+                current_scenario,
+                lorebook_entries if lorebook_entries.length() > 0 else None
+            )
+            
+            // Validate response
+            if not (resp is String) {
+                resp = resp.to_string()
+            }
+            if resp.strip().length() < 10 {
+                resp = generate_emergency_response(current_char, other_char, history, {}, turn)
+            }
+            
+            history.append({'name': current_char['name'], 'content': resp})
+            crystal.manifest(resp)
+            
+            // Switch characters (cycle through all characters)
+            other_char_index = current_char_index
+            current_char_index = (current_char_index + 1) % characters.length()
+            
+            // Delay before next turn
+            if turn < args.get("max_turns", MAX_TURNS) {
+                crystal.manifest("\n⏳ Waiting " + args.get("delay", DELAY_SECONDS) + " seconds...")
+                lowlevel.time.sleep(args.get("delay", DELAY_SECONDS))
+            }
+            
+        } catch KeyboardInterrupt {
+            crystal.manifest("\n⚠️  Interrupted by user. Saving...")
+            break
+        } catch e {
+            crystal.manifest("\n❌ Error on turn " + turn + ": " + e.to_string())
+            import traceback
+            traceback.print_exc()
+            
+            // Generate fallback response
+            var fallback_resp = generate_emergency_response(current_char, characters[other_char_index], history, {}, turn)
+            history.append({'name': current_char['name'], 'content': fallback_resp})
+            crystal.manifest(fallback_resp)
+
+            // Switch characters (cycle through all characters)
+            other_char_index = current_char_index
+            current_char_index = (current_char_index + 1) % characters.length()
+            continue
+    }
+    
+    // Save and analyze
+    save_conversation(history, output_file)
+    print_final_analysis(history, args.get("similarity", DEFAULT_SIMILARITY_THRESHOLD))
+}
+
+func parse_arguments() -> Dict {
+    // Parse command line arguments
+    var arg_dict = {}
+    var args = lowlevel.args.get_args()
+    
+    // Basic argument parsing - in a real implementation, this would be more sophisticated
+    // args should be in format like: script.nym file1.json file2.json --option value
+    var positional_args = []
+    var i = 0
+    
+    while i < args.length() {
+        var arg = args[i]
+        if arg.startswith("--") {
+            var option = arg[2:]  // Remove --
+            i = i + 1
+            if i < args.length() and not args[i].startswith("--") {
+                arg_dict[option] = args[i]
+            } else {
+                arg_dict[option] = True  // Flag without value
+                i = i - 1  // Reconsider this index
+            }
+        } else if arg.startswith("-") and arg.length() == 2 {
+            // Handle short options like -o
+            var option = arg[1:]  // Remove -
+            i = i + 1
+            if i < args.length() and not args[i].startswith("-") {
+                arg_dict[option] = args[i]
+            } else {
+                arg_dict[option] = True  // Flag without value
+                i = i - 1  // Reconsider this index
+            }
+        } else {
+            // Positional argument (character files)
+            positional_args.append(arg)
+        }
+        i = i + 1
+    }
+    
+    arg_dict["characters"] = positional_args[1:]  // All args after script name
+    
+    // Convert some string values to appropriate types
+    if arg_dict.contains("max_turns") { arg_dict["max_turns"] = int(arg_dict["max_turns"]) }
+    if arg_dict.contains("delay") { arg_dict["delay"] = int(arg_dict["delay"]) }
+    if arg_dict.contains("similarity") { arg_dict["similarity"] = float(arg_dict["similarity"]) }
+    if arg_dict.contains("start_turn") { arg_dict["start_turn"] = int(arg_dict["start_turn"]) }
+    if arg_dict.contains("emergency_threshold") { arg_dict["emergency_threshold"] = float(arg_dict["emergency_threshold"]) }
+    if arg_dict.contains("critical_threshold") { arg_dict["critical_threshold"] = float(arg_dict["critical_threshold"]) }
+    
+    // Set defaults for boolean flags if not present
+    if not arg_dict.contains("verbose") { arg_dict["verbose"] = False }
+    if not arg_dict.contains("no_environmental") { arg_dict["no_environmental"] = False }
+    
+    return arg_dict
+}
+
+func validate_api_key(args: Dict) -> String {
+    // Validate API key is set
+    var api_key = args.get("api_key", None) or lowlevel.os.get_env("AICHAT_API_KEY")
+    if not api_key {
+        crystal.manifest("❌ ERROR: AICHAT_API_KEY environment variable not set")
+        crystal.manifest("Set it with: export AICHAT_API_KEY='your-key-here'")
+        crystal.manifest("Or use --api-key parameter")
+        return ""
+    }
+    return api_key
+}
+
+func validate_character_files(args: Dict) -> Void {
+    // Validate character files exist
+    for char_file in args["characters"] {
+        if not lowlevel.os.file_exists(char_file) {
+            crystal.manifest("❌ ERROR: File not found: " + char_file)
+            crystal.manifest("\nLooking for available character files in current directory...")
+            var available_files = lowlevel.os.list_dir(".").filter(|f| f.endswith(".json") and not f.startswith("."))
+            if available_files.length() > 0 {
+                crystal.manifest("Available files:")
+                for f in available_files[:10] {
+                    crystal.manifest("  - " + f)
+                }
+                if available_files.length() > 10 {
+                    crystal.manifest("  ... and " + (available_files.length() - 10) + " more files")
+                }
+            }
+            return
+        }
+    }
+    crystal.manifest("✓ Files validated: " + args["characters"].length() + " characters loaded\n")
+}
+
+func load_conversation_from_file(resume_file: String) -> List[Dict] {
+    // Load conversation history from a JSON file
+    try {
+        var content = lowlevel.os.read_file(resume_file)
+        var data = lowlevel.json.parse_json(content)
+        
+        // Convert old format to new format if necessary
+        var history = []
+        for item in data {
+            if item is Dict {
+                if item.contains('name') and item.contains('content') {
+                    history.append({
+                        'name': item['name'],
+                        'content': item['content']
+                    })
+                } else if item.contains('character') and item.contains('message') {
+                    history.append({
+                        'name': item['character'],
+                        'content': item['message']
+                    })
+                }
+            }
+        }
+        return history
+    } catch e {
+        crystal.manifest("❌ Error loading conversation from " + resume_file + ": " + e.to_string())
+        return []
+    }
+}
+
+func setup_output_file(character_names: List[String], output_arg: String = None) -> String {
+    // Setup output filename
+    var output_file = ""
+    if output_arg {
+        output_file = output_arg
+    } else {
+        // Create a filename with all character names
+        var clean_names = [lowlevel.string.replace_all(name, ['<', '>', ':', '"', '/', '\\', '|', '?', '*', ' '], '_') for name in character_names]
+        output_file = clean_names.join("_&_") + "_conversation.json"
+    }
+    
+    // Sanitize filename
+    output_file = lowlevel.string.replace_all(output_file, ['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_')
+    return output_file
+}
+
+func save_conversation(history: List[Dict], output_file: String) -> Void {
+    // Save conversation history to JSON file
+    crystal.manifest("\n💾 Saving conversation...")
+    var json_data = []
+    for i, h in enumerate(history) {
+        if h is Dict and h.contains('name') and h.contains('content') {
+            json_data.append({
+                'turn': i + 1,
+                'name': h['name'],
+                'content': h['content']
+            })
+        }
+    }
+    
+    var json_str = lowlevel.json.stringify_json(json_data, indent=4)
+    lowlevel.os.write_file(output_file, json_str)
+    crystal.manifest("✅ Conversation saved to " + output_file)
+    crystal.manifest("📊 Total turns: " + history.length())
+}
+
+func print_final_analysis(history: List[Dict], similarity_threshold: Float) -> Void {
+    // Print final repetition analysis
+    var final_repetition = storygen.repitition_detector.detect_repetition_patterns(history, similarity_threshold)
+    crystal.manifest("\n📈 Final repetition analysis:")
+    crystal.manifest("  Overall repetition score: " + final_repetition.get('repetition_score', 0.0).to_string()[:4])
+    var issues = final_repetition.get('issues', [])
+    if issues.length() > 0 {
+        crystal.manifest("  Issues detected: " + ", ".join(issues[:3]))  // Show first 3 issues
+    }
+    var blocked_patterns = final_repetition.get('blocked_patterns', [])
+    if blocked_patterns.length() > 0 {
+        crystal.manifest("  Blocked patterns: " + blocked_patterns.length() + " patterns prevented")
+    }
+}
+
+func generate_emergency_response(current_char: Dict, other_char: Dict, history: List[Dict], 
+                               repetition_data: Dict, turn: Int) -> String {
+    // Generate an emergency response when API fails
+    var emergency_templates = [
+        "*" + current_char['name'] + " pauses, their expression shifting as a new thought emerges* Tell me, " + other_char['name'] + ", what brought you here today?",
+        "*" + current_char['name'] + " recalls a memory* You know, " + other_char['name'] + ", I once encountered something similar... *trails off thoughtfully*",
+        "*" + current_char['name'] + "'s gaze sharpens with sudden intensity* Wait. There's something you're not telling me, isn't there?",
+        "*Unexpectedly changes the subject* Forgive me, but I can't help wondering - what do you truly want from this conversation?",
+        "*" + current_char['name'] + " lets out a quiet laugh* This is strange. I feel like we're circling around something important without saying it directly.",
+        "*Leans forward with renewed curiosity* " + other_char['name'] + ", answer me this: if you could change one thing about your current situation, what would it be?",
+        "*" + current_char['name'] + "'s expression becomes thoughtful* I realize I've been talking without truly listening. What matters most to you in all of this?",
+        "*A distant sound draws their attention briefly before refocusing* Sorry, where were we? Actually, never mind that - tell me about yourself. The real you, not what you think I want to hear."
+    ]
+    
+    // Select based on turn number for variety
+    var template_index = (turn * 3) % emergency_templates.length()
+    var response = emergency_templates[template_index]
+    
+    // Add environmental element occasionally
+    if lowlevel.random.random() < 0.3 {
+        var env_additions = [
+            " *The atmosphere shifts subtly*",
+            " *A chill runs through the air*",
+            " *Light filters through differently now*",
+            " *Time seems to slow for a moment*"
+        ]
+        import lowlevel.random
+        response = response + lowlevel.random.choice(env_additions)
+    }
+    
+    return response
+}
+
+// Helper function to check if any keyword in a list is in a string
+func any_keyword_in_list(keywords: List[String], text: String, min_length: Int = 0) -> Bool {
+    for keyword in keywords {
+        if keyword.length() > min_length and keyword in text {
+            return True
+        }
+    }
+    return False
+}
+
+// Run main function if this file is executed directly
+if lowlevel.os.script_name() == "story_test.nym" {
+    main()
+}
