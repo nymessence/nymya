@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.2.0-alpha~3] - 2025-12-08
+
+### Added
+- **GTK+4 Abstractions with SwiftUI-like syntax**:
+  - Declarative window, button, layout, and input field components
+  - Vstack, HStack, ZStack, and Grid layout containers
+  - Quantum-aware components (QuantumVisualization, etc.)
+  - Mystical computing features (numerology displays, sacred geometry viewers)
+  - ChakraLayout and TachyonFieldView for mystical interfaces
+  - Documentation in docs/GUI_ABSTRACTIONS.md
+
+- **'nymya' executable with compilation system**:
+  - Compiles NymyaLang code via nymyac behind the scenes
+  - Saves compiled executables in hidden temp folder
+  - Provides seamless execution interface
+  - Temporary file management system
+
+- **Aya Nymya Test App**:
+  - Jupyter-like interface with Markdown, HTML, and NymyaLang blocks
+  - Syntax highlighting for NymyaLang
+  - Interactive execution via 'nymya' executable
+  - Sample content demonstrating numerology, sacred geometry, quantum modules
+
+- **Docker-based Testing and Debugging**:
+  - Automated GTK+4 compilation and execution testing
+  - Aya Nymya block execution with runtime error capture
+  - Temp folder execution verification
+  - JSONL logging system for test results
+
+### Changed
+- Introduced GUI library subsystem under nymyac/library/gui/
+- Enhanced symbolic mathematics integration with GUI components
+- Improved compiler toolchain with temporary execution support
+- Added comprehensive GUI documentation
+
 ## [0.2.0] - 2025-12-08
 
 ### Added

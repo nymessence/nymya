@@ -1,9 +1,39 @@
-# NymyaLang - Advanced AI/ML and Quantum Computing Platform (v0.2.0-alpha2)
+# NymyaLang - Advanced AI/ML and Quantum Computing Platform with GUI (v0.2.0-alpha~3)
 
-Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, and symbolic mathematics capabilities.
+Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, symbolic mathematics, and GUI capabilities.
 
 ## Core Philosophy
 Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita**) combined with ethical flow (**Nora**), following the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness.
+
+## New Features in v0.2.0-alpha~3
+
+### 1. GTK+4 Abstractions with SwiftUI-like Syntax
+- Declarative window, button, layout, and input field components
+- Vstack, HStack, ZStack, and Grid layout containers
+- Quantum-aware components (QuantumVisualization, etc.)
+- Mystical computing features (numerology displays, sacred geometry viewers)
+- ChakraLayout and TachyonFieldView for mystical interfaces
+- Comprehensive documentation in `docs/GUI_ABSTRACTIONS.md`
+
+### 2. 'nymya' Executable with Compilation System
+- Compiles NymyaLang code via nymyac behind the scenes
+- Saves compiled executables in hidden temp folder
+- Provides seamless execution interface
+- Temporary file management system
+
+### 3. Aya Nymya Test App - Jupyter-like Interface
+- Jupyter-like interface with blocks for Markdown, HTML, and NymyaLang
+- Syntax highlighting for NymyaLang
+- Interactive execution via 'nymya' executable
+- Sample content demonstrating numerology, sacred geometry, quantum modules
+
+### 4. Enhanced Symbolic Mathematics (from v0.2.0-alpha2)
+- Expanded Numerology Subsystem (`symbolic.numerology`)
+- Special Numbers Library (`symbolic.special`)
+- Prime Number Symbolism (`symbolic.primes`)
+- Sacred Geometry Mapping Engine (`symbolic.sacred_geometry`)
+- Repeating Number Classifier (`symbolic.repeating`)
+- Integration Engine (`symbolic.integration`)
 
 ## New Features in v0.2.0-alpha2
 
