@@ -62,20 +62,68 @@ Description: NymyaLang - A consciousness-integrated programming language
  This package includes the NymyaLang compiler and standard libraries.
 EOF
     
-    # Build or copy actual compiler binary
-    if [ -f "nymyac/target/release/nymyac" ]; then
-        # Use release build if available
-        cp "nymyac/target/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
-    elif [ -f "nymyac/target/debug/nymyac" ]; then
-        # Fallback to debug build
-        cp "nymyac/target/debug/nymyac" "${pkg_dir}/usr/bin/nymyac"
-    else
-        echo "Building the actual compiler binary..."
-        cd nymyac && cargo build --release && cd ..
-        cp "nymyac/target/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
-    fi
+    # Build actual compiler binary for the specific architecture
+    case "$arch" in
+        "amd64")
+            # For amd64 package, build for x86_64 target
+            TARGET="x86_64-unknown-linux-gnu"
+            echo "  Building for target: $TARGET"
+            if [ -d nymyac ]; then
+                cd nymyac && cargo build --target $TARGET --release && cd ..
+                if [ -f "nymyac/target/$TARGET/release/nymyac" ]; then
+                    cp "nymyac/target/$TARGET/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
+                else
+                    echo "Error: Binary not found at nymyac/target/$TARGET/release/nymyac"
+                    exit 1
+                fi
+            else
+                echo "Error: nymyac directory not found"
+                exit 1
+            fi
+            ;;
+        "arm64")
+            # Cross-compile for ARM64
+            TARGET="aarch64-unknown-linux-gnu"
+            echo "  Cross-compiling for target: $TARGET"
+            if [ -d nymyac ]; then
+                cd nymyac && cargo build --target $TARGET --release && cd ..
+                if [ -f "nymyac/target/$TARGET/release/nymyac" ]; then
+                    cp "nymyac/target/$TARGET/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
+                else
+                    echo "Error: Binary not found at nymyac/target/$TARGET/release/nymyac"
+                    exit 1
+                fi
+            else
+                echo "Error: nymyac directory not found"
+                exit 1
+            fi
+            ;;
+        "armhf")
+            # Cross-compile for ARMHF
+            TARGET="armv7-unknown-linux-gnueabihf"
+            echo "  Cross-compiling for target: $TARGET"
+            if [ -d nymyac ]; then
+                cd nymyac && cargo build --target $TARGET --release && cd ..
+                if [ -f "nymyac/target/$TARGET/release/nymyac" ]; then
+                    cp "nymyac/target/$TARGET/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
+                else
+                    echo "Error: Binary not found at nymyac/target/$TARGET/release/nymyac"
+                    exit 1
+                fi
+            else
+                echo "Error: nymyac directory not found"
+                exit 1
+            fi
+            ;;
+        *)
+            echo "Unsupported architecture: $arch"
+            exit 1
+            ;;
+    esac
+
+    # Ensure binary is executable
     chmod +x "${pkg_dir}/usr/bin/nymyac"
-    
+
     # Standard library directories
     mkdir -p "${pkg_dir}/usr/lib/nymya/math"
     mkdir -p "${pkg_dir}/usr/lib/nymya/ml"  

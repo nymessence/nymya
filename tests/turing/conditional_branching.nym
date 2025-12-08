@@ -1,10 +1,10 @@
-// Turing Completeness Verification: Conditional Branching
-// Demonstrates conditional execution capabilities of NymyaLang
+// Turing Completeness Verification: Conditional Branching Example
+// Demonstrates NymyaLang's conditional execution capabilities
 
-import math
 import crystal
+import math
 
-namespace turing_branching {
+namespace turing.conditional {
 
     // Function to test conditional branching
     func test_conditional(x: Int) -> String {
@@ -66,5 +66,4 @@ namespace turing_branching {
     }
 }
 
-// Entry point
-turing_branching.run_tests()
+turing.conditional.run_tests()

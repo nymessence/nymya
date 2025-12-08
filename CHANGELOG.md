@@ -1,9 +1,9 @@
 # Changelog
 
-## [0.2.0-alpha.3] - 2025-12-08
+## [0.2.0-alpha.5] - 2025-12-08
 
 ### Added
-- **GTK+4 Abstractions with SwiftUI-like syntax**:
+- **GTK+4 Abstractions with SwiftUI-like Syntax**:
   - Declarative window, button, layout, and input field components
   - Vstack, HStack, ZStack, and Grid layout containers
   - Quantum-aware components (QuantumVisualization, etc.)
@@ -15,27 +15,46 @@
   - Compiles NymyaLang code via nymyac behind the scenes
   - Saves compiled executables in hidden temp folder
   - Provides seamless execution interface
+  - Architecture detection with QEMU fallback for cross-platform compatibility
   - Temporary file management system
 
 - **Aya Nymya Test App**:
-  - Jupyter-like interface with Markdown, HTML, and NymyaLang blocks
+  - Jupyter-like interface with blocks for Markdown, HTML, and NymyaLang
   - Syntax highlighting for NymyaLang
   - Interactive execution via 'nymya' executable
   - Sample content demonstrating numerology, sacred geometry, quantum modules
 
-- **Docker-based Testing and Debugging**:
-  - Automated GTK+4 compilation and execution testing
-  - Aya Nymya block execution with runtime error capture
-  - Temp folder execution verification
-  - JSONL logging system for test results
+- **Turing Completeness Verification Programs**:
+  - Conditional branching examples
+  - Unbounded looping and recursion implementations
+  - Tape/memory simulation with unbounded storage
+  - Universal computation patterns (register machine, lambda calculus)
+  - Nontrivial computational tests (prime number computation)
+  - Complete verification in tests/turing/
 
 ### Changed
-- Introduced GUI library subsystem under nymyac/library/gui/
+- Updated compiler to support proper cross-architecture builds
 - Enhanced symbolic mathematics integration with GUI components
-- Improved compiler toolchain with temporary execution support
-- Added comprehensive GUI documentation
+- Improved error handling and architecture detection in nymya executable
+- Added comprehensive GUI and Turing completeness documentation
 
-## [0.2.0] - 2025-12-08
+## [0.2.0-alpha.4] - 2025-12-08
+
+### Added
+- Symbolic Mathematics Subsystem:
+  - Numerology engine with canonical mappings (1-9, master numbers)
+  - Repeating number classifier (111, 222, 369 patterns, etc.)
+  - Special numbers library with cultural and mathematical constants
+  - Prime number symbolism with classification and properties
+  - Sacred geometry engine with complete mapping system
+  - Integration engine with overlays and multi-layer meanings
+
+### Changed
+- Enhanced math library with pow_int and gcd functions
+- Integrated symbolic mathematics with existing quantum and AI/ML modules
+- Improved documentation covering symbolic mathematics subsystem
+
+## [0.2.0-alpha.3] - 2025-12-08
 
 ### Added
 - Complete library API documentation in docs/LIBRARY_API.md

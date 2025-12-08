@@ -1,15 +1,49 @@
 # Git ignore file for NymyaLang project
 
+# Rust/Cargo build artifacts
+target/
+**/target/
+**/Cargo.lock
+
 # Compiled binaries
 *.o
 *.so
 *.exe
 *.out
+*.bin
+*.obj
+*.lib
+*.a
+*.dll
+*.dylib
+
+# Temp files and directories
 /tmp/
 /build/
 /dist/
 /nymya-build-*/
+nymya_pkg_*/
+pkg_temp_*/
+build_*/
+cross_build_output/
+tmp_build/
+temp_*/
+**/temp_*.nym
+**/temp_*.cpp
+**/temp_*.exe
+.nymya_temp/
+.nymyac_cache/
+.nymyac_temp/
+**/_*
 
+# Distribution packages
+*.deb
+**/*.deb
+
+# Generated files
+**/generated_*
+**/compiled_*
+**/output/
 
 # IDE files
 .vscode/
@@ -27,6 +61,13 @@ vendor/
 
 # Logs
 *.log
+*.jsonl
+**/logs/
 
 # Tools directory (contains cloned repositories)
 /tools/coreutils/
+
+# Runtime generated files
+**/*.out
+**/*.bin
+**/*.obj

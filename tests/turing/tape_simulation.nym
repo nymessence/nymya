@@ -1,55 +1,62 @@
 // Turing Completeness Verification: Tape/Memory Simulation
-// Demonstrates memory manipulation capabilities of NymyaLang
+// Demonstrates NymyaLang's ability to simulate unbounded memory
 
-import math
 import crystal
+import math
 
-namespace turing_tape {
+namespace turing.tape {
 
-    // Simple tape implementation using a list
+    // Simulated tape using a list to represent unbounded memory
     class Tape {
         data: List[Int]
         head_position: Int
+        default_value: Int
         
-        init() {
-            this.data = [0]  // Initialize with one cell containing 0
+        init(default_val: Int) {
+            this.data = [default_val]  // Initialize with one cell containing default value
             this.head_position = 0
+            this.default_value = default_val
+        }
+        
+        func read() -> Int {
+            if this.head_position >= 0 and this.head_position < this.data.length {
+                return this.data[this.head_position]
+            } else {
+                return this.default_value
+            }
+        }
+        
+        func write(value: Int) -> Void {
+            // Extend tape if needed
+            while this.head_position >= this.data.length {
+                this.data.append(this.default_value)
+            }
+            
+            if this.head_position < 0 {
+                // Extend tape to the left by adding cells at the beginning
+                while this.head_position < 0 {
+                    this.data.insert(0, this.default_value)
+                    this.head_position = this.head_position + 1
+                }
+            }
+            
+            this.data[this.head_position] = value
         }
         
         func move_right() -> Void {
             this.head_position = this.head_position + 1
-            // Extend tape if needed
-            if this.head_position >= this.data.length {
-                this.data.append(0)
-            }
         }
         
         func move_left() -> Void {
-            if this.head_position > 0 {
-                this.head_position = this.head_position - 1
-            } else {
-                // Prepend a new cell if at the beginning
-                this.data.insert(0, 0)
-                this.head_position = 0
-            }
-        }
-        
-        func write_value(value: Int) -> Void {
-            if this.head_position < this.data.length {
-                this.data[this.head_position] = value
-            }
-        }
-        
-        func read_value() -> Int {
-            if this.head_position < this.data.length {
-                return this.data[this.head_position]
-            } else {
-                return 0
-            }
+            this.head_position = this.head_position - 1
         }
         
         func get_position() -> Int {
             return this.head_position
+        }
+        
+        func set_position(pos: Int) -> Void {
+            this.head_position = pos
         }
         
         func get_data() -> List[Int] {
@@ -63,7 +70,7 @@ namespace turing_tape {
                     result = result + ", "
                 }
                 if i == this.head_position {
-                    result = result + "*" + this.data[i].to_string() + "*"
+                    result = result + "*" + this.data[i].to_string() + "*"  // Mark current position
                 } else {
                     result = result + this.data[i].to_string()
                 }
@@ -73,32 +80,82 @@ namespace turing_tape {
         }
     }
 
-    // Simple counter using the tape
+    // Simulate a simple counter using the tape
     func tape_counter(tape: Tape, steps: Int) -> Void {
-        tape.write_value(0)  // Initialize counter
-        for i in range(steps) {
-            var current = tape.read_value()
-            tape.write_value(current + 1)
-            tape.move_right()
-            tape.write_value(current + 1)
-            tape.move_left()
+        var count = 0
+        while count < steps {
+            var current_val = tape.read()
+            tape.write(current_val + 1)  // Increment current cell
+            tape.move_right()            // Move to next cell
+            tape.write(1)                // Place counter value
+            tape.move_left()             // Return to counter cell
+            count = count + 1
         }
     }
 
-    // Copy data using the tape
+    // Simulate copying data on the tape
     func tape_copy(tape: Tape, value: Int, dest_pos: Int) -> Void {
-        // Write initial value
-        tape.write_value(value)
+        // Save original position
+        var original_pos = tape.get_position()
         
-        // Move to destination, copying the value
-        for i in range(dest_pos) {
+        // Write the value at current position
+        tape.write(value)
+        
+        // Move to destination and copy
+        while tape.get_position() < dest_pos {
             tape.move_right()
         }
-        tape.write_value(value)
+        tape.write(value)
         
         // Return to original position
-        for i in range(dest_pos) {
-            tape.move_left()
+        tape.set_position(original_pos)
+    }
+
+    // Simulate a register machine using the tape
+    class RegisterMachine {
+        tape: Tape
+        registers: List[Int]  // Use specific positions on the tape as registers
+        
+        init(register_count: Int) {
+            this.tape = Tape(0)
+            this.registers = []
+            for i in range(register_count) {
+                this.registers.append(0)  // Initialize registers to 0
+            }
+        }
+        
+        func get_register(index: Int) -> Int {
+            if index >= 0 and index < this.registers.length {
+                return this.registers[index]
+            }
+            return 0  // Out of bounds
+        }
+        
+        func set_register(index: Int, value: Int) -> Void {
+            if index >= 0 and index < this.registers.length {
+                this.registers[index] = value
+                // Also update the tape representation
+                this.tape.set_position(index)
+                this.tape.write(value)
+            }
+        }
+        
+        func add_registers(dest_index: Int, source1_index: Int, source2_index: Int) -> Void {
+            var val1 = this.get_register(source1_index)
+            var val2 = this.get_register(source2_index)
+            var result = val1 + val2
+            this.set_register(dest_index, result)
+        }
+        
+        func multiply_registers(dest_index: Int, source1_index: Int, source2_index: Int) -> Void {
+            var val1 = this.get_register(source1_index)
+            var val2 = this.get_register(source2_index)
+            var result = val1 * val2
+            this.set_register(dest_index, result)
+        }
+        
+        func get_tape() -> Tape {
+            return this.tape
         }
     }
 
@@ -107,33 +164,42 @@ namespace turing_tape {
         crystal.manifest("=== Tape/Memory Simulation Test ===")
         
         // Test basic tape operations
-        var tape1 = Tape()
-        crystal.manifest("Initial tape: " + tape1.to_string())
+        var tape = Tape(0)
+        crystal.manifest("Initial tape: " + tape.to_string())
         
-        tape1.write_value(42)
-        crystal.manifest("After writing 42: " + tape1.to_string())
+        tape.write(42)
+        crystal.manifest("After writing 42: " + tape.to_string())
         
-        tape1.move_right()
-        tape1.write_value(24)
-        crystal.manifest("After moving right and writing 24: " + tape1.to_string())
+        tape.move_right()
+        tape.write(24)
+        crystal.manifest("After moving right and writing 24: " + tape.to_string())
         
-        tape1.move_left()
-        var read_val = tape1.read_value()
+        tape.move_left()
+        var read_val = tape.read()
         crystal.manifest("Value at position 0: " + read_val)
         
         // Test counter functionality
-        var tape2 = Tape()
-        tape_counter(tape2, 5)
-        crystal.manifest("Tape after counter (5 steps): " + tape2.to_string())
+        tape_counter(tape, 5)
+        crystal.manifest("Tape after counter (5 steps): " + tape.to_string())
         
-        // Test copy functionality
-        var tape3 = Tape()
-        tape_copy(tape3, 99, 3)
-        crystal.manifest("Tape after copying 99 to position 3: " + tape3.to_string())
+        // Test tape copy functionality
+        tape_copy(tape, 99, 10)
+        crystal.manifest("Tape after copying 99 to position 10: " + tape.to_string())
+        
+        // Test register machine
+        var rm = RegisterMachine(5)  // 5 registers
+        rm.set_register(0, 10)
+        rm.set_register(1, 20)
+        rm.add_registers(2, 0, 1)  // R2 = R0 + R1
+        crystal.manifest("Register R0: " + rm.get_register(0))
+        crystal.manifest("Register R1: " + rm.get_register(1))
+        crystal.manifest("Register R2 (R0+R1): " + rm.get_register(2))
+        
+        rm.multiply_registers(3, 0, 1)  // R3 = R0 * R1
+        crystal.manifest("Register R3 (R0*R1): " + rm.get_register(3))
         
         crystal.manifest("Tape/memory simulation test completed successfully!")
     }
 }
 
-// Entry point
-turing_tape.run_tests()
+turing.tape.run_tests()

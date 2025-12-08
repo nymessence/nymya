@@ -71,6 +71,9 @@ enum Statement {
         condition: Expression,
         body: Vec<Statement>,
     },
+    Import {
+        path: String,
+    },
     // Add more statement types as needed
 }
 
@@ -153,26 +156,115 @@ impl NymyaParser {
     }
     
     fn declaration(&mut self) -> Result<Option<Statement>, String> {
+        if self.match_token(&Token::Import) {
+            return self.import_statement();
+        }
+
+        if self.match_token(&Token::Func) {
+            return self.function_declaration();
+        }
+
+        if self.match_token(&Token::Let) {
+            return self.variable_declaration();
+        }
+
         // For now, we'll just handle basic statement parsing
         self.statement()
     }
-    
+
+    fn import_statement(&mut self) -> Result<Option<Statement>, String> {
+        // Parse import statement: import module.path
+        if let Token::Identifier(path) = self.peek() {
+            let module_path = path.clone();
+            self.advance(); // Consume the identifier
+
+            self.consume(&Token::Semicolon, "Expect ';' after import statement.")?;
+
+            Ok(Some(Statement::Import { path: module_path }))
+        } else {
+            Err("Expected module path after 'import'".to_string())
+        }
+    }
+
+    fn function_declaration(&mut self) -> Result<Option<Statement>, String> {
+        // For now, just handle basic function declarations
+        // We'll return a dummy expression to avoid issues
+        if let Token::Identifier(_) = self.peek() {
+            let name = match self.advance() {
+                Token::Identifier(id) => id,
+                _ => return Err("Expected function name".to_string())
+            };
+
+            self.consume(&Token::LeftParen, "Expected '(' after function name")?;
+            // Skip parameters for now
+            while !self.check(&Token::RightParen) && !self.is_at_end() {
+                self.advance();
+            }
+            self.consume(&Token::RightParen, "Expected ')' after parameters")?;
+
+            // Skip body for now
+            if self.check(&Token::LeftBrace) {
+                // Skip to matching brace
+                let mut brace_count = 0;
+                loop {
+                    if self.is_at_end() {
+                        return Err("Reached end of file while parsing function".to_string());
+                    }
+                    match self.peek() {
+                        Token::LeftBrace => brace_count += 1,
+                        Token::RightBrace if brace_count == 1 => {
+                            self.advance();
+                            break;
+                        },
+                        Token::RightBrace => brace_count -= 1,
+                        _ => {}
+                    }
+                    if brace_count == 0 && matches!(self.peek(), Token::RightBrace) {
+                        self.advance();
+                        break;
+                    }
+                    self.advance();
+                }
+            }
+
+            // For now, return a dummy expression
+            Ok(None)
+        } else {
+            Err("Expected function name".to_string())
+        }
+    }
+
+    fn variable_declaration(&mut self) -> Result<Option<Statement>, String> {
+        // For now, just handle basic variable declarations
+        if let Token::Identifier(name) = self.peek() {
+            let var_name = name.clone();
+            self.advance(); // consume the identifier
+            self.consume(&Token::Eq, "Expected '=' in variable declaration")?;
+            let value = self.expression()?;
+            self.consume(&Token::Semicolon, "Expected ';' after variable declaration")?;
+
+            Ok(Some(Statement::VariableDeclaration { name: var_name, value }))
+        } else {
+            Err("Expected variable name".to_string())
+        }
+    }
+
     fn statement(&mut self) -> Result<Option<Statement>, String> {
         if self.match_token(&Token::LeftBrace) {
             return self.block_statement();
         }
-        
+
         if self.match_token(&Token::If) {
             return self.if_statement();
         }
-        
+
         if self.match_token(&Token::While) {
             return self.while_statement();
         }
-        
+
         let expr = self.expression()?;
         self.consume(&Token::Semicolon, "Expect ';' after expression.")?;
-        
+
         Ok(Some(Statement::Expression(expr)))
     }
     
@@ -824,13 +916,14 @@ fn compile_file(input_file: &str, output_name: &Option<String>) {
                 input_file.trim_end_matches(".nym").to_string()
             };
 
-            // Compile using g++
+            // Compile using native compiler for the host architecture
             use std::process::Command;
             let compile_result = Command::new("g++")
                 .arg(output_filename)
                 .arg("-o")
                 .arg(&exe_filename)
                 .arg("-std=c++17")
+                .arg("-O2")  // Add optimization
                 .output();
 
             match compile_result {
@@ -1167,6 +1260,11 @@ fn ast_to_cpp(stmt: &Statement) -> String {
         }}"#,
                 cond_cpp, body_cpp
             )
+        },
+        Statement::Import { path } => {
+            // Import statements are handled separately at the file level
+            // Return an empty string for import statements in execution context
+            "".to_string()
         },
     }
 }

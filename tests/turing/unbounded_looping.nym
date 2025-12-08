@@ -1,13 +1,13 @@
-// Turing Completeness Verification: Unbounded Looping/Recursion
-// Demonstrates looping and recursive capabilities of NymyaLang
+// Turing Completeness Verification: Unbounded Looping Example
+// Demonstrates NymyaLang's ability to perform unbounded computation
 
-import math
 import crystal
+import math
 
-namespace turing_looping {
+namespace turing.looping {
 
-    // Simple counter loop (bounded but simulating unbounded behavior)
-    func simple_loop(max_count: Int) -> Int {
+    // Simple counter loop (demonstrates basic unbounded counting)
+    func simple_counter(max_count: Int) -> Int {
         var count = 0
         while count < max_count {
             count = count + 1
@@ -15,29 +15,29 @@ namespace turing_looping {
         return count
     }
 
-    // Recursive factorial function
-    func factorial(n: Int) -> Int {
+    // Recursive factorial function (demonstrates unbounded recursion)
+    func recursive_factorial(n: Int) -> Int {
         if n <= 1 {
             return 1
         } else {
-            return n * factorial(n - 1)
+            return n * recursive_factorial(n - 1)
         }
     }
 
-    // Recursive fibonacci (demonstrates recursion with branching)
-    func fibonacci(n: Int) -> Int {
+    // Recursive fibonacci (demonstrates exponential recursion)
+    func recursive_fibonacci(n: Int) -> Int {
         if n <= 1 {
             return n
         } else {
-            return fibonacci(n - 1) + fibonacci(n - 2)
+            return recursive_fibonacci(n - 1) + recursive_fibonacci(n - 2)
         }
     }
 
-    // Loop with dynamic termination condition (simulating unbounded behavior)
-    func dynamic_loop(start_value: Int, target: Int) -> Int {
+    // Dynamic termination loop (unbounded until condition is met)
+    func dynamic_termination(start_value: Int, target: Int) -> Int {
         var current = start_value
         var iterations = 0
-        var max_iterations = 1000  // Prevent infinite loops in test
+        var max_iterations = 10000  // Prevent infinite loops in test
         
         while current != target and iterations < max_iterations {
             if current < target {
@@ -51,15 +51,33 @@ namespace turing_looping {
         return current
     }
 
-    // Countdown loop with recursive elements
+    // Count down to zero recursively
     func countdown_recursive(n: Int) -> Int {
+        crystal.manifest("Countdown: " + n)
         if n <= 0 {
-            crystal.manifest("Blastoff!")
+            crystal.manifest("Blast off!")
             return 0
         } else {
-            crystal.manifest("Countdown: " + n)
             return 1 + countdown_recursive(n - 1)
         }
+    }
+
+    // Collatz conjecture sequence (famous unbounded computation example)
+    func collatz_sequence(n: Int) -> Int {
+        var current = n
+        var steps = 0
+        var max_steps = 1000  // Prevent infinite loops for testing
+        
+        while current != 1 and steps < max_steps {
+            if current % 2 == 0 {
+                current = current / 2
+            } else {
+                current = 3 * current + 1
+            }
+            steps = steps + 1
+        }
+        
+        return steps
     }
 
     // Run the tests
@@ -67,29 +85,32 @@ namespace turing_looping {
         crystal.manifest("=== Unbounded Looping/Recursion Test ===")
         
         // Test simple loop
-        var loop_result = simple_loop(10)
-        crystal.manifest("simple_loop(10) = " + loop_result)
+        var loop_result = simple_counter(100)
+        crystal.manifest("simple_counter(100) = " + loop_result)
         
         // Test factorial recursion
-        var fact_result = factorial(5)
-        crystal.manifest("factorial(5) = " + fact_result)
+        var fact_result = recursive_factorial(10)
+        crystal.manifest("10! = " + fact_result)
         
-        // Test fibonacci recursion (small number to avoid excessive computation)
-        var fib_result = fibonacci(6)
-        crystal.manifest("fibonacci(6) = " + fib_result)
+        // Test fibonacci recursion (small number to avoid long computation)
+        var fib_result = recursive_fibonacci(10)
+        crystal.manifest("fibonacci(10) = " + fib_result)
         
         // Test dynamic loop
-        var dynamic_result = dynamic_loop(5, 15)
-        crystal.manifest("dynamic_loop(5, 15) = " + dynamic_result)
+        var dynamic_result = dynamic_termination(50, 60)
+        crystal.manifest("Dynamic termination: " + dynamic_result)
         
         // Test recursive countdown
         crystal.manifest("Starting countdown...")
-        var countdown_result = countdown_recursive(3)
+        var countdown_result = countdown_recursive(5)
         crystal.manifest("Countdown returned: " + countdown_result)
+        
+        // Test Collatz sequence
+        var collatz_steps = collatz_sequence(7)
+        crystal.manifest("Steps for Collatz sequence starting at 7: " + collatz_steps)
         
         crystal.manifest("Unbounded looping/recursion test completed successfully!")
     }
 }
 
-// Entry point
-turing_looping.run_tests()
+turing.looping.run_tests()

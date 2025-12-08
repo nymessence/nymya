@@ -5,7 +5,7 @@ Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming e
 ## Core Philosophy
 Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita**) combined with ethical flow (**Nora**), following the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness.
 
-## New Features in v0.2.0-alpha~3
+## New Features in v0.2.0-alpha.5
 
 ### 1. GTK+4 Abstractions with SwiftUI-like Syntax
 - Declarative window, button, layout, and input field components

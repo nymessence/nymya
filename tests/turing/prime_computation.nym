@@ -1,0 +1,287 @@
+// Turing Completeness Verification: Prime Number Computation
+// Demonstrates NymyaLang's ability to perform nontrivial mathematical computation
+
+import crystal
+import math
+
+namespace turing.primes {
+
+    // Simple prime number generator to demonstrate computational complexity
+    func generate_primes(count: Int) -> List[Int] {
+        var primes = []
+        var candidate = 2  // Start with first prime
+        
+        while primes.length < count {
+            if is_prime(candidate) {
+                primes.append(candidate)
+            }
+            candidate = candidate + 1
+        }
+        
+        return primes
+    }
+    
+    // Prime checking function
+    func is_prime(n: Int) -> Bool {
+        if n <= 1 {
+            return false
+        }
+        if n <= 3 {
+            return true
+        }
+        if n % 2 == 0 or n % 3 == 0 {
+            return false
+        }
+        
+        // Check divisibility by numbers of form 6k ± 1 up to √n
+        var i = 5
+        while i * i <= n {
+            if n % i == 0 or n % (i + 2) == 0 {
+                return false
+            }
+            i = i + 6
+        }
+        
+        return true
+    }
+    
+    // Get next prime after n
+    func next_prime(n: Int) -> Int {
+        var candidate = n + 1
+        while not is_prime(candidate) {
+            candidate = candidate + 1
+        }
+        return candidate
+    }
+    
+    // Generate Fibonacci sequence
+    func fibonacci(n: Int) -> Int {
+        if n <= 1 {
+            return n
+        }
+        
+        var a = 0
+        var b = 1
+        var i = 1
+        
+        while i < n {
+            var temp = a + b
+            a = b
+            b = temp
+            i = i + 1
+        }
+        
+        return b
+    }
+    
+    // Calculate factorial
+    func factorial(n: Int) -> Int {
+        if n <= 1 {
+            return 1
+        }
+        
+        var result = 1
+        var i = 1
+        while i <= n {
+            result = result * i
+            i = i + 1
+        }
+        
+        return result
+    }
+    
+    // Prime factorization
+    func prime_factorization(n: Int) -> List[Int] {
+        var factors = []
+        var num = n
+        
+        // Factor out 2's
+        while num % 2 == 0 {
+            factors.append(2)
+            num = num / 2
+        }
+        
+        // Factor out odd numbers from 3 onwards
+        var i = 3
+        while i * i <= num {
+            while num % i == 0 {
+                factors.append(i)
+                num = num / i
+            }
+            i = i + 2
+        }
+        
+        // If num is still greater than 1, it's a prime
+        if num > 1 {
+            factors.append(num)
+        }
+        
+        return factors
+    }
+    
+    // Sieve of Eratosthenes for generating primes
+    func sieve_of_eratosthenes(limit: Int) -> List[Int] {
+        if limit < 2 {
+            return []
+        }
+        
+        // Create a boolean list "is_prime[0..limit]" and initialize all entries as true
+        var is_prime = []
+        for i in range(limit + 1) {
+            if i < 2 {
+                is_prime.append(false)
+            } else {
+                is_prime.append(true)
+            }
+        }
+        
+        var p = 2
+        while p * p <= limit {
+            // If is_prime[p] is not changed, then it's a prime
+            if is_prime[p] {
+                // Mark all multiples of p as not prime
+                var i = p * p
+                while i <= limit {
+                    is_prime[i] = false
+                    i = i + p
+                }
+            }
+            p = p + 1
+        }
+        
+        // Collect all prime numbers
+        var primes = []
+        for i in range(2, limit + 1) {
+            if is_prime[i] {
+                primes.append(i)
+            }
+        }
+        
+        return primes
+    }
+    
+    // Primality test using Fermat's little theorem (probabilistic)
+    func fermat_primality_test(n: Int, k: Int) -> Bool {
+        if n <= 1 {
+            return false
+        }
+        if n <= 3 {
+            return true
+        }
+        if n % 2 == 0 {
+            return false
+        }
+        
+        // Apply Fermat's little theorem k times
+        for _ in range(k) {
+            var a = (n - 2) % 100 + 2  // Random base between 2 and n-2 (simplified)
+            var result = modular_exponentiation(a, n - 1, n)
+            
+            if result != 1 {
+                return false  // Composite number
+            }
+        }
+        
+        return true  // Probable prime
+    }
+    
+    // Modular exponentiation: (base^exp) % mod
+    func modular_exponentiation(base: Int, exp: Int, mod: Int) -> Int {
+        if mod == 1 {
+            return 0
+        }
+        
+        var result = 1
+        var b = base % mod
+        var e = exp
+        
+        while e > 0 {
+            if e % 2 == 1 {
+                result = (result * b) % mod
+            }
+            e = e >> 1  // Divide by 2 using bit shift
+            b = (b * b) % mod
+        }
+        
+        return result
+    }
+    
+    // Run the prime number computation tests
+    func run_tests() -> Void {
+        crystal.manifest("=== Nontrivial Computational Test: Prime Number Generation ===")
+        
+        // Test basic prime checking
+        crystal.manifest("Basic prime checks:")
+        var test_numbers = [2, 3, 4, 5, 17, 25, 29, 97, 100, 101]
+        for num in test_numbers {
+            var is_prime_result = is_prime(num)
+            crystal.manifest("  " + num + " is prime: " + is_prime_result)
+        }
+        
+        // Generate first 10 primes
+        crystal.manifest("\nGenerating first 10 primes:")
+        var primes_10 = generate_primes(10)
+        for prime in primes_10 {
+            crystal.manifest("  " + prime)
+        }
+        
+        // Generate primes up to 50 using sieve
+        crystal.manifest("\nPrimes up to 50 using Sieve of Eratosthenes:")
+        var primes_50 = sieve_of_eratosthenes(50)
+        for prime in primes_50 {
+            crystal.manifest("  " + prime)
+        }
+        
+        // Test prime factorization
+        crystal.manifest("\nPrime factorizations:")
+        var factorization_tests = [12, 24, 35, 97, 100, 128, 255, 315]
+        for num in factorization_tests {
+            var factors = prime_factorization(num)
+            crystal.manifest("  " + num + " = " + factors.join(" × "))
+        }
+        
+        // Test Fibonacci sequence
+        crystal.manifest("\nFibonacci sequence (first 10 numbers):")
+        for i in range(10) {
+            var fib = fibonacci(i)
+            crystal.manifest("  F(" + i + ") = " + fib)
+        }
+        
+        // Test factorial computation
+        crystal.manifest("\nFactorial computations:")
+        var factorial_tests = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        for n in factorial_tests {
+            var fact = factorial(n)
+            crystal.manifest("  " + n + "! = " + fact)
+        }
+        
+        // Test Fermat primality test
+        crystal.manifest("\nFermat primality tests (probabilistic):")
+        var fermat_tests = [17, 19, 21, 23, 97, 99]
+        for n in fermat_tests {
+            var fermat_result = fermat_primality_test(n, 10)  // 10 trials
+            var definitive = is_prime(n)  // For comparison
+            crystal.manifest("  " + n + " (Fermat: " + fermat_result + ", Definitive: " + definitive + ")")
+        }
+        
+        // Performance comparison between basic and sieved approaches
+        crystal.manifest("\nPerformance comparison:")
+        var start_time = crystal.time.microseconds()
+        var sieve_primes = sieve_of_eratosthenes(1000)
+        var sieve_time = crystal.time.microseconds() - start_time
+        
+        crystal.manifest("  Sieve of Eratosthenes for primes up to 1000: " + sieve_primes.length + " primes found in " + sieve_time + " microseconds")
+        
+        // Generate the same number of primes with basic method
+        start_time = crystal.time.microseconds()
+        var basic_primes = generate_primes(sieve_primes.length)
+        var basic_time = crystal.time.microseconds() - start_time
+        
+        crystal.manifest("  Basic generation of " + sieve_primes.length + " primes took " + basic_time + " microseconds")
+        
+        crystal.manifest("\nPrime number computation test completed!")
+        crystal.manifest("This demonstrates NymyaLang's ability to perform complex mathematical computations efficiently.")
+    }
+}
+
+turing.primes.run_tests()
