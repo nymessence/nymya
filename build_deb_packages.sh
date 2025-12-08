@@ -61,16 +61,19 @@ Description: NymyaLang - A consciousness-integrated programming language
  This package includes the NymyaLang compiler and standard libraries.
 EOF
     
-    # Create mock compiler binary
-    cat > "${pkg_dir}/usr/bin/nymyac" << 'EOF'
-#!/bin/sh
-echo "NymyaLang Compiler ${VERSION} (arch: ARCH_PLACEHOLDER)"
-echo "Usage: nymyac <input.nym> -o <output>"
-echo ""
-echo "This is a mock binary for demonstration purposes."
-EOF
+    # Build or copy actual compiler binary
+    if [ -f "nymyac/target/release/nymyac" ]; then
+        # Use release build if available
+        cp "nymyac/target/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
+    elif [ -f "nymyac/target/debug/nymyac" ]; then
+        # Fallback to debug build
+        cp "nymyac/target/debug/nymyac" "${pkg_dir}/usr/bin/nymyac"
+    else
+        echo "Building the actual compiler binary..."
+        cd nymyac && cargo build --release && cd ..
+        cp "nymyac/target/release/nymyac" "${pkg_dir}/usr/bin/nymyac"
+    fi
     chmod +x "${pkg_dir}/usr/bin/nymyac"
-    sed -i "s/ARCH_PLACEHOLDER/$arch/g" "${pkg_dir}/usr/bin/nymyac"
     
     # Standard library directories
     mkdir -p "${pkg_dir}/usr/lib/nymya/math"

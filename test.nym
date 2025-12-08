@@ -1,0 +1,6 @@
+// Example NymyaLang program
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Hello, World from NymyaLang!")
+}
