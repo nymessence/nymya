@@ -1,0 +1,145 @@
+// Test for Data Structures Library
+import crystal
+import data_structures
+
+func test_all_data_structures() -> Void {
+    crystal.manifest("=== Testing Data Structures Library ===")
+
+    // Test Binary Search Tree
+    crystal.manifest("--- Testing Binary Search Tree ---")
+    var bst = data_structures.BST[Int]()
+
+    // Insert values
+    bst.insert(5)
+    bst.insert(3)
+    bst.insert(7)
+    bst.insert(1)
+    bst.insert(9)
+
+    crystal.manifest("BST size after insertion: " + bst.get_size())
+    crystal.manifest("Is BST empty? " + bst.is_empty())
+    crystal.manifest("Search for 3: " + bst.search(3))
+    crystal.manifest("Search for 10: " + bst.search(10))
+
+    var traversal = bst.inorder_traversal()
+    crystal.manifest("Inorder traversal: [" + traversal.join(", ") + "]")
+
+    // Test Queue
+    crystal.manifest("\n--- Testing Queue ---")
+    var queue = data_structures.Queue[String](10)  // Initial capacity of 10
+
+    queue.enqueue("first")
+    queue.enqueue("second")
+    queue.enqueue("third")
+
+    crystal.manifest("Queue size: " + queue.get_size())
+    var peeked_item = queue.peek()
+    if peeked_item != null {
+        crystal.manifest("Peek: " + peeked_item)
+    } else {
+        crystal.manifest("Peek: null")
+    }
+
+    var dequeued = queue.dequeue()
+    if dequeued != null {
+        crystal.manifest("Dequeued: " + dequeued)
+        crystal.manifest("Queue size after dequeue: " + queue.get_size())
+    } else {
+        crystal.manifest("Dequeue returned null (empty queue)")
+    }
+
+    queue.enqueue("fourth")
+    queue.enqueue("fifth")
+
+    // Test MinHeap
+    crystal.manifest("\n--- Testing MinHeap ---")
+    var heap = data_structures.MinHeap[Int]()
+
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
+    heap.insert(1)
+    heap.insert(15)
+
+    crystal.manifest("MinHeap size: " + heap.get_size())
+    var min_val = heap.peek_min()
+    if min_val != null {
+        crystal.manifest("Min value: " + min_val)
+    } else {
+        crystal.manifest("Min value: null (heap is empty)")
+    }
+
+    while not heap.is_empty() {
+        var extracted = heap.extract_min()
+        if extracted != null {
+            crystal.manifest("Extracted min: " + extracted)
+        } else {
+            crystal.manifest("Extracted min: null")
+        }
+    }
+
+    // Test Linked List
+    crystal.manifest("\n--- Testing LinkedList ---")
+    var ll = data_structures.LinkedList[String]()
+
+    ll.append("A")
+    ll.append("B")
+    ll.append("C")
+    ll.prepend("Start")
+
+    crystal.manifest("Linked list size: " + ll.get_size())
+    crystal.manifest("Find 'B': " + ll.find("B"))
+    crystal.manifest("Find 'Z': " + ll.find("Z"))
+    var list_vals = ll.to_list()
+    crystal.manifest("List contents: [" + list_vals.join(", ") + "]")
+
+    // Test Tuple
+    crystal.manifest("\n--- Testing Tuples ---")
+    var tuple2 = data_structures.Tuple2("hello", 42)
+    crystal.manifest("Tuple2: first=" + tuple2.get_first() + ", second=" + tuple2.get_second())
+
+    var tuple3 = data_structures.Tuple3("a", "b", "c")
+    crystal.manifest("Tuple3: first=" + tuple3.get_first() + ", second=" + tuple3.get_second() + ", third=" + tuple3.get_third())
+
+    var tuple4 = data_structures.Tuple4(1, 2, 3, 4)
+    crystal.manifest("Tuple4: [" + tuple4.get_first() + ", " + tuple4.get_second() + ", " +
+                     tuple4.get_third() + ", " + tuple4.get_fourth() + "]")
+
+    // Test Stack
+    crystal.manifest("\n--- Testing Stack ---")
+    var stack = data_structures.Stack[String]()
+
+    stack.push("item1")
+    stack.push("item2")
+    stack.push("item3")
+
+    crystal.manifest("Stack size: " + stack.get_size())
+    var top_item = stack.peek()
+    if top_item != null {
+        crystal.manifest("Top item: " + top_item)
+    } else {
+        crystal.manifest("Top item: null")
+    }
+
+    var popped_item = stack.pop()
+    if popped_item != null {
+        crystal.manifest("Popped item: " + popped_item)
+    } else {
+        crystal.manifest("Popped item: null")
+    }
+
+    crystal.manifest("Stack size after pop: " + stack.get_size())
+
+    // Test assertions
+    crystal.manifest("\n--- Testing Assert Functions ---")
+    var test_val = 42
+
+    // Test assertion functions
+    data_structures.testing.assert_true(test_val > 40, "Value is greater than 40")
+    data_structures.testing.assert_equal(42, test_val, "Value equals 42")
+    data_structures.testing.assert_not_equal(43, test_val, "Value does not equal 43")
+
+    crystal.manifest("All data structure tests completed successfully!")
+}
+
+test_all_data_structures()

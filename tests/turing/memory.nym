@@ -1,0 +1,243 @@
+// Turing Completeness Verification: Memory/Tape Simulation
+// Demonstrates NymyaLang's unbounded memory capabilities
+
+import crystal
+import math
+
+namespace turing.memory {
+
+    // Simulated tape using dynamic list (unbounded storage)
+    class Tape {
+        data: List[Int]
+        head_position: Int
+        default_value: Int
+        
+        init(default_val: Int) {
+            this.data = [default_val]  // Initialize with one cell containing default value
+            this.head_position = 0
+            this.default_value = default_val
+        }
+        
+        func read() -> Int {
+            if this.head_position >= 0 and this.head_position < this.data.length {
+                return this.data[this.head_position]
+            } else {
+                return this.default_value  // Return default for out-of-bounds
+            }
+        }
+        
+        func write(value: Int) -> Void {
+            // Extend tape if needed
+            while this.head_position >= this.data.length {
+                this.data.append(this.default_value)
+            }
+            
+            if this.head_position < 0 {
+                // Extend tape to the left by adding cells at the beginning
+                while this.head_position < 0 {
+                    this.data.insert(0, this.default_value)
+                    this.head_position = this.head_position + 1
+                }
+            }
+            
+            this.data[this.head_position] = value
+        }
+        
+        func move_right() -> Void {
+            this.head_position = this.head_position + 1
+        }
+        
+        func move_left() -> Void {
+            this.head_position = this.head_position - 1
+        }
+        
+        func get_position() -> Int {
+            return this.head_position
+        }
+        
+        func set_position(pos: Int) -> Void {
+            this.head_position = pos
+        }
+        
+        func get_data() -> List[Int] {
+            return this.data.copy()
+        }
+        
+        func to_string() -> String {
+            var result = "["
+            for i in range(this.data.length) {
+                if i > 0 {
+                    result = result + ", "
+                }
+                if i == this.head_position {
+                    result = result + "*" + this.data[i].to_string() + "*"  // Mark current position
+                } else {
+                    result = result + this.data[i].to_string()
+                }
+            }
+            result = result + "]"
+            return result
+        }
+    }
+
+    // Register machine simulation
+    class RegisterMachine {
+        registers: List[Int]
+        
+        init() {
+            this.registers = []
+            // Initialize with a few registers
+            for i in range(10) {
+                this.registers.append(0)
+            }
+        }
+        
+        func get_register(index: Int) -> Int {
+            if index >= 0 and index < this.registers.length {
+                return this.registers[index]
+            }
+            return 0  // Default for out-of-bounds
+        }
+        
+        func set_register(index: Int, value: Int) -> Void {
+            // Extend registers if needed
+            while this.registers.length <= index {
+                this.registers.append(0)
+            }
+            this.registers[index] = value
+        }
+        
+        func increment_register(index: Int) -> Void {
+            var current = this.get_register(index)
+            this.set_register(index, current + 1)
+        }
+        
+        func decrement_register(index: Int) -> Void {
+            var current = this.get_register(index)
+            if current > 0 {
+                this.set_register(index, current - 1)
+            }
+        }
+        
+        func is_zero_register(index: Int) -> Bool {
+            return this.get_register(index) == 0
+        }
+    }
+
+    // Count prime numbers using unbounded memory
+    func count_primes_up_to(limit: Int) -> List[Int] {
+        // Use a list to store primes - unbounded memory growth
+        var primes = []
+        var candidate = 2
+        
+        while candidate <= limit {
+            if is_prime(candidate) {
+                primes.append(candidate)  // Store in unbounded list
+            }
+            candidate = candidate + 1
+        }
+        
+        return primes
+    }
+
+    func is_prime(n: Int) -> Bool {
+        if n <= 1 {
+            return false
+        }
+        if n <= 3 {
+            return true
+        }
+        if n % 2 == 0 or n % 3 == 0 {
+            return false
+        }
+        
+        var i = 5
+        while i * i <= n {
+            if n % i == 0 or n % (i + 2) == 0 {
+                return false
+            }
+            i = i + 6
+        }
+        
+        return true
+    }
+
+    // Simulate a simple counter using the tape
+    func tape_counter(tape: Tape, steps: Int) -> Void {
+        var count = 0
+        while count < steps {
+            var current_val = tape.read()
+            tape.write(current_val + 1)  // Increment current cell
+            tape.move_right()            // Move to next cell
+            tape.write(1)                // Place step counter
+            tape.move_left()             // Return to counter cell
+            count = count + 1
+        }
+    }
+
+    // Copy data using the tape
+    func tape_copy(tape: Tape, value: Int, dest_pos: Int) -> Void {
+        // Save original position
+        var original_pos = tape.get_position()
+        
+        // Write the value at current position
+        tape.write(value)
+        
+        // Move to destination and copy
+        while tape.get_position() < dest_pos {
+            tape.move_right()
+        }
+        tape.write(value)  // Copy value to destination
+        
+        // Return to original position
+        tape.set_position(original_pos)
+    }
+
+    func test() -> Void {
+        crystal.manifest("=== Unbounded Memory Storage Test ===")
+        
+        // Test tape functionality
+        var tape = Tape(0)
+        crystal.manifest("Initial tape: " + tape.to_string())
+        
+        tape.write(42)
+        crystal.manifest("After writing 42: " + tape.to_string())
+        
+        tape.move_right()
+        tape.write(24) 
+        crystal.manifest("After moving right and writing 24: " + tape.to_string())
+        
+        tape.move_left()
+        var read_val = tape.read()
+        crystal.manifest("Value at position 0: " + read_val)
+        
+        // Test counter functionality
+        tape_counter(tape, 5)
+        crystal.manifest("Tape after counter (5 steps): " + tape.to_string())
+        
+        // Test copy functionality  
+        tape_copy(tape, 99, 3)
+        crystal.manifest("Tape after copying 99 to position 3: " + tape.to_string())
+        
+        // Test register machine
+        var rm = RegisterMachine()
+        crystal.manifest("Register machine initialized with 10 registers")
+        
+        rm.set_register(0, 100)
+        rm.set_register(1, 200)
+        crystal.manifest("Set R0=" + rm.get_register(0) + ", R1=" + rm.get_register(1))
+        
+        rm.increment_register(0)
+        rm.decrement_register(1)
+        crystal.manifest("After inc R0 and dec R1: R0=" + rm.get_register(0) + ", R1=" + rm.get_register(1))
+        
+        // Test with growing memory for primes
+        var primes = count_primes_up_to(30)
+        crystal.manifest("Primes up to 30: [" + primes.join(", ") + "] (count: " + primes.length + ")")
+        
+        crystal.manifest("Unbounded memory simulation test completed successfully!")
+        crystal.manifest("Demonstrated: dynamic lists, tape simulation, register machines")
+    }
+}
+
+turing.memory.test()

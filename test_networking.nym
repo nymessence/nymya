@@ -1,0 +1,9 @@
+import crystal
+import networking
+
+crystal.manifest("Networking test: Libraries accessible")
+var special_nums = [42, 108, 33, 144]
+for num in special_nums {
+    var meaning = symbolic.numerology.get_meaning(num)
+    crystal.manifest("Number " + num + " symbolic meaning: " + meaning.meaning)
+}

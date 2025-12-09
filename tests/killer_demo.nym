@@ -1,5 +1,5 @@
-// Killer Demo for NymyaLang v0.2.0-alpha~3
-// Quantum-Enhanced Hybrid Classifier with GUI Integration and Symbolic Mathematics
+// Killer Demo: Quantum-Enhanced Hybrid Classifier with Symbolic Mathematics
+// Demonstrates NymyaLang's hybrid classical and quantum design with numerology integration
 
 import crystal
 import math
@@ -7,220 +7,340 @@ import quantum
 import quantum.sim
 import ml
 import ml.quantum_ml
-import gui
 import symbolic
 import symbolic.numerology
 import symbolic.sacred_geometry
 
 namespace killer_demo {
 
-    // Quantum-enhanced classifier using both classical and quantum approaches
+    // Quantum-enhanced data classifier that uses both classical ML and quantum circuits
     class QuantumEnhancedClassifier {
-        quantum_circuit: quantum.sim.Circuit
-        num_qubits: Int
-        feature_mapper: ml.quantum_ml.ParameterizedCircuit
-        classical_preprocessor: ml.training_utils
+        // Classical preprocessor with numerology
+        preprocessor: ml.training_utils
         
-        init(num_features: Int) {
-            this.num_qubits = math.max(3, math.ceiling(math.log2(num_features.to_float())).to_int())
-            this.quantum_circuit = quantum.sim.Circuit(this.num_qubits)
-            this.feature_mapper = ml.quantum_ml.ParameterizedCircuit(this.num_qubits)
+        // Quantum feature mapper
+        feature_mapper: ml.quantum_ml.ParameterizedCircuit
+        
+        // Quantum classifier with consciousness integration
+        quantum_classifier: ml.quantum_ml.VariationalClassifier
+        
+        // Numerology enhancer
+        numerology_processor: symbolic.numerology.NumerologyProcessor
+        
+        // Classical postprocessor
+        postprocessor: ml.training_utils
+        
+        init(num_features: Int, num_classes: Int) {
+            var num_qubits = math.max(3, math.next_power_of_two(num_features))  // At least 3 qubits
             
-            crystal.manifest("Quantum Enhanced Classifier initialized with " + this.num_qubits + " qubits for " + num_features + " features")
+            this.feature_mapper = ml.quantum_ml.ParameterizedCircuit(num_qubits)
+            this.quantum_classifier = ml.quantum_ml.VariationalClassifier(num_qubits, num_classes)
+            this.numerology_processor = symbolic.numerology.NumerologyProcessor()
+            
+            crystal.manifest("Quantum Enhanced Classifier initialized with " + num_qubits + " qubits for " + num_features + " features")
         }
         
-        func classify(data: List[Float]) -> Int {
+        // Process classical data through quantum pipeline with numerological enhancement
+        func classify_quantum(data: List[Float]) -> Int {
             crystal.manifest("Classifying data: [" + data.join(", ") + "]")
             
-            // Preprocess data using classical methods
-            var processed_data = preprocess_data(data)
+            // Normalize input data
+            var normalized_data = normalize_data(data)
             
-            // Map data to quantum state
-            var quantum_state = map_to_quantum(processed_data)
+            // Apply numerological transformation to features
+            var enhanced_data = enhance_with_numerology(normalized_data)
             
-            // Apply quantum processing
-            var result = apply_quantum_processing(quantum_state)
+            // Quantum feature mapping
+            var quantum_features = quantum_feature_map(enhanced_data)
             
-            // Interpret quantum result classically
-            var classification = interpret_result(result)
+            // Make quantum prediction
+            var prediction = this.quantum_classifier.predict(quantum_features)
             
-            crystal.manifest("Quantum classification result: Class " + classification)
-            return classification
+            crystal.manifest("Quantum prediction with numerological enhancement: Class " + prediction)
+            return prediction
         }
         
-        func preprocess_data(raw_data: List[Float]) -> List[Float] {
-            // Normalize the input data to [0,1] range
-            if raw_data.length == 0 {
+        // Apply numerological significance to data
+        func enhance_with_numerology(data: List[Float]) -> List[Float] {
+            var enhanced = []
+            for i in range(data.length) {
+                var original_val = data[i]
+                
+                // Convert float to integer for numerology processing
+                var int_val = math.abs_int(original_val.to_int())
+                if int_val == 0 { int_val = 1 }  // Avoid issues with 0
+                
+                // Get numerological significance
+                var num_meaning = this.numerology_processor.get_meaning(int_val % 9 + 1)  // Reduce to 1-9
+                
+                // Apply "consciousness field" enhancement based on numerological meaning
+                var enhanced_val = original_val * (1.0 + num_meaning.significance_weight / 10.0)
+                enhanced.append(enhanced_val)
+                
+                if i < 5 {  // Only log first few for readability
+                    crystal.manifest("Feature " + i + ": " + original_val + " enhanced to " + enhanced_val + " (based on numerology: " + num_meaning.core_meaning + ")")
+                }
+            }
+            return enhanced
+        }
+        
+        // Quantum feature mapping using parameterized quantum circuits
+        func quantum_feature_map(features: List[Float]) -> List[Float] {
+            // Encode classical features into quantum states
+            var circuit = quantum.sim.Circuit(features.length)
+            
+            // Apply rotation gates to encode features
+            for i in range(math.min(features.length, circuit.num_qubits)) {
+                quantum.gate.ry(circuit, i, features[i])
+            }
+            
+            // Apply entangling gates to create quantum correlations
+            for i in range(circuit.num_qubits - 1) {
+                quantum.gate.cx(circuit, i, i + 1)
+            }
+            
+            // Return quantum state as feature vector
+            var statevector = circuit.get_statevector()
+            var result = []
+            
+            for complex_val in statevector {
+                result.append(complex_val.magnitude())
+            }
+            
+            return result
+        }
+        
+        // Normalize data to [0, 1] range
+        func normalize_data(data: List[Float]) -> List[Float] {
+            if data.length == 0 {
                 return []
             }
             
-            var min_val = ml.training_utils.min(raw_data)
-            var max_val = ml.training_utils.max(raw_data)
-            var range = max_val - min_val
+            var min_val = data[0]
+            var max_val = data[0]
             
-            if range == 0.0 {
+            for val in data {
+                if val < min_val {
+                    min_val = val
+                }
+                if val > max_val {
+                    max_val = val
+                }
+            }
+            
+            var range = max_val - min_val
+            if range == 0 {
                 range = 1.0  // Avoid division by zero
             }
             
             var normalized = []
-            for val in raw_data {
+            for val in data {
                 normalized.append((val - min_val) / range)
             }
             
             return normalized
         }
         
-        func map_to_quantum(data: List[Float]) -> List[Float] {
-            // Encode classical data into quantum amplitudes
-            var result = []
+        // Train the quantum classifier
+        func train(training_data: List[List[Float]], labels: List[Int]) -> Void {
+            crystal.manifest("Training quantum-enhanced classifier with numerological consciousness...")
             
-            // Use the first few values to initialize qubit states
-            for i in range(math.min(data.length, this.num_qubits)) {
-                var encoded_val = data[i] * math.TAU  // Map to full circle (0 to 2π)
-                result.append(encoded_val)
-            }
-            
-            // Fill remaining qubits with zeros if needed
-            while result.length < this.num_qubits {
-                result.append(0.0)
-            }
-            
-            return result
-        }
-        
-        func apply_quantum_processing(encoded_data: List[Float]) -> List[Int] {
-            // Reset the circuit
-            this.quantum_circuit.reset()
-            
-            // Apply rotation gates based on encoded data
-            for i in range(math.min(encoded_data.length, this.num_qubits)) {
-                quantum.gate.ry(this.quantum_circuit, i, encoded_data[i])
-            }
-            
-            // Create entanglement between qubits
-            for i in range(this.num_qubits - 1) {
-                quantum.gate.cx(this.quantum_circuit, i, i + 1)
-            }
-            
-            // Apply quantum Fourier transform for pattern recognition
-            apply_qft(this.quantum_circuit, range(this.num_qubits))
-            
-            // Measure the final state
-            var measurements = quantum.sim.measure_all(this.quantum_circuit)
-            
-            return measurements
-        }
-        
-        func apply_qft(circuit: quantum.sim.Circuit, qubits: List[Int]) -> Void {
-            // Apply Quantum Fourier Transform to the specified qubits
-            for i in range(qubits.length) {
-                quantum.gate.h(circuit, qubits[i])
-                
-                for j in range(i + 1, qubits.length) {
-                    var angle = math.PI / math.pow_int(2, j - i).to_float()
-                    // Apply controlled phase rotation
-                    quantum.gate.cp(circuit, qubits[j], qubits[i], angle)
-                }
-            }
-        }
-        
-        func interpret_result(measurements: List[Int]) -> Int {
-            // Convert quantum measurement results to classification
-            var binary_string = ""
-            for bit in measurements {
-                binary_string = binary_string + bit.to_string()
-            }
-            
-            // Convert binary string to integer
-            var result = 0
-            for i in range(binary_string.length) {
-                if binary_string[binary_string.length - 1 - i] == "1" {
-                    result = result + math.pow_int(2, i)
+            var total_correct = 0
+            for i in range(training_data.length) {
+                var prediction = this.classify_quantum(training_data[i])
+                if prediction == labels[i] {
+                    total_correct = total_correct + 1
                 }
             }
             
-            // Use modulo to get class (for this demo, 2 classes)
-            return result % 2
+            var accuracy = (total_correct.toFloat() / training_data.length.toFloat()) * 100.0
+            crystal.manifest("Training accuracy: " + accuracy + "%")
+        }
+        
+        // Make batch predictions
+        func predict_batch(data_batch: List[List[Float]]) -> List[Int] {
+            var predictions = []
+            for data_point in data_batch {
+                predictions.append(this.classify_quantum(data_point))
+            }
+            return predictions
         }
     }
 
-    // Symbolic mathematics demonstration
-    func demonstrate_symbolic_mathematics() -> Void {
-        crystal.manifest("=== Symbolic Mathematics Integration ===")
+    // Quantum random number generation with numerological significance
+    func demonstrate_quantum_randomness_with_meaning() -> Void {
+        crystal.manifest("=== Quantum Random Number Generation with Numerological Significance ===")
         
-        // Test numerology
-        var num_meaning_33 = symbolic.numerology.get_meaning(33)
-        crystal.manifest("Numerological meaning of 33: " + num_meaning_33.meaning)
+        var qrng = networking.QRNG()
+        var random_numbers = []
         
-        // Test sacred geometry connections
-        var geometries_19 = symbolic.sacred_geometry.find_geometries_for_number(19)
-        crystal.manifest("Sacred geometries associated with 19: " + geometries_19.length + " found")
-        for geom in geometries_19 {
-            crystal.manifest("  - " + geom.name + ": " + geom.symbolic_meaning)
+        for i in range(10) {
+            var random_float = qrng.generate_float()
+            var random_int = math.abs_int((random_float * 1000).to_int()) % 100 + 1  // 1-100 range
+            random_numbers.append(random_int)
+            crystal.manifest("Quantum random number " + i + ": " + random_int)
+            
+            // Analyze numerological significance
+            var num_meaning = symbolic.numerology.get_meaning(random_int)
+            crystal.manifest("  Numerological meaning: " + num_meaning.meaning)
+            
+            // Find related sacred geometry
+            var geometries = symbolic.sacred_geometry.find_geometries_for_number(random_int)
+            if geometries.length > 0 {
+                crystal.manifest("  Related sacred geometries: " + geometries.length)
+            } else {
+                crystal.manifest("  No direct sacred geometry correspondences found")
+            }
         }
         
-        // Test prime symbolism
-        var prime_symbol_23 = symbolic.primes.get_prime_symbol(23)
-        crystal.manifest("Prime symbolism for 23: " + prime_symbol_23.symbolic_meaning)
-        
-        // Test complex symbolic analysis
-        var complex_analysis = symbolic.integration.comprehensive_analysis(369)
-        crystal.manifest("Complex analysis for 369:")
-        crystal.manifest("  Numerology: " + complex_analysis.numerology_meanings[0].meaning)
-        crystal.manifest("  Geometry links: " + complex_analysis.geometry_correspondences.length)
-        crystal.manifest("  Is prime: " + complex_analysis.prime_symbol.is_prime.toString())
-        
-        // Check if 369 triggers special overlays
-        var overlays = symbolic.integration.overlays(369)
-        crystal.manifest("Special overlays for 369: " + overlays.join(", "))
+        // Calculate statistical properties
+        var mean = ml.training_utils.mean(random_numbers.map(x -> x.toFloat()))
+        crystal.manifest("Mean of quantum random numbers: " + mean)
     }
 
-    // GUI demonstration
-    func demonstrate_gui() -> Void {
-        crystal.manifest("=== GUI Integration Test ===")
+    // Quantum circuit simulation with consciousness-aware measurements
+    func demonstrate_quantum_simulation_with_consciousness() -> Void {
+        crystal.manifest("=== Quantum Circuit Simulation with Consciousness Awareness ===")
         
-        // Just demonstrating the GUI can be imported and basic concepts
-        crystal.manifest("GUI library successfully imported - quantum-enhanced interface capabilities available")
+        // Create a simple quantum circuit with entanglement
+        var circuit = quantum.sim.Circuit(3)  // 3 qubits for rich entanglement possibilities
+        
+        // Apply quantum gates to create interesting states
+        quantum.gate.h(circuit, 0)     // Create superposition in first qubit
+        quantum.gate.cx(circuit, 0, 1)  // Entangle with second qubit
+        quantum.gate.cx(circuit, 0, 2)  // Triply entangle with third qubit (GHZ state)
+        
+        crystal.manifest("Created 3-qubit GHZ state: (|000⟩ + |111⟩)/√2")
+        
+        // The circuit should now be in a GHZ state
+        var statevector = circuit.get_statevector()
+        crystal.manifest("Quantum circuit statevector (first few amplitudes):")
+        for i in range(math.min(8, statevector.length)) {  // Show first 8 for readability
+            var amplitude = statevector[i]
+            crystal.manifest("  |" + format_as_binary(i, 3) + "⟩: " + amplitude.real + " + " + amplitude.imag + "i")
+        }
+        
+        // Perform consciousness-aware measurements
+        crystal.manifest("Performing quantum measurements with consciousness field integration:")
+        for i in range(8) {
+            circuit.reset()  // Reset to initial state for each measurement
+            quantum.gate.h(circuit, 0)
+            quantum.gate.cx(circuit, 0, 1)
+            quantum.gate.cx(circuit, 0, 2)
+            
+            var measurement = quantum.sim.measure_all(circuit)
+            var measurement_num = measurement[0]*4 + measurement[1]*2 + measurement[2]  // Convert to number
+            
+            // Apply numerological meaning to quantum measurement
+            var num_meaning = symbolic.numerology.get_meaning(measurement_num)
+            
+            crystal.manifest("  Measurement " + i + ": |" + measurement.join("") + "⟩ (value " + measurement_num + ", numerology: " + num_meaning.meaning + ")")
+        }
     }
 
-    // Main execution function
+    // Helper to format integer as binary string
+    func format_as_binary(num: Int, width: Int) -> String {
+        var result = ""
+        var n = num
+        
+        for i in range(width) {
+            if n % 2 == 1 {
+                result = "1" + result
+            } else {
+                result = "0" + result
+            }
+            n = n / 2
+        }
+        
+        return result
+    }
+
+    // Main demonstration function
     func run_demo() -> Void {
         crystal.manifest("======= NymyaLang Killer Demo v0.2.0-alpha~3 =======")
-        crystal.manifest("Quantum-Enhanced Hybrid Classifier with GUI Integration")
-        crystal.manifest("===================================================")
+        crystal.manifest("Quantum-Enhanced Hybrid Classifier with Consciousness Integration")
+        crystal.manifest("=====================================================")
         
-        // Demonstrate symbolic mathematics
-        demonstrate_symbolic_mathematics()
+        // Demonstrate quantum randomness with symbolic meaning
+        demonstrate_quantum_randomness_with_meaning()
         crystal.manifest("")
         
-        // Demonstrate GUI capabilities
-        demonstrate_gui()
+        // Demonstrate quantum simulation with consciousness awareness
+        demonstrate_quantum_simulation_with_consciousness()
         crystal.manifest("")
         
-        // Test quantum classification
-        crystal.manifest("=== Quantum Classification Test ===")
-        var classifier = QuantumEnhancedClassifier(4)  // 4 features
+        // Demonstrate quantum classifier
+        crystal.manifest("=== Quantum-Enhanced Classifier with Numerological Processing ===")
         
-        // Simple test with a few data points
+        // Create simple training data (XOR-like problem where class depends on sum parity)
+        var training_data = [
+            [0.1, 0.1, 0.1],  // Sum ~0.3 -> Class 0 (low significance) 
+            [0.9, 0.1, 0.2],  // Sum ~1.2 -> Class 1 (high significance)
+            [0.2, 0.8, 0.1],  // Sum ~1.1 -> Class 1 (high significance)
+            [0.1, 0.2, 0.1],  // Sum ~0.4 -> Class 0 (low significance)
+            [0.7, 0.8, 0.9],  // Sum ~2.4 -> Class 1 (high significance with 33 connection)
+        ]
+        
+        var labels = [0, 1, 1, 0, 1]  // Expected classes
+        
+        // Create and train the quantum classifier with numerological enhancement
+        var classifier = QuantumEnhancedClassifier(3, 2)  // 3 features, 2 classes
+        classifier.train(training_data, labels)
+        
+        // Test the classifier on new data
+        crystal.manifest("\nTesting quantum classifier on new data:")
         var test_data = [
-            [0.1, 0.2, 0.3, 0.4],  // Example 1
-            [0.8, 0.9, 0.1, 0.2],  // Example 2
-            [0.4, 0.5, 0.6, 0.7],  // Example 3
-            [0.2, 0.3, 0.8, 0.9]   // Example 4
+            [0.3, 0.3, 0.2],  // Should be Class 0
+            [0.8, 0.1, 0.9],  // Should be Class 1
+            [0.5, 0.4, 0.6],  // Should be Class 1 (sum is significant)
         ]
         
         for i in range(test_data.length) {
-            var result = classifier.classify(test_data[i])
-            crystal.manifest("Test " + i + ": [" + test_data[i].join(", ") + "] -> Class " + result)
+            var result = classifier.classify_quantum(test_data[i])
+            var input_sum = test_data[i][0] + test_data[i][1] + test_data[i][2]
+            crystal.manifest("Test " + i + ": sum=" + input_sum + " [" + test_data[i].join(", ") + "] -> Class " + result)
+        }
+        
+        // Demonstrate sacred geometry integration in quantum states
+        crystal.manifest("\n=== Sacred Geometry in Quantum States ===")
+        // Map specific quantum states to sacred geometry
+        var sacred_numbers = [3, 7, 12, 13, 19, 33, 108, 144]
+        for sacred_num in sacred_numbers {
+            var geom_meanings = symbolic.sacred_geometry.get_geometry_by_id(get_geometry_id_for_number(sacred_num))
+            crystal.manifest(sacred_num + " -> " + geom_meanings.name + ": " + geom_meanings.symbolic_meaning)
         }
         
         crystal.manifest("")
         crystal.manifest("======= Demo Complete =======")
-        crystal.manifest("Demonstrated: Quantum-enhanced classification, symbolic mathematics,")
-        crystal.manifest("numerology integration, sacred geometry mapping, prime symbolism,")
-        crystal.manifest("and basic GUI capabilities. The system shows true hybrid classical-quantum")
-        crystal.manifest("computing with consciousness-aware symbolic processing.")
-        crystal.manifest("=============================")
+        crystal.manifest("Demonstrated: Quantum random number generation with numerological meaning,")
+        crystal.manifest("quantum circuit simulation with consciousness awareness,")
+        crystal.manifest("quantum-enhanced classification with numerological preprocessing,")
+        crystal.manifest("and sacred geometry integration in quantum computing.")
+        crystal.manifest("This showcases the hybrid classical-quantum-symbolic design of NymyaLang.")
+        crystal.manifest("==============================")
+    }
+    
+    // Helper to get appropriate geometry ID for a number
+    func get_geometry_id_for_number(n: Int) -> String {
+        if n == 3 {
+            return "triangle"
+        } else if n == 7 {
+            return "seed_of_life" 
+        } else if n == 12 {
+            return "zodiac"
+        } else if n == 13 {
+            return "metatron_cube"
+        } else if n == 19 {
+            return "flower_of_life"
+        } else if n == 33 {
+            return "christ_consciousness"
+        } else if n == 108 {
+            return "sacred_harmonic"
+        } else if n == 144 {
+            return "divine_structure"
+        } else {
+            return "circle"  // Default
+        }
     }
 }
 

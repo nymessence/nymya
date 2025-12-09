@@ -1,0 +1,10 @@
+import quantum
+import quantum.sim
+import crystal
+import math
+crystal.manifest("Testing quantum library...")
+var circuit = quantum.sim.Circuit(2)
+quantum.gate.h(circuit, 0)  // Hadamard on qubit 0
+quantum.gate.cx(circuit, 0, 1)  // CNOT gate
+var measurement = quantum.sim.measure_all(circuit)
+crystal.manifest("Quantum circuit measurement: [" + measurement.join(", ") + "]")
