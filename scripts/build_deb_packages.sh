@@ -1,16 +1,26 @@
 #!/bin/bash
 # NymyaLang Package Build Script
-# Creates .deb packages for the three target architectures: amd64, arm64, armhf
+# Creates .deb packages for multiple architectures: amd64, arm64, armhf
+# Source version info from version.conf
 
 set -e  # Exit on error
 
-echo "=== NymyaLang Package Build System ==="
+# Source version information from version.conf
+if [ -f "/home/erick/nymya/version.conf" ]; then
+    source /home/erick/nymya/version.conf
+else
+    # Default values if version.conf not found
+    VERSION="0.2.0"
+    DEV_STAGE="alpha"
+    REVISION="6"
+    BUILD_DIR="nymya-build-${VERSION}"
+    VERSION_STRING="${VERSION}-${DEV_STAGE}~${REVISION}"
+fi
+
+echo "=== NymyaLang Package Build System v${VERSION_STRING} ==="
 echo "Building .deb packages for multiple architectures: amd64, arm64, armhf"
 echo ""
 
-VERSION=${1:-"0.2.0"}
-DEV_STAGE="alpha"
-REVISION="5"
 BUILD_DIR="nymya-build-${VERSION}"
 
 # Create root build directory
