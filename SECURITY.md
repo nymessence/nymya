@@ -17,7 +17,7 @@ We support the following versions with security updates:
 
 **Do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report security concerns by emailing our security team at: **nymessence-security@gmail.com**
+Instead, please report security concerns by emailing us: **nymessence@gmail.com**
 
 ### What to Include in Your Report
 
