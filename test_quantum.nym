@@ -1,9 +1,0 @@
-import crystal
-import quantum
-import quantum.sim
-
-crystal.manifest("Quantum test: Creating circuit")
-var circuit = quantum.sim.Circuit(2)
-quantum.gate.h(circuit, 0)
-quantum.gate.cx(circuit, 0, 1)
-crystal.manifest("Created Bell state circuit with 2 qubits")

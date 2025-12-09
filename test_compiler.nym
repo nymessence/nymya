@@ -1,6 +1,0 @@
-import crystal
-import math
-
-crystal.manifest("Compiler test: Basic functionality")
-var result = math.sqrt(16.0)
-crystal.manifest("Square root of 16: " + result)

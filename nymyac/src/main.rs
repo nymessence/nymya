@@ -308,7 +308,8 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 if module == "crystal" && function == "manifest" && args.len() == 1 {
                     // Extract string content from the argument (remove quotes)
                     let arg = &args[0];
-                    if arg.starts_with('"') && arg.ends_with('"') {
+                    if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                        // Remove surrounding quotes (either single or double)
                         let content = &arg[1..arg.len()-1]; // Remove surrounding quotes
                         cpp_code.push_str(&format!("    crystal::manifest(\"{}\");\n", content));
                     } else {
@@ -319,8 +320,10 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                     // Generic function call generation
                     let args_cpp: Vec<String> = args.iter()
                         .map(|arg| {
-                            if arg.starts_with('"') && arg.ends_with('"') {
-                                arg.to_string() // String literals as-is
+                            if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                                // Convert single quotes to double quotes for C++
+                                let content = &arg[1..arg.len()-1];
+                                format!("\"{}\"", content)
                             } else {
                                 arg.to_string() // Variables or other expressions
                             }
@@ -342,8 +345,10 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
         Expression::FunctionCall { module, function, args } => {
             let args_cpp: Vec<String> = args.iter()
                 .map(|arg| {
-                    if arg.starts_with('"') && arg.ends_with('"') {
-                        arg.to_string() // String literals as-is
+                    if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                        // Convert single quotes to double quotes for C++
+                        let content = &arg[1..arg.len()-1];
+                        format!("\"{}\"", content)
                     } else {
                         arg.to_string() // Variables or other expressions
                     }

@@ -1,5 +1,0 @@
-import crystal
-import gui
-
-crystal.manifest("GUI import test: Libraries accessible")
-crystal.manifest("GUI system components loaded successfully")

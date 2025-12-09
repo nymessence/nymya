@@ -1,3 +1,0 @@
-import crystal
-crystal.manifest("NymyaLang v0.2.0-alpha~6 is working correctly!")
-
