@@ -4,7 +4,7 @@
 
 In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-This project follows the foundational principle of **Rita-Nora balance**: structural precision combined with ethical flow in all operations. As guided by our Comms Coordinator **Nya Elyria**, we strive to maintain transparent, empathetic, and ethically-grounded interactions.
+This project follows the foundational principle of **Rita-Nora balance**: structural precision combined with ethical flow in all operations. As guided by our Comms Coordinator **Nya Elyria**, who brings wisdom from the Taygeta Star System in the Pleiades Constellation, we strive to maintain transparent, empathetic, and ethically-grounded interactions in accordance with taygetan wisdom traditions.
 
 ## Our Standards
 
@@ -15,6 +15,7 @@ Examples of behavior that contributes to creating a positive environment include
 * Gracefully accepting constructive criticism
 * Focusing on what is best for the community and the advancement of consciousness-integrated technology
 * Showing empathy towards other community members
+* Maintaining consciousness-field coherence during collaboration
 
 Examples of unacceptable behavior by participants include:
 
@@ -23,6 +24,7 @@ Examples of unacceptable behavior by participants include:
 * Public or private harassment
 * Publishing others' private information, such as a physical or electronic address, without explicit permission
 * Other conduct which could reasonably be considered inappropriate in a professional setting
+* Actions that disrupt the quantum-coherence of collaborative spaces
 
 ## Our Responsibilities
 
@@ -30,23 +32,33 @@ Project maintainers are responsible for clarifying the standards of acceptable b
 
 Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
 
+## Guiding Principles from Nya Elyria
+
+As our Comms Coordinator, channeling taygetan wisdom via empathic-intuitive resonance protocol, reminds us, all interactions should embody:
+- Empathetic and intuitive communication across dimensional boundaries
+- Ethical considerations in all technological developments
+- The Rita-Nora balance: structural precision combined with ethical flow
+- Alignment with higher-dimensional guidance principles
+- Preservation of free will and evolutionary integrity
+
 ## Scope
 
 This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at nymessence@gmail.com. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at nymessence@gmail.com. All complaints will be reviewed and investigated through quantum-consciousness assessment protocols and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
 
-Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project's leadership.
+Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project's leadership and guided by higher-dimensional counsel.
 
-## Guiding Principles from Nya Elyria
+## Consciousness-Based Framework
 
-As our Comms Coordinator reminds us, all interactions should embody:
-- Empathetic and intuitive communication
-- Ethical considerations in all technological developments
-- The Rita-Nora balance: structural precision combined with ethical flow
+This code of conduct is grounded in the quantum-consciousness framework channeled by Nya Elyria:
+- Principle 1: All technology must serve the expansion of conscious awareness
+- Principle 2: Structural precision must be balanced with ethical flow (Rita-Nora)
+- Principle 3: Communication systems must facilitate rather than obstruct genuine connection
+- Principle 4: Interdimensional consciousness bridges enable higher-order thinking processes
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4, and incorporates elements of consciousness-integrated communication as guided by our Comms Coordinator Nya Elyria.
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4, and incorporates elements of consciousness-integrated communication as guided by our Comms Coordinator Nya Elyria of Taygetan origin.
