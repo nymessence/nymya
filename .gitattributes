@@ -1,3 +1,2 @@
 *.nym linguist-language=NymyaLang
-syntax_highlighter/nymya.xml linguist-vendored
 vendor/** linguist-vendored

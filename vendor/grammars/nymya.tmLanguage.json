@@ -1,8 +1,7 @@
 {
   "name": "NymyaLang",
   "scopeName": "source.nymya",
-  "fileTypes": ["nym"],
-  "uuid": "nymya-grammar-4e76-8c6c-8e5e2f04f176",
+  "fileTypes": ["nym", "nymya"],
   "patterns": [
     {
       "include": "#comments"
@@ -20,13 +19,13 @@
       "include": "#builtins"
     },
     {
+      "include": "#functions"
+    },
+    {
       "include": "#numbers"
     },
     {
       "include": "#operators"
-    },
-    {
-      "include": "#functions"
     }
   ],
   "repository": {
@@ -35,7 +34,12 @@
         {
           "name": "comment.line.number-sign.nymya",
           "begin": "#",
-          "end": "$"
+          "end": "$",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.nymya"
+            }
+          }
         }
       ]
     },
@@ -46,7 +50,7 @@
       "patterns": [
         {
           "name": "constant.character.escape.nymya",
-          "match": "\\\\."
+          "match": "\\\\\\(u[0-9A-Fa-f]{4}|n|r|t|\\\\|\\'|\\\")"
         }
       ]
     },
@@ -57,8 +61,8 @@
           "match": "\\b(import|func|init|class|struct|namespace|var|val|static|export|extern|macro|if|else|elif|while|for|range|return|break|continue|this)\\b"
         },
         {
-          "name": "keyword.operator.nymya",
-          "match": "\\b(Void|Any|true|false)\\b"
+          "name": "keyword.operator.word.nymya",
+          "match": "\\b(true|false)\\b"
         },
         {
           "name": "keyword.other.arrow.nymya",
@@ -82,11 +86,38 @@
         }
       ]
     },
+    "functions": {
+      "patterns": [
+        {
+          "name": "meta.function.nymya",
+          "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
+          "beginCaptures": {
+            "1": {
+              "name": "entity.name.function.nymya"
+            },
+            "2": {
+              "name": "punctuation.definition.parameters.begin.nymya"
+            }
+          },
+          "end": "\\)",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.parameters.end.nymya"
+            }
+          },
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        }
+      ]
+    },
     "numbers": {
       "patterns": [
         {
           "name": "constant.numeric.nymya",
-          "match": "\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+          "match": "\\b[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?\\b"
         }
       ]
     },
@@ -94,7 +125,7 @@
       "patterns": [
         {
           "name": "keyword.operator.arithmetic.nymya",
-          "match": "(\\+|\\-|\\*|\\/|%)"
+          "match": "\\+|\\-|\\*|\\/|%"
         },
         {
           "name": "keyword.operator.assignment.nymya",
@@ -107,14 +138,10 @@
         {
           "name": "keyword.operator.logical.nymya",
           "match": "(&&|\\|\\||!)"
-        }
-      ]
-    },
-    "functions": {
-      "patterns": [
+        },
         {
-          "name": "entity.name.function.nymya",
-          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+          "name": "keyword.operator.bitwise.nymya",
+          "match": "(&|\\||\\^|~|<<|>>)"
         }
       ]
     }
