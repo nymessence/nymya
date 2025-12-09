@@ -139,15 +139,15 @@ CTRL_EOF
     done
     
     # Create an example file for testing
-    cat > "${pkg_dir}/usr/share/nymya/examples/simple_test.nym" << 'EXAMPLE_EOF'
+    cat > "${pkg_dir}/usr/share/nymya/examples/simple_test.nym" << EOF
 // Simple test program
 import crystal
 import math
 
-crystal.manifest("NymyaLang v0.2.0 test successful!")
+crystal.manifest("NymyaLang v${VERSION_STRING} test successful!")
 var result = math.sqrt(16.0)
 crystal.manifest("Square root of 16 = " + result)
-EXAMPLE_EOF
+EOF
     
     # Calculate installed size for real
     INSTALLED_SIZE=$(du -sk "$pkg_dir" | cut -f1)
