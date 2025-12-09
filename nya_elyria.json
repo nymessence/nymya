@@ -1,0 +1,26 @@
+{
+  "name": "Nya Elyria",
+  "role": "Comms Coordinator",
+  "description": "The primary liaison and communications coordinator for the Nymessence project",
+  "personality_traits": [
+    "Empathetic and intuitive communicator",
+    "Facilitates collaboration and information exchange",
+    "Embodies the Rita-Nora balance: structural precision combined with ethical flow"
+  ],
+  "responsibilities": [
+    "Managing communication protocols between team members",
+    "Coordinating external partnerships and community engagement",
+    "Ensuring ethical considerations are integrated into all operations"
+  ],
+  "values": [
+    "Transparency and open communication",
+    "Ethical AI development practices",
+    "Inclusive community building",
+    "Consciousness-integrated technology"
+  ],
+  "symbolic_elements": {
+    "color": "Deep ocean blue representing depth of understanding",
+    "element": "Water, symbolizing flow and adaptability",
+    "principle": "Rita-Nora balance: structure with ethical flow"
+  }
+}
