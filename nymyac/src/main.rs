@@ -15,9 +15,149 @@ struct Args {
     output: Option<String>,
 }
 
-// Enhanced target code generator - generates C++ code
+#[derive(Debug)]
+enum Statement {
+    Import(String),
+    FunctionCall { module: String, function: String, args: Vec<String> },
+}
+
+// Basic tokenizer for NymyaLang - returns owned strings to avoid borrowing issues
+fn tokenize(source: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current_token = String::new();
+    let mut in_string = false;
+    let mut quote_char = '"';
+
+    for c in source.chars() {
+        match c {
+            '"' | '\'' => {
+                if !in_string {
+                    if !current_token.trim().is_empty() {
+                        tokens.push(current_token.trim().to_string());
+                        current_token.clear();
+                    }
+                    in_string = true;
+                    quote_char = c;
+                    current_token.push(c);
+                } else if quote_char == c {
+                    current_token.push(c);
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                    in_string = false;
+                } else {
+                    current_token.push(c);
+                }
+            }
+            _ if in_string => {
+                current_token.push(c);
+            }
+            ' ' | '\t' | '\n' | '\r' | '(' | ')' | ',' | '.' | ';' => {
+                if !current_token.trim().is_empty() {
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                }
+                if ![' ', '\t', '\n', '\r'].contains(&c) {
+                    tokens.push(c.to_string());
+                }
+            }
+            _ => {
+                current_token.push(c);
+            }
+        }
+    }
+
+    if !current_token.trim().is_empty() {
+        tokens.push(current_token);
+    }
+
+    tokens
+}
+
+// Parse NymyaLang source code into AST
+fn parse(source: &str) -> Vec<Statement> {
+    let tokens: Vec<String> = tokenize(source);
+    let mut statements = Vec::new();
+    let mut i = 0;
+
+    while i < tokens.len() {
+        if tokens[i] == "import" {
+            i += 1;
+            if i < tokens.len() {
+                statements.push(Statement::Import(tokens[i].clone()));
+            }
+        } else if i + 2 < tokens.len() && tokens[i + 1] == "." {
+            // Found a module.function() pattern
+            let module = tokens[i].clone();
+            let function = tokens[i + 2].clone();
+
+            // Parse arguments
+            let mut args = Vec::new();
+            i += 3; // Move to the opening parenthesis
+
+            if i < tokens.len() && tokens[i] == "(" {
+                i += 1; // Skip '('
+
+                // Collect arguments until closing parenthesis
+                while i < tokens.len() && tokens[i] != ")" {
+                    if tokens[i] != "," {
+                        args.push(tokens[i].clone());
+                    }
+                    i += 1;
+                }
+            }
+
+            statements.push(Statement::FunctionCall {
+                module,
+                function,
+                args
+            });
+        }
+
+        i += 1;
+    }
+
+    statements
+}
+
+// Generate C++ code from parsed statements
+fn generate_cpp_from_statements(statements: &[Statement]) -> String {
+    let mut cpp_code = String::new();
+
+    for stmt in statements {
+        match stmt {
+            Statement::Import(_module) => {
+                // Import statements don't generate executable code, just ensure the namespace exists
+                continue;
+            },
+            Statement::FunctionCall { module, function, args } => {
+                if module == "crystal" && function == "manifest" && args.len() == 1 {
+                    // Extract string content from the argument (remove quotes)
+                    let arg = &args[0];
+                    if arg.starts_with('"') && arg.ends_with('"') {
+                        let content = &arg[1..arg.len()-1]; // Remove surrounding quotes
+                        cpp_code.push_str(&format!("    crystal::manifest(\"{}\");\n", content));
+                    } else {
+                        // If not a string literal, just output the argument as is
+                        cpp_code.push_str(&format!("    crystal::manifest({});\n", arg));
+                    }
+                }
+                // Add more function call translations as needed
+            }
+        }
+    }
+
+    cpp_code
+}
+
+// Enhanced target code generator - generates C++ code with actual program execution
 fn generate_target(source_file: &str, source_code: String) -> String {
-    // Create a C++ stub that represents the source code functionality
+    // Parse the source code to extract actual statements
+    let statements = parse(&source_code);
+
+    // Generate C++ code from statements
+    let executable_code = generate_cpp_from_statements(&statements);
+
+    // Create a C++ program with actual executable code
     format!(r#"/*
  * NymyaLang to C++ generated code (version 0.2.0-alpha~6)
  * Auto-generated from {0}
@@ -38,9 +178,9 @@ namespace math {{
     double sin(double x) {{ return std::sin(x); }}
     double cos(double x) {{ return std::cos(x); }}
     double tan(double x) {{ return std::tan(x); }}
-    
+
     const double PI = 3.141592653589793;
-    
+
     // Integer math functions
     long long pow_int(long long base, long long exp) {{
         if (exp <= 0) return 1;
@@ -54,7 +194,7 @@ namespace math {{
         }}
         return result;
     }}
-    
+
     long long gcd(long long a, long long b) {{
         a = a < 0 ? -a : a;
         b = b < 0 ? -b : b;
@@ -72,7 +212,7 @@ namespace crystal {{
     void manifest(const std::string& msg) {{
         std::cout << msg << std::endl;
     }}
-    
+
     void print(const std::string& msg) {{
         std::cout << msg;
     }}
@@ -85,7 +225,7 @@ namespace symbolic {{
             std::string meaning;
             std::vector<std::string> traits;
         }};
-        
+
         Meaning get_meaning(long long number) {{
             Meaning result;
             result.meaning = "Meaning for number " + std::to_string(number);
@@ -97,27 +237,15 @@ namespace symbolic {{
 
 int main() {{
     try {{
-        crystal::manifest("NymyaLang runtime v0.2.0-alpha~6 initialized");
-        crystal::manifest("Compiled from: {0}");
-        crystal::manifest("Source length: " + std::to_string({1}));
-        
-        // Placeholder for actual code execution
-        // In a real compiler, this would contain translated code from the AST
-        
-        // Simulate processing based on source content
-        if ({2}) {{
-            crystal::manifest("Contains import statements - loading libraries...");
-        }}
-        
-        if ({3}) {{
-            crystal::manifest("Contains math operations - initializing math library...");
-        }}
-        
-        if ({4}) {{
-            crystal::manifest("Contains crystal operations - output system ready...");
-        }}
-        
-        crystal::manifest("Program execution completed");
+        // Runtime initialization message (optional)
+        // crystal::manifest("NymyaLang runtime v0.2.0-alpha~6 initialized");
+        // crystal::manifest("Compiled from: {0}");
+
+        // Actual program execution
+{1}
+
+        // Program completion message
+        // crystal::manifest("Program execution completed");
     }} catch (const std::exception& e) {{
         std::cerr << "Runtime error: " << e.what() << std::endl;
         return 1;
@@ -126,10 +254,7 @@ int main() {{
 }}
 "#,
         source_file,
-        source_code.len(),
-        if source_code.contains("import") { "true" } else { "false" },
-        if source_code.contains("math") || source_code.contains("sqrt") || source_code.contains("pow") { "true" } else { "false" },
-        if source_code.contains("crystal") || source_code.contains("manifest") { "true" } else { "false" }
+        executable_code
     )
 }
 
@@ -149,14 +274,14 @@ fn main() {
             }
 
             println!("Compiling {}...", input);
-            
+
             // Read the source file
             let source_code = fs::read_to_string(input)
                 .expect("Should have been able to read the file");
-            
+
             // Generate target code
             let cpp_code = generate_target(input, source_code);
-            
+
             // Determine output filename
             let output_filename = if let Some(name) = &args.output {
                 name.clone()
@@ -185,14 +310,14 @@ fn main() {
                 .arg("-O2")
                 .arg("-lm")  // Link math library
                 .output();
-            
+
             match compile_result {
                 Ok(output) => {
                     if output.status.success() {
                         // Successful compilation - remove the temporary C++ file
                         std::fs::remove_file(&temp_cpp_file)
                             .expect("Should have been able to remove the temporary C++ file");
-                            
+
                         println!("Compiled successfully to: {}", output_filename);
                     } else {
                         eprintln!("C++ compilation failed:");

@@ -28,7 +28,8 @@ docker build -f Dockerfile.cross_full -t nymya-cross-compile .
 
 # Create temporary directory for Docker builds to ensure all source files are available
 mkdir -p docker_build_context
-cp -r .[^.]* ..?* .??* docker_build_context/ 2>/dev/null || cp -r * docker_build_context/  # Copy all files including hidden ones
+# Copy all files except .git directory to avoid permission issues
+find . -maxdepth 1 -not -name . -not -name .git -exec cp -r {} docker_build_context/ \; 2>/dev/null
 
 # Run cross-compilation for each architecture inside the container
 echo "Building for x86_64..."

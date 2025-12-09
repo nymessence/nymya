@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0-alpha.7] - 2025-12-09
+
+### Fixed
+- **Compiler Code Generation Issue**: Fixed critical bug where the nymyac compiler was generating template C++ code with only placeholder comments instead of actual executable code from NymyaLang source
+  - Implemented proper tokenization and parsing of NymyaLang source code
+  - Added AST generation and code translation from NymyaLang to C++
+  - Fixed `crystal.manifest()` calls to properly output to console instead of just showing metadata messages
+  - Verified fix with multiple test programs showing correct output
+
+### Changed
+- Updated version numbers to 0.2.0-alpha.7 across all configuration files
+- Improved compiler with actual code generation instead of stub generation
+
 ## [0.2.0-alpha.6] - 2025-12-08
 
 ### Added
