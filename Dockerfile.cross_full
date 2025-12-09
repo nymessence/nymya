@@ -1,0 +1,76 @@
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV RUST_BACKTRACE=1
+
+# Install essential build tools and cross-compilation toolchains
+RUN apt-get update && \
+    apt-get install -y \
+    # Essential build tools  
+    build-essential \
+    gcc \
+    g++ \
+    clang \
+    cmake \
+    make \
+    pkg-config \
+    # Cross-compilation toolchains
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    gcc-x86-64-linux-gnu \
+    g++-x86-64-linux-gnu \
+    gcc-arm-linux-gnueabihf \
+    g++-arm-linux-gnueabihf \
+    gcc-riscv64-linux-gnu \
+    g++-riscv64-linux-gnu \
+    # Additional tools
+    qemu-user-static \
+    qemu-system-aarch64 \
+    qemu-system-x86 \
+    qemu-system-x86-64 \
+    qemu-system-riscv64 \
+    binfmt-support \
+    # Rust toolchain
+    curl \
+    wget \
+    git \
+    # Libraries
+    libssl-dev \
+    zlib1g-dev \
+    # Utilities
+    file \
+    jq \
+    python3 \
+    dpkg-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install targets for cross-compilation
+RUN rustup target add \
+    x86_64-unknown-linux-gnu \
+    aarch64-unknown-linux-gnu \
+    armv7-unknown-linux-gnueabihf \
+    riscv64gc-unknown-linux-gnu
+
+# Configure cargo for cross-compilation
+RUN mkdir -p ~/.cargo && \
+    echo '[target.x86_64-unknown-linux-gnu]' > ~/.cargo/config.toml && \
+    echo 'linker = "x86_64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.aarch64-unknown-linux-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.armv7-unknown-linux-gnueabihf]' >> ~/.cargo/config.toml && \
+    echo 'linker = "arm-linux-gnueabihf-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml && \
+    echo '[target.riscv64gc-unknown-linux-gnu]' >> ~/.cargo/config.toml && \
+    echo 'linker = "riscv64-linux-gnu-gcc"' >> ~/.cargo/config.toml && \
+    echo '' >> ~/.cargo/config.toml
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

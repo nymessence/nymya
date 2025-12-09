@@ -1,0 +1,179 @@
+// Test 5: Nontrivial Computation - Prime Number Detection and Factoring
+// Demonstrates nontrivial computational tasks required for Turing completeness
+
+import crystal
+import math
+
+namespace turing.nontrivial {
+
+    // Prime number detection - nontrivial computation
+    func is_prime(n: Int) -> Bool {
+        if n <= 1 {
+            return false
+        }
+        if n <= 3 {
+            return true
+        }
+        if n % 2 == 0 or n % 3 == 0 {
+            return false
+        }
+        
+        var i = 5
+        while i * i <= n {
+            if n % i == 0 or n % (i + 2) == 0 {
+                return false
+            }
+            i = i + 6
+        }
+        
+        return true
+    }
+    
+    // Generate prime numbers up to limit
+    func generate_primes(limit: Int) -> List[Int] {
+        var primes = []
+        var candidate = 2
+        
+        while candidate < limit {
+            if is_prime(candidate) {
+                primes.append(candidate)
+            }
+            candidate = candidate + 1
+        }
+        
+        return primes
+    }
+    
+    // Factor a number - nontrivial computational problem
+    func factorize(n: Int) -> List[Int] {
+        if n <= 1 {
+            return []
+        }
+        
+        var factors = []
+        var temp = n
+        
+        // Factor out 2s
+        while temp % 2 == 0 {
+            factors.append(2)
+            temp = temp / 2
+        }
+        
+        // Factor out odd numbers starting from 3
+        var i = 3
+        while i * i <= temp {
+            while temp % i == 0 {
+                factors.append(i)
+                temp = temp / i
+            }
+            i = i + 2
+        }
+        
+        // If temp is still greater than 1, it's a prime
+        if temp > 1 {
+            factors.append(temp)
+        }
+        
+        return factors
+    }
+    
+    // Fast exponentiation - another nontrivial computation
+    func fast_pow(base: Int, exp: Int) -> Int {
+        if exp <= 0 {
+            return 1
+        }
+        
+        var result = 1
+        var b = base
+        var e = exp
+        
+        while e > 0 {
+            if e % 2 == 1 {
+                result = result * b
+            }
+            b = b * b
+            e = e / 2
+        }
+        
+        return result
+    }
+    
+    // GCD computation using Euclidean algorithm
+    func gcd(a: Int, b: Int) -> Int {
+        var x = math.abs_int(a)
+        var y = math.abs_int(b)
+        
+        while y != 0 {
+            var temp = y
+            y = x % y
+            x = temp
+        }
+        
+        return x
+    }
+    
+    // Run all nontrivial computation tests
+    func run_tests() -> Void {
+        crystal.manifest("=== Nontrivial Computation Tests ===")
+        
+        // Test prime detection
+        crystal.manifest("--- Prime Number Detection ---")
+        var test_numbers = [2, 3, 4, 5, 17, 25, 29, 97, 100, 101]
+        
+        for num in test_numbers {
+            var prime_result = is_prime(num)
+            crystal.manifest(num + " is prime: " + prime_result)
+        }
+        
+        // Test prime generation
+        crystal.manifest("\n--- Prime Generation (up to 50) ---")
+        var primes_50 = generate_primes(50)
+        crystal.manifest("Primes up to 50: [" + primes_50.join(", ") + "]")
+        
+        // Test number factorization
+        crystal.manifest("\n--- Number Factorization ---")
+        var factorization_tests = [12, 24, 35, 97, 100, 128, 255, 315]
+        
+        for num in factorization_tests {
+            var factors = factorize(num)
+            crystal.manifest(num + " = " + factors.join(" × "))
+        }
+        
+        // Test fast exponentiation
+        crystal.manifest("\n--- Fast Exponentiation ---")
+        var exp_tests = [[2, 10], [3, 5], [5, 4], [11, 3]]
+        
+        for test in exp_tests {
+            var base = test[0]
+            var exp = test[1]
+            var result = fast_pow(base, exp)
+            crystal.manifest(base + "^" + exp + " = " + result)
+        }
+        
+        // Test GCD computation
+        crystal.manifest("\n--- GCD Computation ---")
+        var gcd_tests = [[48, 18], [100, 25], [17, 13], [1071, 462]]
+        
+        for test in gcd_tests {
+            var a = test[0]
+            var b = test[1]
+            var result = gcd(a, b)
+            crystal.manifest("GCD(" + a + ", " + b + ") = " + result)
+        }
+        
+        // Demonstrate symbolic mathematics integration
+        crystal.manifest("\n--- Symbolic Mathematics Integration ---")
+        var meaning_33 = symbolic.get_meaning(33)
+        crystal.manifest("Numerological meaning of 33: " + meaning_33.meaning)
+        
+        var prime_symbol_23 = symbolic.primes.get_prime_symbol(23)
+        crystal.manifest("Prime symbolism for 23: " + prime_symbol_23.symbolic_meaning)
+        
+        var geometry_for_19 = symbolic.sacred_geometry.find_geometries_for_number(19)
+        crystal.manifest("Sacred geometries for 19: " + geometry_for_19.length + " found")
+        
+        crystal.manifest("\n=== Nontrivial Computation Tests Complete ===")
+    }
+}
+
+turing.nontrivial.run_tests()

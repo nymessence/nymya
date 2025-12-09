@@ -1,0 +1,7 @@
+import crystal
+import symbolic
+crystal.manifest("Testing symbolic mathematics integration...")
+var meaning_33 = symbolic.get_meaning(33)
+crystal.manifest("Number 33 meaning: " + meaning_33.meaning)
+var geometry_for_19 = symbolic.find_geometries_for_number(19)
+crystal.manifest("Geometries for 19: " + geometry_for_19.length)

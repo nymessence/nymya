@@ -1,0 +1,191 @@
+// Test 3: Memory/Tape Simulation
+// This demonstrates unbounded memory access required for Turing completeness
+
+import crystal
+import math
+
+namespace turing.memory {
+
+    // Simulate a tape with dynamic growth - can grow indefinitely in both directions
+    class Tape {
+        data: List[Int]
+        head_position: Int
+        default_value: Int
+        
+        init() {
+            this.data = [0]  // Initialize with one cell containing 0
+            this.head_position = 0
+            this.default_value = 0
+        }
+        
+        func read() -> Int {
+            if this.head_position >= 0 and this.head_position < this.data.length {
+                return this.data[this.head_position]
+            } else {
+                // If out of bounds, return default value but potentially extend tape
+                return this.default_value
+            }
+        }
+        
+        func write(value: Int) -> Void {
+            // Extend tape if needed
+            while this.head_position >= this.data.length {
+                this.data.append(this.default_value)
+            }
+            
+            // Extend to the left if needed
+            while this.head_position < 0 {
+                this.data.insert(0, this.default_value)
+                this.head_position = this.head_position + 1
+            }
+            
+            this.data[this.head_position] = value
+        }
+        
+        func move_right() -> Void {
+            this.head_position = this.head_position + 1
+        }
+        
+        func move_left() -> Void {
+            this.head_position = this.head_position - 1
+        }
+        
+        func to_string() -> String {
+            var result = "["
+            for i in range(this.data.length) {
+                if i > 0 { result = result + ", " }
+                if i == this.head_position {
+                    result = result + "*" + this.data[i].to_string() + "*"  // Mark head position
+                } else {
+                    result = result + this.data[i].to_string()
+                }
+            }
+            result = result + "]"
+            return result
+        }
+        
+        func get_position() -> Int {
+            return this.head_position
+        }
+        
+        func set_position(pos: Int) -> Void {
+            this.head_position = pos
+        }
+    }
+
+    // Dynamic memory allocation test
+    func test_dynamic_allocation() -> Void {
+        crystal.manifest("=== Dynamic Memory Allocation Test ===")
+        
+        // Create a simple dynamic list to demonstrate unbounded storage
+        var dynamic_list = []
+        var count = 0
+        while count < 20 {
+            dynamic_list.append(count * count)  // Append squares
+            count = count + 1
+        }
+        
+        crystal.manifest("Created dynamic list with " + dynamic_list.length + " elements")
+        crystal.manifest("First 10 elements: " + dynamic_list.slice(0, 10).join(", "))
+        crystal.manifest("Last 10 elements: " + dynamic_list.slice(dynamic_list.length - 10, dynamic_list.length).join(", "))
+        
+        // Test the tape simulation
+        var tape = Tape()
+        crystal.manifest("Initial tape: " + tape.to_string())
+        
+        // Write some values and move the head
+        tape.write(42)
+        crystal.manifest("After writing 42: " + tape.to_string())
+        
+        tape.move_right()
+        tape.write(24)
+        crystal.manifest("After moving right and writing 24: " + tape.to_string())
+        
+        tape.move_right()
+        tape.move_right()
+        tape.write(100)
+        crystal.manifest("After moving 2 more rights and writing 100: " + tape.to_string())
+        
+        tape.move_left()
+        var read_val = tape.read()
+        crystal.manifest("Read value at current position: " + read_val)
+        
+        crystal.manifest("=== Memory/Tape Simulation Test Complete ===\n")
+    }
+
+    // Register machine simulation - another form of unbounded memory
+    class RegisterMachine {
+        registers: List[Int]
+        program_counter: Int
+        
+        init(num_registers: Int) {
+            this.registers = []
+            for i in range(num_registers) {
+                this.registers.append(0)
+            }
+            this.program_counter = 0
+        }
+        
+        func get_register(index: Int) -> Int {
+            if index >= 0 and index < this.registers.length {
+                return this.registers[index]
+            }
+            return 0  // Default for out of bounds
+        }
+        
+        func set_register(index: Int, value: Int) -> Void {
+            // Extend registers if needed
+            while this.registers.length <= index {
+                this.registers.append(0)
+            }
+            this.registers[index] = value
+        }
+        
+        func increment_register(index: Int) -> Void {
+            var current_val = this.get_register(index)
+            this.set_register(index, current_val + 1)
+        }
+        
+        func decrement_register(index: Int) -> Void {
+            var current_val = this.get_register(index)
+            if current_val > 0 {
+                this.set_register(index, current_val - 1)
+            }
+        }
+        
+        func is_zero_register(index: Int) -> Bool {
+            return this.get_register(index) == 0
+        }
+    }
+
+    func test_register_machine() -> Void {
+        crystal.manifest("=== Register Machine Simulation Test ===")
+        
+        // Create a register machine with initial size
+        var rm = RegisterMachine(5)
+        crystal.manifest("Created register machine with 5 initial registers")
+        
+        // Test basic register operations
+        rm.set_register(0, 10)
+        rm.set_register(1, 20)
+        crystal.manifest("R0=" + rm.get_register(0) + ", R1=" + rm.get_register(1))
+        
+        // Test dynamic expansion
+        rm.set_register(10, 99)  // This should expand the register array
+        crystal.manifest("R10=" + rm.get_register(10) + " (registers now have length: " + rm.registers.length + ")")
+        
+        // Test increment/decrement operations
+        rm.increment_register(0)
+        rm.decrement_register(1)
+        crystal.manifest("After inc R0 and dec R1: R0=" + rm.get_register(0) + ", R1=" + rm.get_register(1))
+        
+        crystal.manifest("=== Register Machine Test Complete ===\n")
+    }
+    
+    func run_all_tests() -> Void {
+        test_dynamic_allocation()
+        test_register_machine()
+    }
+}
+
+turing.memory.run_all_tests()

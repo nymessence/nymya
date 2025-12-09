@@ -1,4 +1,4 @@
-# NymyaLang - Advanced AI/ML and Quantum Computing Platform with GUI (v0.2.0-alpha.3)
+# NymyaLang - Advanced AI/ML and Quantum Computing Platform with GUI (v0.2.0-alpha.6)
 
 Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, symbolic mathematics, and GUI capabilities.
 

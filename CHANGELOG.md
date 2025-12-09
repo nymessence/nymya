@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.0-alpha~6] - 2025-12-08
+## [0.2.0-alpha.6] - 2025-12-08
 
 ### Added
 - **Data Structures Library (`data_structures`)**:
