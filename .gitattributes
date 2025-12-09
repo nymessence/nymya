@@ -1,2 +1,2 @@
-*.nym linguist-language=NymyaLang
+*.nym linguist-language=Swift
 vendor/** linguist-vendored
