@@ -27,6 +27,7 @@ enum Expression {
     FunctionCall { module: String, function: String, args: Vec<String> },
     ArrayAccess { array: Box<Expression>, index: Box<Expression> },
     ArrayMethodCall { array: Box<Expression>, method: String, args: Vec<String> },  // For methods like .append(), .length
+    ArrayLiteral(Vec<Expression>), // For array literals like []
     Variable(String),
     Number(f64),
     StringLiteral(String),
@@ -97,6 +98,13 @@ fn tokenize(source: &str) -> Vec<String> {
                     tokens.push(c.to_string());
                 }
             }
+            '[' | ']' => {
+                if !current_token.trim().is_empty() {
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                }
+                tokens.push(c.to_string());
+            }
             _ if c.is_alphanumeric() || c == '_' => {
                 current_token.push(c);
             }
@@ -131,7 +139,7 @@ fn parse(source: &str) -> Vec<Statement> {
                 statements.push(Statement::Import(tokens[i].clone()));
             }
         } else if i + 1 < tokens.len() && tokens[i] == "var" {
-            // Handle variable assignment: var result = module.function(args)
+            // Handle variable assignment: var result = module.function(args) or var list = []
             i += 1; // Skip "var"
             if i < tokens.len() {
                 let var_name = tokens[i].clone();
@@ -183,8 +191,18 @@ fn parse(source: &str) -> Vec<Statement> {
 fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
     // Look for complex expressions like function calls or binary operations
     if *i < tokens.len() {
+        // Handle array literal assignment like: var arr = []
+        if *i < tokens.len() && &tokens[*i] == "[" {
+            if *i + 1 < tokens.len() && &tokens[*i + 1] == "]" {
+                *i += 2; // Skip '[' and ']'
+                return Expression::StringLiteral("std::vector<int>()".to_string()); // Represent empty array as C++ vector initialization
+            } else {
+                // This should be handled in parse_simple_expression as array access
+                return parse_simple_expression(tokens, i);
+            }
+        }
         // Handle array access like: array[index]
-        if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
+        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
             let array_expr = parse_simple_expression(tokens, i); // Parse the array identifier
             *i += 1; // Skip '['
             let index_expr = parse_simple_expression(tokens, i);
@@ -273,8 +291,14 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
 // Helper to parse simple expressions (non-binary)
 fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
     if *i < tokens.len() {
+        // Handle array literal: []
+        if *i + 1 < tokens.len() && &tokens[*i] == "[" && &tokens[*i + 1] == "]" {
+            *i += 2; // Skip '[' and ']'
+            // Return initialization of an empty vector
+            return Expression::StringLiteral("std::vector<int>()".to_string()); // For now, return a C++ vector initialization
+        }
         // Handle array access like: array[index]
-        if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
+        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
             let array_name = tokens[*i].clone(); // Get the array name
             *i += 1; // Skip '['
             let index_expr = parse_simple_expression(tokens, i);
@@ -357,15 +381,23 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 continue;
             },
             Statement::VariableAssignment { var_name, expression } => {
-                // Check if this is an array initialization or an array method call
-                if let Expression::ArrayMethodCall { .. } = expression {
-                    // This is an array operation
-                    let expr_cpp = generate_cpp_for_expression(expression);
-                    cpp_code.push_str(&format!("    {};\n", expr_cpp));
-                } else {
-                    // Regular variable assignment - use auto for better type inference
-                    let expr_cpp = generate_cpp_for_expression(expression);
-                    cpp_code.push_str(&format!("    auto {} = {};\n", var_name, expr_cpp));
+                // Check if this is an array literal initialization or an array method call
+                match expression {
+                    Expression::ArrayLiteral(_elements) => {
+                        // This is an array initialization
+                        let expr_cpp = generate_cpp_for_expression(expression);
+                        cpp_code.push_str(&format!("    auto {} = std::vector<int>();\n", var_name));  // Initialize as empty vector
+                    },
+                    Expression::ArrayMethodCall { .. } => {
+                        // This is an array operation call
+                        let expr_cpp = generate_cpp_for_expression(expression);
+                        cpp_code.push_str(&format!("    {};\n", expr_cpp));
+                    },
+                    _ => {
+                        // Regular variable assignment - use auto for better type inference
+                        let expr_cpp = generate_cpp_for_expression(expression);
+                        cpp_code.push_str(&format!("    auto {} = {};\n", var_name, expr_cpp));
+                    }
                 }
             },
             Statement::FunctionCall { module, function, args } => {
@@ -447,6 +479,10 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                 "set" => format!("{}[{}] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()), args_cpp.get(1).unwrap_or(&"0".to_string())),
                 _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
             }
+        },
+        Expression::ArrayLiteral(elements) => {
+            // For now, represent empty array initialization as a default constructor
+            "std::vector<any>".to_string()  // For empty arrays represented as []
         },
         Expression::Variable(name) => name.clone(),
         Expression::Number(val) => val.to_string(),
