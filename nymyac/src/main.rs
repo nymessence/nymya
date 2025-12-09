@@ -18,7 +18,17 @@ struct Args {
 #[derive(Debug)]
 enum Statement {
     Import(String),
+    VariableAssignment { var_name: String, expression: Expression },
     FunctionCall { module: String, function: String, args: Vec<String> },
+}
+
+#[derive(Debug)]
+enum Expression {
+    FunctionCall { module: String, function: String, args: Vec<String> },
+    Variable(String),
+    Number(f64),
+    StringLiteral(String),
+    BinaryOperation { left: Box<Expression>, operator: String, right: Box<Expression> },
 }
 
 // Basic tokenizer for NymyaLang - returns owned strings to avoid borrowing issues
@@ -28,7 +38,9 @@ fn tokenize(source: &str) -> Vec<String> {
     let mut in_string = false;
     let mut quote_char = '"';
 
-    for c in source.chars() {
+    let mut chars = source.chars().peekable();
+
+    while let Some(c) = chars.next() {
         match c {
             '"' | '\'' => {
                 if !in_string {
@@ -51,17 +63,52 @@ fn tokenize(source: &str) -> Vec<String> {
             _ if in_string => {
                 current_token.push(c);
             }
-            ' ' | '\t' | '\n' | '\r' | '(' | ')' | ',' | '.' | ';' => {
+            ' ' | '\t' | '\n' | '\r' => {
                 if !current_token.trim().is_empty() {
                     tokens.push(current_token.clone());
                     current_token.clear();
                 }
-                if ![' ', '\t', '\n', '\r'].contains(&c) {
+            }
+            '(' | ')' | ',' | ';' => {
+                if !current_token.trim().is_empty() {
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                }
+                tokens.push(c.to_string());
+            }
+            '.' => {
+                // Check if we're handling a floating-point number: if current_token is numeric, append the dot and next digits
+                if !current_token.is_empty() && current_token.chars().all(|ch| ch.is_ascii_digit()) {
+                    // Look ahead to see if the next characters form a decimal number
+                    current_token.push(c); // Add the dot
+
+                    // Gather any following digits to form the decimal part
+                    while let Some(&next_ch) = chars.peek() {
+                        if next_ch.is_ascii_digit() {
+                            current_token.push(chars.next().unwrap());
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    // If not part of a number, handle as a separate token (e.g., in module.function)
+                    if !current_token.trim().is_empty() {
+                        tokens.push(current_token.clone());
+                        current_token.clear();
+                    }
                     tokens.push(c.to_string());
                 }
             }
-            _ => {
+            _ if c.is_alphanumeric() || c == '_' => {
                 current_token.push(c);
+            }
+            _ => {
+                // Operator or other separators
+                if !current_token.trim().is_empty() {
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                }
+                tokens.push(c.to_string());
             }
         }
     }
@@ -84,6 +131,21 @@ fn parse(source: &str) -> Vec<Statement> {
             i += 1;
             if i < tokens.len() {
                 statements.push(Statement::Import(tokens[i].clone()));
+            }
+        } else if i + 1 < tokens.len() && tokens[i] == "var" {
+            // Handle variable assignment: var result = module.function(args)
+            i += 1; // Skip "var"
+            if i < tokens.len() {
+                let var_name = tokens[i].clone();
+                i += 1; // Move to "="
+                if i < tokens.len() && tokens[i] == "=" {
+                    i += 1; // Skip "="
+                    let expr = parse_expression(&tokens, &mut i);
+                    statements.push(Statement::VariableAssignment {
+                        var_name,
+                        expression: expr
+                    });
+                }
             }
         } else if i + 2 < tokens.len() && tokens[i + 1] == "." {
             // Found a module.function() pattern
@@ -119,6 +181,114 @@ fn parse(source: &str) -> Vec<Statement> {
     statements
 }
 
+// Helper function to parse expressions
+fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
+    // Look for complex expressions like function calls or binary operations
+    if *i < tokens.len() {
+        if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
+            // Handle module.function() calls
+            let module = tokens[*i].clone();
+            let function = tokens[*i + 2].clone();
+            *i += 3; // Skip module.function
+
+            let mut args = Vec::new();
+            if *i < tokens.len() && &tokens[*i] == "(" {
+                *i += 1; // Skip '('
+
+                while *i < tokens.len() && &tokens[*i] != ")" {
+                    if &tokens[*i] != "," {
+                        args.push(tokens[*i].clone());
+                    }
+                    *i += 1;
+                }
+
+                if *i < tokens.len() && &tokens[*i] == ")" {
+                    *i += 1; // Skip ')'
+                }
+            }
+
+            return Expression::FunctionCall { module, function, args };
+        } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
+            // String literal
+            let content = tokens[*i][1..tokens[*i].len()-1].to_string(); // Remove quotes
+            *i += 1;
+            return Expression::StringLiteral(content);
+        } else if tokens[*i].parse::<f64>().is_ok() {
+            // Number literal
+            let num = tokens[*i].parse::<f64>().unwrap();
+            *i += 1;
+            return Expression::Number(num);
+        } else if *i + 1 < tokens.len() && &tokens[*i + 1] == "+" {
+            // Handle binary operations like "text + variable"
+            let left_expr = parse_simple_expression(tokens, i);
+            if *i < tokens.len() && &tokens[*i] == "+" {
+                *i += 1; // Skip "+"
+                let right_expr = parse_simple_expression(tokens, i);
+                return Expression::BinaryOperation {
+                    left: Box::new(left_expr),
+                    operator: "+".to_string(),
+                    right: Box::new(right_expr)
+                };
+            }
+        } else {
+            // Simple variable name
+            let var_name = tokens[*i].clone();
+            *i += 1;
+            return Expression::Variable(var_name);
+        }
+    }
+
+    // Default return if nothing matches
+    Expression::StringLiteral("".to_string())
+}
+
+// Helper to parse simple expressions (non-binary)
+fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
+    if *i < tokens.len() {
+        if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
+            // Handle module.function() calls
+            let module = tokens[*i].clone();
+            let function = tokens[*i + 2].clone();
+            *i += 3; // Skip module.function
+
+            let mut args = Vec::new();
+            if *i < tokens.len() && &tokens[*i] == "(" {
+                *i += 1; // Skip '('
+
+                while *i < tokens.len() && &tokens[*i] != ")" {
+                    if &tokens[*i] != "," {
+                        args.push(tokens[*i].clone());
+                    }
+                    *i += 1;
+                }
+
+                if *i < tokens.len() && &tokens[*i] == ")" {
+                    *i += 1; // Skip ')'
+                }
+            }
+
+            return Expression::FunctionCall { module, function, args };
+        } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
+            // String literal
+            let content = tokens[*i][1..tokens[*i].len()-1].to_string(); // Remove quotes
+            *i += 1;
+            return Expression::StringLiteral(content);
+        } else if tokens[*i].parse::<f64>().is_ok() {
+            // Number literal
+            let num = tokens[*i].parse::<f64>().unwrap();
+            *i += 1;
+            return Expression::Number(num);
+        } else {
+            // Variable name
+            let var_name = tokens[*i].clone();
+            *i += 1;
+            return Expression::Variable(var_name);
+        }
+    }
+
+    Expression::StringLiteral("".to_string())
+}
+
 // Generate C++ code from parsed statements
 fn generate_cpp_from_statements(statements: &[Statement]) -> String {
     let mut cpp_code = String::new();
@@ -128,6 +298,11 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
             Statement::Import(_module) => {
                 // Import statements don't generate executable code, just ensure the namespace exists
                 continue;
+            },
+            Statement::VariableAssignment { var_name, expression } => {
+                // Generate C++ code for variable assignment
+                let expr_cpp = generate_cpp_for_expression(expression);
+                cpp_code.push_str(&format!("    double {} = {};\n", var_name, expr_cpp));
             },
             Statement::FunctionCall { module, function, args } => {
                 if module == "crystal" && function == "manifest" && args.len() == 1 {
@@ -140,13 +315,51 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                         // If not a string literal, just output the argument as is
                         cpp_code.push_str(&format!("    crystal::manifest({});\n", arg));
                     }
+                } else {
+                    // Generic function call generation
+                    let args_cpp: Vec<String> = args.iter()
+                        .map(|arg| {
+                            if arg.starts_with('"') && arg.ends_with('"') {
+                                arg.to_string() // String literals as-is
+                            } else {
+                                arg.to_string() // Variables or other expressions
+                            }
+                        })
+                        .collect();
+
+                    cpp_code.push_str(&format!("    {}::{}({});\n", module, function, args_cpp.join(", ")));
                 }
-                // Add more function call translations as needed
             }
         }
     }
 
     cpp_code
+}
+
+// Generate C++ code for expressions
+fn generate_cpp_for_expression(expr: &Expression) -> String {
+    match expr {
+        Expression::FunctionCall { module, function, args } => {
+            let args_cpp: Vec<String> = args.iter()
+                .map(|arg| {
+                    if arg.starts_with('"') && arg.ends_with('"') {
+                        arg.to_string() // String literals as-is
+                    } else {
+                        arg.to_string() // Variables or other expressions
+                    }
+                })
+                .collect();
+            format!("{}::{}({})", module, function, args_cpp.join(", "))
+        },
+        Expression::Variable(name) => name.clone(),
+        Expression::Number(val) => val.to_string(),
+        Expression::StringLiteral(content) => format!("\"{}\"", content),
+        Expression::BinaryOperation { left, operator, right } => {
+            let left_cpp = generate_cpp_for_expression(left.as_ref());
+            let right_cpp = generate_cpp_for_expression(right.as_ref());
+            format!("{} {} {}", left_cpp, operator, right_cpp)
+        },
+    }
 }
 
 // Enhanced target code generator - generates C++ code with actual program execution
@@ -159,8 +372,8 @@ fn generate_target(source_file: &str, source_code: String) -> String {
 
     // Create a C++ program with actual executable code
     format!(r#"/*
- * NymyaLang to C++ generated code (version 0.2.0-alpha~6)
- * Auto-generated from {0}
+ * NymyaLang to C++ generated code (version {})
+ * Auto-generated from {}
  */
 
 #include <iostream>
@@ -238,11 +451,11 @@ namespace symbolic {{
 int main() {{
     try {{
         // Runtime initialization message (optional)
-        // crystal::manifest("NymyaLang runtime v0.2.0-alpha~6 initialized");
-        // crystal::manifest("Compiled from: {0}");
+        // crystal::manifest("NymyaLang runtime {} initialized");
+        // crystal::manifest("Compiled from: {}");
 
         // Actual program execution
-{1}
+{}
 
         // Program completion message
         // crystal::manifest("Program execution completed");
@@ -253,6 +466,9 @@ int main() {{
     return 0;
 }}
 "#,
+        env!("CARGO_PKG_VERSION"),  // Use the crate version
+        source_file,
+        env!("CARGO_PKG_VERSION"),  // Use the crate version
         source_file,
         executable_code
     )

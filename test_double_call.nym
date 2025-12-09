@@ -1,0 +1,4 @@
+import crystal
+
+crystal.manifest("First call")
+crystal.manifest("Second call")
