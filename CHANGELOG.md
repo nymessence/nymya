@@ -1,5 +1,76 @@
 # Changelog
 
+## [0.2.0-alpha~6] - 2025-12-08
+
+### Added
+- **Data Structures Library (`data_structures`)**:
+  - Binary Search Trees (BST) with insertion, search, and traversal operations
+  - Queues with enqueue, dequeue, and peek operations
+  - Min-Heaps with insert, extract_min, and peek operations
+  - Doubly Linked Lists with append, prepend, find, and remove operations
+  - Tuple implementations (Tuple2, Tuple3, Tuple4) with getter/setter methods
+  - Stack implementation with push, pop, and peek operations
+
+- **Testing Utilities (`data_structures.testing`)**:
+  - Assertion functions: `assert()`, `assert_equal()`, `assert_not_equal()`, `assert_true()`, `assert_false()`
+  - Comprehensive testing framework for data structures
+
+- **Centralized Version Management**:
+  - `version.conf` file with VERSION, DEV_STAGE, and REVISION variables
+  - Build scripts now read version from central configuration
+  - Consistent version tracking across all components
+
+- **Enhanced Math Library**:
+  - Added `math.pow_int()` for safe integer exponentiation
+  - Added `math.gcd()` for integer greatest common divisor
+  - Optimized implementations for mathematical operations
+
+- **Cross-Platform Executable (`nymya`)**:
+  - Improved architecture detection with proper ARM64/AMD64/RISCV64 support
+  - Enhanced QEMU fallback mechanism for mixed-architecture execution
+  - Better error handling and temporary file management
+
+- **Comprehensive GUI Abstractions**:
+  - Complete GTK+4 integration with SwiftUI-like declarative syntax
+  - Quantum-aware UI components with consciousness integration
+  - Sacred geometry viewers and numerology displays
+  - Mystical computing interfaces with chakra layouts
+  - Proper event handling through reactive system
+
+- **Symbolic Mathematics Engine**:
+  - Complete numerology subsystem with meanings for 1-9 and master numbers
+  - Sacred geometry mapping engine with Metatron's Cube, Flower of Life, etc.
+  - Prime number symbolism with twin prime and Mersenne prime classification
+  - Integration engine with overlays and multi-layer meanings
+
+- **Quantum Algorithms Implementation**:
+  - Deutsch-Jozsa, Bernstein-Vazirani, Simon's algorithms
+  - Quantum phase estimation and Shor's factoring algorithm
+  - Grover's search algorithm and quantum Fourier transform
+  - QAOA and VQE for quantum optimization
+
+- **Turing Completeness Verification**:
+  - Conditional branching programs
+  - Unbounded looping and recursion implementations
+  - Tape/memory simulation with dynamic allocation
+  - Universal computation patterns and nontrivial computation tests
+
+### Changed
+- Improved quantum simulator with complete tensor product calculations
+- Enhanced symbolic mathematics integration with quantum computing
+- Optimized compiler with proper AST generation and code translation
+- Better error handling and architecture detection in execution pipeline
+- Organized scripts into dedicated `scripts/` directory
+- Fixed compilation pipeline to properly generate C++ executables
+- Enhanced documentation with complete API references
+
+### Fixed
+- Fixed C++ target code generation in `nymyac` compiler
+- Corrected quantum gate matrix computations and tensor products
+- Resolved architecture compatibility issues in binary execution
+- Fixed import statement handling in the symbolic mathematics system
+- Corrected build script to properly handle cross-compilation targets
+
 ## [0.2.0-alpha.5] - 2025-12-08
 
 ### Added
