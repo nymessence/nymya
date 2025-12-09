@@ -25,6 +25,8 @@ enum Statement {
 #[derive(Debug)]
 enum Expression {
     FunctionCall { module: String, function: String, args: Vec<String> },
+    ArrayAccess { array: Box<Expression>, index: Box<Expression> },
+    ArrayMethodCall { array: Box<Expression>, method: String, args: Vec<String> },  // For methods like .append(), .length
     Variable(String),
     Number(f64),
     StringLiteral(String),
@@ -83,12 +85,8 @@ fn tokenize(source: &str) -> Vec<String> {
                     current_token.push(c); // Add the dot
 
                     // Gather any following digits to form the decimal part
-                    while let Some(&next_ch) = chars.peek() {
-                        if next_ch.is_ascii_digit() {
-                            current_token.push(chars.next().unwrap());
-                        } else {
-                            break;
-                        }
+                    while chars.peek().map_or(false, |&next_ch| next_ch.is_ascii_digit()) {
+                        current_token.push(chars.next().unwrap());
                     }
                 } else {
                     // If not part of a number, handle as a separate token (e.g., in module.function)
@@ -185,11 +183,24 @@ fn parse(source: &str) -> Vec<Statement> {
 fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
     // Look for complex expressions like function calls or binary operations
     if *i < tokens.len() {
-        if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
-            // Handle module.function() calls
-            let module = tokens[*i].clone();
+        // Handle array access like: array[index]
+        if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
+            let array_expr = parse_simple_expression(tokens, i); // Parse the array identifier
+            *i += 1; // Skip '['
+            let index_expr = parse_simple_expression(tokens, i);
+            if *i < tokens.len() && &tokens[*i] == "]" {
+                *i += 1; // Skip ']'
+                return Expression::ArrayAccess {
+                    array: Box::new(array_expr),
+                    index: Box::new(index_expr)
+                };
+            }
+        }
+        // Handle function calls like: module.function() or array.method()
+        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
+            let module_or_array = tokens[*i].clone();
             let function = tokens[*i + 2].clone();
-            *i += 3; // Skip module.function
+            *i += 3; // Skip module_or_array.function
 
             let mut args = Vec::new();
             if *i < tokens.len() && &tokens[*i] == "(" {
@@ -205,9 +216,26 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
                 if *i < tokens.len() && &tokens[*i] == ")" {
                     *i += 1; // Skip ')'
                 }
-            }
 
-            return Expression::FunctionCall { module, function, args };
+                // Check if this is an array method call
+                if module_or_array.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
+                   (function == "append" || function == "length" || function == "get" || function == "set") {
+                    let array_var = Expression::Variable(module_or_array);
+                    return Expression::ArrayMethodCall {
+                        array: Box::new(array_var),
+                        method: function,
+                        args
+                    };
+                }
+                // Otherwise treat as a regular function call
+                else {
+                    return Expression::FunctionCall {
+                        module: module_or_array,
+                        function,
+                        args
+                    };
+                }
+            }
         } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
             // String literal
             let content = tokens[*i][1..tokens[*i].len()-1].to_string(); // Remove quotes
@@ -245,8 +273,24 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
 // Helper to parse simple expressions (non-binary)
 fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
     if *i < tokens.len() {
-        if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
-            // Handle module.function() calls
+        // Handle array access like: array[index]
+        if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
+            let array_name = tokens[*i].clone(); // Get the array name
+            *i += 1; // Skip '['
+            let index_expr = parse_simple_expression(tokens, i);
+            if *i < tokens.len() && &tokens[*i] == "]" {
+                *i += 1; // Skip ']'
+                let array_var = Expression::Variable(array_name);
+                return Expression::ArrayAccess {
+                    array: Box::new(array_var),
+                    index: Box::new(index_expr)
+                };
+            }
+            // If no closing bracket, just return as variable
+            return Expression::Variable(array_name);
+        }
+        // Handle function calls like: module.function()
+        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
             let module = tokens[*i].clone();
             let function = tokens[*i + 2].clone();
             *i += 3; // Skip module.function
@@ -265,9 +309,22 @@ fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
                 if *i < tokens.len() && &tokens[*i] == ")" {
                     *i += 1; // Skip ')'
                 }
-            }
 
-            return Expression::FunctionCall { module, function, args };
+                // Check if this is an array method call
+                if module.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
+                   (function == "append" || function == "length" || function == "get" || function == "set") {
+                    let array_var = Expression::Variable(module);
+                    return Expression::ArrayMethodCall {
+                        array: Box::new(array_var),
+                        method: function,
+                        args
+                    };
+                } else {
+                    return Expression::FunctionCall { module, function, args };
+                }
+            } else {
+                return Expression::FunctionCall { module, function, args };
+            }
         } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
             // String literal
             let content = tokens[*i][1..tokens[*i].len()-1].to_string(); // Remove quotes
@@ -300,9 +357,16 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 continue;
             },
             Statement::VariableAssignment { var_name, expression } => {
-                // Generate C++ code for variable assignment
-                let expr_cpp = generate_cpp_for_expression(expression);
-                cpp_code.push_str(&format!("    double {} = {};\n", var_name, expr_cpp));
+                // Check if this is an array initialization or an array method call
+                if let Expression::ArrayMethodCall { .. } = expression {
+                    // This is an array operation
+                    let expr_cpp = generate_cpp_for_expression(expression);
+                    cpp_code.push_str(&format!("    {};\n", expr_cpp));
+                } else {
+                    // Regular variable assignment - use auto for better type inference
+                    let expr_cpp = generate_cpp_for_expression(expression);
+                    cpp_code.push_str(&format!("    auto {} = {};\n", var_name, expr_cpp));
+                }
             },
             Statement::FunctionCall { module, function, args } => {
                 if module == "crystal" && function == "manifest" && args.len() == 1 {
@@ -355,6 +419,34 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                 })
                 .collect();
             format!("{}::{}({})", module, function, args_cpp.join(", "))
+        },
+        Expression::ArrayAccess { array, index } => {
+            let array_cpp = generate_cpp_for_expression(array.as_ref());
+            let index_cpp = generate_cpp_for_expression(index.as_ref());
+            format!("{}[{}]", array_cpp, index_cpp)
+        },
+        Expression::ArrayMethodCall { array, method, args } => {
+            let array_cpp = generate_cpp_for_expression(array.as_ref());
+            let args_cpp: Vec<String> = args.iter()
+                .map(|arg| {
+                    if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                        // Convert single quotes to double quotes for C++
+                        let content = &arg[1..arg.len()-1];
+                        format!("\"{}\"", content)
+                    } else {
+                        arg.to_string() // Variables or other expressions
+                    }
+                })
+                .collect();
+
+            // Map NymyaLang array methods to appropriate C++ equivalents
+            match method.as_str() {
+                "append" => format!("{}.push_back({})", array_cpp, args_cpp.join(", ")),
+                "length" | "size" => format!("{}.size()", array_cpp),
+                "get" | "at" => format!("{}[{}]", array_cpp, args_cpp.join(", ")), // Use [] for simple indexing
+                "set" => format!("{}[{}] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()), args_cpp.get(1).unwrap_or(&"0".to_string())),
+                _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
+            }
         },
         Expression::Variable(name) => name.clone(),
         Expression::Number(val) => val.to_string(),

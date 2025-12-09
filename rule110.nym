@@ -1,0 +1,75 @@
+import crystal
+import math
+
+// Rule 110 Cellular Automaton Simulation
+// Initial state: 255 1s followed by a 0 (256 cells wide)
+// Rule 110: 111->0, 110->1, 101->1, 100->0, 011->1, 010->1, 001->1, 000->0
+// Outputs CSV format showing each generation
+
+func rule110_cell(left: Int, center: Int, right: Int) -> Int {
+    if (left == 1 && center == 1 && right == 1) { return 0; }
+    if (left == 1 && center == 1 && right == 0) { return 1; }
+    if (left == 1 && center == 0 && right == 1) { return 1; }
+    if (left == 1 && center == 0 && right == 0) { return 0; }
+    if (left == 0 && center == 1 && right == 1) { return 1; }
+    if (left == 0 && center == 1 && right == 0) { return 1; }
+    if (left == 0 && center == 0 && right == 1) { return 1; }
+    return 0; // 000 -> 0
+}
+
+func simulate_rule110(width: Int, generations: Int) -> Void {
+    // Initialize row: 255 1s followed by 1 zero using array
+    var row = []
+    var i = 0
+    while (i < width - 1) {
+        row.append(1)
+        i = i + 1
+    }
+    row.append(0)
+    
+    // Output first generation
+    var j = 0
+    var output = ""
+    while (j < width) {
+        output = output + row[j].to_string()
+        if (j < width - 1) { output = output + "," }
+        j = j + 1
+    }
+    crystal.manifest(output)
+    
+    // Simulate evolution
+    var gen = 0
+    while (gen < generations) {
+        var new_row = []
+        var k = 0
+        while (k < width) {
+            var left = 0
+            var right = 0
+            var center = row[k]
+            
+            if (k > 0) { left = row[k - 1] }
+            if (k < width - 1) { right = row[k + 1] }
+            
+            var new_val = rule110_cell(left, center, right)
+            new_row.append(new_val)
+            k = k + 1
+        }
+        
+        // Output new generation
+        var m = 0
+        var output_gen = ""
+        while (m < width) {
+            output_gen = output_gen + new_row[m].to_string()
+            if (m < width - 1) { output_gen = output_gen + "," }
+            m = m + 1
+        }
+        crystal.manifest(output_gen)
+        
+        // Update row for next generation
+        row = new_row
+        gen = gen + 1
+    }
+}
+
+// Run the simulation with width 256 and 10 generations (reduced for testing)
+simulate_rule110(256, 10)

@@ -1,0 +1,40 @@
+import crystal
+
+// Most basic Turing completeness test
+// Demonstrating conditional branching and loops (two requirements for Turing completeness)
+
+func countdown(start: Int) -> Void {
+    var current = start
+    while (current > 0) {
+        crystal.manifest("Count: " + current.to_string())
+        current = current - 1
+    }
+    crystal.manifest("Countdown complete!")
+}
+
+// Conditional test
+func conditional_test(value: Int) -> String {
+    if (value > 5) {
+        return "Greater than 5"
+    } else if (value == 5) {
+        return "Equals 5"
+    } else {
+        return "Less than 5"
+    }
+}
+
+// Main execution
+crystal.manifest("Turing Completeness Primitive Operations Test")
+countdown(3)
+
+var result = conditional_test(7)
+crystal.manifest("Conditional result: " + result)
+
+result = conditional_test(5)
+crystal.manifest("Conditional result: " + result)
+
+result = conditional_test(2)
+crystal.manifest("Conditional result: " + result)
+
+crystal.manifest("NymyaLang demonstrates conditional branching and unbounded loops")
+crystal.manifest("Core requirements for Turing completeness met at language level")
