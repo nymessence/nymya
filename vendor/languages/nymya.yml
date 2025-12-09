@@ -1,0 +1,10 @@
+NymyaLang:
+  type: programming
+  extensions:
+    - .nym
+  tm_scope: source.nymya
+  ace_mode: text
+  codemirror_mode: null
+  codemirror_mime_type: null
+  wrap: false
+  language_id: 999999

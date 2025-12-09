@@ -58,6 +58,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 vendor/
+# But allow vendor directories needed for GitHub Linguist
+!vendor/grammars/
+!vendor/languages/
 
 # Logs
 *.log
