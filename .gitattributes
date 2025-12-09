@@ -1,5 +1,3 @@
 *.nym linguist-language=NymyaLang
-*.nanorc linguist-language=NymyaLang
-*.vim linguist-language=NymyaLang
-nymya.lang linguist-language=NymyaLang
-nymya.xml linguist-language=NymyaLang
+syntax_highlighter/nymya.xml linguist-vendored
+vendor/** linguist-vendored
