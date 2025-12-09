@@ -191,13 +191,14 @@ fn parse(source: &str) -> Vec<Statement> {
 fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
     // Look for complex expressions like function calls or binary operations
     if *i < tokens.len() {
-        // Handle array literal assignment like: var arr = []
+        // Handle array literal: []
         if *i < tokens.len() && &tokens[*i] == "[" {
             if *i + 1 < tokens.len() && &tokens[*i + 1] == "]" {
                 *i += 2; // Skip '[' and ']'
-                return Expression::StringLiteral("std::vector<int>()".to_string()); // Represent empty array as C++ vector initialization
+                return Expression::ArrayLiteral(vec![]); // Return an empty array literal
             } else {
-                // This should be handled in parse_simple_expression as array access
+                // If there are elements, this should be handled in the extended version
+                // For now, treat as a simple case
                 return parse_simple_expression(tokens, i);
             }
         }
