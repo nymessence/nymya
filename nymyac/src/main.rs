@@ -300,11 +300,33 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
                     args
                 };
             } else {
-                // Handle dot expressions that aren't method calls
-                break; // For now, just break for non-method cases
+                // This is property access without arguments (e.g., obj.length, obj.size)
+                // Check if this is an array property method
+                if method_name == "append" || method_name == "length" || method_name == "size" ||
+                   method_name == "get" || method_name == "at" || method_name == "set" {
+                    // Check if expression is a variable that looks like an array (starts with lowercase)
+                    if let Expression::Variable(var_name) = &expr {
+                        if var_name.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
+                            expr = Expression::ArrayMethodCall {
+                                array: Box::new(expr),
+                                method: method_name.clone(),
+                                args: vec![]  // No arguments for property access
+                            };
+                            continue;
+                        }
+                    }
+                    // If not an array variable, fall through to create a general MethodCall
+                }
+
+                // General method call without arguments (or non-array property)
+                expr = Expression::MethodCall {
+                    object: Box::new(expr),
+                    method: method_name,
+                    args: vec![]  // No arguments
+                };
             }
         } else {
-            break; // No more method calls
+            break; // No more method calls or property access
         }
     }
 

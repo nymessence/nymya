@@ -1,0 +1,7 @@
+import crystal
+
+var test_list = []
+test_list.append(42)
+var first_element = test_list[0]
+crystal.manifest("First element: " + first_element.to_string())
+

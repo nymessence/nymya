@@ -1,0 +1,6 @@
+import crystal
+
+var test_list = []
+test_list.append(1)
+var size_val = test_list.length
+crystal.manifest("Size: " + size_val.to_string())
