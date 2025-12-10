@@ -1,11 +1,27 @@
 # Changelog
 
+## [0.2.0-alpha.8] - 2025-12-09
+
+### Fixed
+- **Compiler Expression Parsing**: Fixed critical issue where variable.method() calls were incorrectly treated as module.function() calls
+  - Updated tokenizer to handle special characters and array operators correctly
+  - Enhanced parser to distinguish between module.function() and variable.method() patterns
+  - Fixed code generation to properly output C++ method calls (obj.method()) instead of invalid syntax (obj::method())
+  - Added support for array access operations like array[index] in variable assignments
+  - Resolved issue where var_name.to_string() was generating var_name::to_string() syntax
+  - Fixed array method calls to properly generate .push_back(), .size(), and other appropriate C++ methods
+
+### Changed
+- Updated version numbers to 0.2.0-alpha.8 across all configuration files
+- Enhanced compiler to properly handle array operations and method calls
+- Improved expression parsing to support both array methods and general object methods
+
 ## [0.2.0-alpha.7] - 2025-12-09
 
 ### Fixed
 - **Compiler Code Generation Issue**: Fixed critical bug where the nymyac compiler was generating template C++ code with only placeholder comments instead of actual executable code from NymyaLang source
   - Implemented proper tokenization and parsing of NymyaLang source code
-  - Added AST generation and code translation from NymyaLang to C++
+  - Added AST generation and code translation from Nymya to C++
   - Fixed `crystal.manifest()` calls to properly output to console instead of just showing metadata messages
   - Verified fix with multiple test programs showing correct output
 
