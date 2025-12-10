@@ -1,0 +1,15 @@
+import crystal
+
+// Simple test with array functionality
+var my_list = []
+my_list.append(1) 
+my_list.append(2)
+my_list.append(3)
+
+// Access element
+var first = my_list[0]
+crystal.manifest("First element is: " + first.to_string())
+
+// Check length
+var count = my_list.length
+crystal.manifest("List length is: " + count.to_string())

@@ -1,0 +1,10 @@
+import crystal
+
+// Simple test to check basic array functionality
+crystal.manifest("Testing basic array operations")
+
+// Create an array
+var test_list = []
+test_list.append(42)
+
+crystal.manifest("Array operation completed")

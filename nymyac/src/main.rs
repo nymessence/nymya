@@ -20,6 +20,7 @@ enum Statement {
     Import(String),
     VariableAssignment { var_name: String, expression: Expression },
     FunctionCall { module: String, function: String, args: Vec<String> },
+    ExpressionStmt { expression: Expression },  // For expressions that are statements (like obj.method())
     ArrayMethodCall { array_var: String, method: String, args: Vec<String> },
 }
 
