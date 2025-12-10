@@ -29,6 +29,7 @@ enum Expression {
     FunctionCall { module: String, function: String, args: Vec<String> },
     ArrayAccess { array: Box<Expression>, index: Box<Expression> },
     ArrayMethodCall { array: Box<Expression>, method: String, args: Vec<String> },  // For methods like .append(), .length
+    MethodCall { object: Box<Expression>, method: String, args: Vec<String> },  // For general method calls like var.method()
     ArrayLiteral(Vec<Expression>), // For array literals like []
     Variable(String),
     Number(f64),
