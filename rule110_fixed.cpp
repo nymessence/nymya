@@ -87,16 +87,16 @@ int main() {
     row.push_back(0);
     auto j = 0;
     ]::to_string();
-    crystal->manifest(output);
+    crystal::manifest(output);
     auto gen = 0;
     std::vector<int> new_row;
     auto left = 0;
-    auto center = row[k];
+    auto center = "";
     auto new_val = rule110_cell;
     new_row.push_back(new_val);
     auto m = 0;
     ]::to_string();
-    crystal->manifest(output_gen);
+    crystal::manifest(output_gen);
 
 
         // Program completion message
