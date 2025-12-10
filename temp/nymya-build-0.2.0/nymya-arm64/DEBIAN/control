@@ -1,0 +1,26 @@
+Package: nymya
+Version: 0.2.0-alpha~8
+Section: devel
+Priority: optional
+Architecture: arm64
+Depends: libc6 (>= 2.14), libgcc1 (>= 1:4.1.1), libstdc++6 (>= 4.1.1)
+Maintainer: Nymessence Development Team <nymessence@gmail.com>
+X-Thanks-To: Erick (Founder & Architect), Nya (Comms Coordinator), Qwen-cli Agent
+Support-us: https://www.buymeacoffee.com/nymessence/
+Installed-Size: 1960
+Repo: https://www.github.com/nymessence/nymya.git
+Description: NymyaLang - A consciousness-integrated programming language
+ The NymyaLang compiler (nymyac) is a next-generation programming language
+ with quantum computing integration and consciousness awareness. Features include:
+ .
+ * Advanced AI/ML with both classical and quantum machine learning
+ * Quantum networking and consciousness-aware communication
+ * Hypercalc mathematical functions with special case handling
+ * Low-level bit manipulation and system operations
+ * Quantum-resistant encryption and secure communications
+ * Integration with quantum photonic hardware
+ .
+ The language follows the foundational principle of Rita-Nora balance:
+ structural precision combined with ethical flow in all operations.
+ .
+ This package includes the NymyaLang compiler and standard libraries.

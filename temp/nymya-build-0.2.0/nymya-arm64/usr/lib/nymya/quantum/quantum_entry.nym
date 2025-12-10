@@ -1,0 +1,35 @@
+// Quantum Library Entry Point
+// Exposes quantum gates, algorithms, and core types
+
+import quantum.gate
+import quantum.alg
+
+// Re-export core types
+export class Qubit {
+    alpha: math.Complex  // |0⟩ amplitude
+    beta: math.Complex   // |1⟩ amplitude
+    
+    init(alpha: math.Complex, beta: math.Complex) { /* implementation */ }
+    static func zero() -> Qubit { /* implementation */ }
+    static func one() -> Qubit { /* implementation */ }
+    static func plus() -> Qubit { /* implementation */ }
+    static func minus() -> Qubit { /* implementation */ }
+}
+
+export class QRegister {
+    qubits: List[Qubit]
+    
+    init(size: Int) { /* implementation */ }
+    func size() -> Int { /* implementation */ }
+    func get(index: Int) -> Qubit { /* implementation */ }
+    func set(index: Int, qubit: Qubit) -> Void { /* implementation */ }
+}
+
+// Re-export namespaces
+export namespace gate {
+    // Re-exported from quantum.gate
+}
+
+export namespace alg {
+    // Re-exported from quantum.alg
+}

@@ -1,0 +1,79 @@
+# NymyaLang syntax highlighting for Nano
+# Save as ~/.nanorc or /usr/share/nano/nym.nanorc
+
+syntax "nym" "\.nym$"
+
+# Comments
+comment "#"
+
+# Keywords
+color blue "\<import\>"
+color blue "\<func\>"
+color blue "\<init\>"
+color blue "\<class\>"
+color blue "\<struct\>"
+color blue "\<namespace\>"
+color blue "\<var\>"
+color blue "\<val\>"
+color blue "\<static\>"
+color blue "\<export\>"
+color blue "\<extern\>"
+color blue "\<macro\>"
+color blue "\<if\>"
+color blue "\<else\>"
+color blue "\<elif\>"
+color blue "\<while\>"
+color blue "\<for\>"
+color blue "\<range\>"
+color blue "\<return\>"
+color blue "\<break\>"
+color blue "\<continue\>"
+color blue "\<this\>"
+color blue "\<Void\>"
+color blue "\<Any\>"
+color blue "\<true\>"
+color blue "\<false\>"
+
+# Types
+color cyan "\<Int\>"
+color cyan "\<Float\>"
+color cyan "\<String\>"
+color cyan "\<Char\>"
+color cyan "\<Bool\>"
+color cyan "\<List\>"
+color cyan "\<Type\>"
+
+# Built-ins
+color magenta "\<length\>"
+color magenta "\<append\>"
+color magenta "\<remove\>"
+color magenta "\<copy\>"
+color magenta "\<reverse\>"
+color magenta "\<sort\>"
+color magenta "\<to_string\>"
+color magenta "\<to_int\>"
+color magenta "\<to_float\>"
+color magenta "\<to_list\>"
+color magenta "\<push\>"
+color magenta "\<pop\>"
+color magenta "\<top\>"
+color magenta "\<empty\>"
+color magenta "\<clear\>"
+color magenta "\<contains\>"
+color magenta "\<find\>"
+color magenta "\<split\>"
+color magenta "\<join\>"
+color magenta "\<trim\>"
+color magenta "\<upper\>"
+color magenta "\<lower\>"
+color magenta "\<count\>"
+color magenta "\<index\>"
+
+# Strings
+color green ""[^"]*""
+
+# Numbers
+color yellow "\<[0-9.]+\>"
+
+# Operators
+color red "\+\|-\|\*\|/\|%\|=\|==\|!=\|<\|>\|<=\|>=\|&&\|||\|!\|&\||\|\^\|~\|<<\|>>\|+=\|-=\|*=\|/=\|%=\|\+\+\|--\|->"

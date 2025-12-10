@@ -1,7 +1,0 @@
-NymyaLang:
-  type: programming
-  extensions:
-    - .nym
-  tm_scope: source.nymya
-  ace_mode: text
-  linguist_language_id: 999999

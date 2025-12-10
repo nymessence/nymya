@@ -1,0 +1,17 @@
+// CNOT Gate - Controlled NOT
+// Part of the quantum gate library collection
+
+namespace quantum {
+    namespace gate {
+        
+        // Controlled-NOT gate implementation
+        func cnot(control: Qubit, target: Qubit) -> List[Qubit] {
+            // If control is |1⟩, flip target; otherwise, leave target unchanged
+            if math.abs(control.beta) > 0.99 { // If control is approximately |1⟩
+                return [control, x(target)]
+            } else { // Control is approximately |0⟩
+                return [control, target]
+            }
+        }
+    }
+}

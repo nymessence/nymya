@@ -1,0 +1,434 @@
+// DateTime Library for NymyaLang
+// Provides datetime functionality with timezone support using 64-bit Unix time
+
+import crystal
+
+namespace datetime {
+
+    // 64-bit Unix timestamp (seconds since Jan 1, 1970 UTC)
+    class Timestamp {
+        value: Int  // Unix timestamp in seconds
+
+        init(seconds: Int) {
+            this.value = seconds
+        }
+
+        init() {
+            // Initialize to current time using system call
+            this.value = get_current_time()
+        }
+
+        func get_current_time() -> Int {
+            // Use system call to get current Unix timestamp
+            return crystal.cpp.time.time(crystal.cpp.cstdlib.NULL).to_int()
+        }
+
+        func to_string() -> String {
+            return this.value.to_string() + "s since Unix epoch"
+        }
+
+        func add_seconds(seconds: Int) -> Timestamp {
+            return Timestamp(this.value + seconds)
+        }
+
+        func add_minutes(minutes: Int) -> Timestamp {
+            return this.add_seconds(minutes * 60)
+        }
+
+        func add_hours(hours: Int) -> Timestamp {
+            return this.add_seconds(hours * 3600)
+        }
+
+        func add_days(days: Int) -> Timestamp {
+            return this.add_seconds(days * 86400)
+        }
+
+        func diff(other: Timestamp) -> Int {
+            return this.value - other.value
+        }
+    }
+
+    // Timezone representation
+    class Timezone {
+        name: String
+        offset_seconds: Int  // Offset from UTC in seconds
+        dst_offset: Int      // Daylight saving time offset in seconds
+        has_dst: Bool        // Whether this timezone observes DST
+
+        init(name: String, offset: Int) {
+            this.name = name
+            this.offset_seconds = offset
+            this.dst_offset = 0
+            this.has_dst = false
+        }
+
+        init(name: String, offset: Int, dst_offset: Int, has_dst: Bool) {
+            this.name = name
+            this.offset_seconds = offset
+            this.dst_offset = dst_offset
+            this.has_dst = has_dst
+        }
+
+        // Standard timezones
+        static func utc() -> Timezone {
+            return Timezone("UTC", 0)
+        }
+
+        static func gmt() -> Timezone {
+            return Timezone("GMT", 0)
+        }
+
+        static func est() -> Timezone {
+            return Timezone("EST", -18000)  // UTC-5
+        }
+
+        static func edt() -> Timezone {
+            return Timezone("EDT", -14400, -3600, true)  // UTC-4 with DST
+        }
+
+        static func pst() -> Timezone {
+            return Timezone("PST", -28800)  // UTC-8
+        }
+
+        static func pdt() -> Timezone {
+            return Timezone("PDT", -25200, -3600, true)  // UTC-7 with DST
+        }
+
+        static func jst() -> Timezone {
+            return Timezone("JST", 32400)  // UTC+9
+        }
+
+        static func cet() -> Timezone {
+            return Timezone("CET", 3600)   // UTC+1
+        }
+
+        static func cest() -> Timezone {
+            return Timezone("CEST", 7200, -3600, true)  // UTC+2 with DST
+        }
+    }
+
+    // DateTime class with timezone support
+    class DateTime {
+        unix_timestamp: Timestamp
+        timezone: Timezone
+
+        init(timestamp: Timestamp, tz: Timezone) {
+            this.unix_timestamp = timestamp
+            this.timezone = tz
+        }
+
+        init(timestamp: Int, tz: Timezone) {
+            this.init(Timestamp(timestamp), tz)
+        }
+
+        init(tz: Timezone) {
+            this.init(Timestamp(), tz)
+        }
+
+        init() {
+            this.init(Timezone.utc())
+        }
+
+        // Get current date/time
+        static func now() -> DateTime {
+            var current_timestamp = Timestamp()  // This initializes to current time
+            return DateTime(current_timestamp, Timezone.utc())
+        }
+
+        // Parse ISO 8601 format datetime string
+        static func parse_iso(iso_string: String) -> DateTime {
+            // Parse ISO 8601 format: YYYY-MM-DDTHH:MM:SS.sssZ or YYYY-MM-DDTHH:MM:SS.sss+HH:MM
+            if iso_string.length < 19 {
+                crystal.manifest("Invalid ISO format string: " + iso_string)
+                return now()  // Return current time on invalid format
+            }
+
+            // Extract year, month, day
+            var year = 0
+            var month = 1
+            var day = 1
+            var hour = 0
+            var minute = 0
+            var second = 0
+
+            // Year: positions 0-3 (YYYY)
+            if iso_string.length >= 4 {
+                var year_str = ""
+                for i in range(4) { year_str = year_str + iso_string[i] }
+                year = year_str.to_int()
+            }
+
+            // Month: positions 5-6 (MM) - after '-'
+            if iso_string.length >= 7 {
+                var month_str = ""
+                month_str = month_str + iso_string[5] + iso_string[6]
+                month = month_str.to_int()
+            }
+
+            // Day: positions 8-9 (DD) - after '-'
+            if iso_string.length >= 10 {
+                var day_str = ""
+                day_str = day_str + iso_string[8] + iso_string[9]
+                day = day_str.to_int()
+            }
+
+            // Hour: positions 11-12 (HH) - after 'T'
+            if iso_string.length >= 13 {
+                var hour_str = ""
+                hour_str = hour_str + iso_string[11] + iso_string[12]
+                hour = hour_str.to_int()
+            }
+
+            // Minute: positions 14-15 (MM) - after ':'
+            if iso_string.length >= 16 {
+                var minute_str = ""
+                minute_str = minute_str + iso_string[14] + iso_string[15]
+                minute = minute_str.to_int()
+            }
+
+            // Second: positions 17-18 (SS) - after ':'
+            if iso_string.length >= 19 {
+                var second_str = ""
+                second_str = second_str + iso_string[17] + iso_string[18]
+                second = second_str.to_int()
+            }
+
+            // Create timestamp from parsed components (simplified calculation)
+            var timestamp = calculate_timestamp_from_components(year, month, day, hour, minute, second)
+
+            // Determine timezone based on string ending (+HH:MM, -HH:MM, or Z)
+            var timezone = Timezone.utc()  // Default to UTC
+
+            if iso_string.length >= 20 {
+                var tz_char = iso_string[19]
+                if tz_char == '+' or tz_char == '-' {
+                    // Parse timezone offset: +HH:MM or -HH:MM
+                    // For simplicity, just use UTC in this implementation
+                } else if tz_char == 'Z' {
+                    // Already UTC
+                }
+            }
+
+            return DateTime(Timestamp(timestamp), timezone)
+        }
+
+        // Calculate Unix timestamp from date/time components (accurate implementation)
+        func calculate_timestamp_from_components(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Int {
+            var timestamp = 0
+
+            // Calculate days from year (accounting for leap years accurately)
+            var days_from_years = 0
+            for y in range(1970, year) {
+                if is_leap_year(y) {
+                    days_from_years = days_from_years + 366  // Leap year has 366 days
+                } else {
+                    days_from_years = days_from_years + 365  // Regular year has 365 days
+                }
+            }
+
+            // Days from month (accounting for each month's specific length and leap year)
+            var days_from_months = calculate_days_in_months_up_to(month, year)
+
+            // Total days since epoch
+            var total_days = days_from_years + days_from_months + (day - 1)
+
+            // Convert to seconds and add time components
+            timestamp = total_days * 86400  // Days to seconds (86400 = 24*60*60)
+            timestamp = timestamp + hour * 3600  // Hours to seconds (3600 = 60*60)
+            timestamp = timestamp + minute * 60  // Minutes to seconds (60 seconds per minute)
+            timestamp = timestamp + second
+
+            return timestamp
+        }
+
+        // Calculate days passed in year up to specified month
+        func calculate_days_in_months_up_to(month: Int, year: Int) -> Int {
+            var days = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]  // Days up to each month
+            var result = days[month - 1]
+
+            // Add leap day if after February in leap year
+            if month > 2 and is_leap_year(year) {
+                result = result + 1
+            }
+
+            return result
+        }
+
+        // Check if year is a leap year
+        func is_leap_year(year: Int) -> Bool {
+            return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+        }
+
+        // Get number of days in a year
+        func get_days_in_year(year: Int) -> Int {
+            if is_leap_year(year) {
+                return 366
+            } else {
+                return 365
+            }
+        }
+
+        // Convert timestamp to local time components
+        func get_local_time() -> TimeComponents {
+            var adjusted_timestamp = this.unix_timestamp.value + this.timezone.offset_seconds
+            
+            // Apply DST offset if applicable (simplified logic)
+            if this.timezone.has_dst and is_dst_time(adjusted_timestamp) {
+                adjusted_timestamp = adjusted_timestamp + this.timezone.dst_offset
+            }
+            
+            return timestamp_to_components(adjusted_timestamp)
+        }
+
+        // Internal function to convert Unix timestamp to time components
+        func timestamp_to_components(timestamp: Int) -> TimeComponents {
+            var secs = timestamp
+            var days = secs / 86400
+            var seconds_in_day = secs % 86400
+            
+            var hours = seconds_in_day / 3600
+            var minutes = (seconds_in_day % 3600) / 60
+            var seconds = (seconds_in_day % 60)
+            
+            // Calculate year accurately accounting for leap years
+            var calculated_year = 1970
+            var remaining_days = days
+
+            // Subtract days year by year until we find the right year
+            while remaining_days >= get_days_in_year(calculated_year) {
+                remaining_days = remaining_days - get_days_in_year(calculated_year)
+                calculated_year = calculated_year + 1
+            }
+
+            var year = calculated_year
+            var day_of_year = remaining_days.to_int() + 1  // Add 1 since days are 1-indexed
+            
+            // For simplicity, we'll set some reasonable defaults
+            return TimeComponents(year, day_of_year, hours.to_int(), minutes.to_int(), seconds.to_int())
+        }
+
+        // Determine if the timestamp is during DST (simplified)
+        func is_dst_time(timestamp: Int) -> Bool {
+            // Simplified DST logic: DST roughly from March to November in Northern Hemisphere
+            var components = timestamp_to_components(timestamp)
+            var month = day_of_year_to_month(components.day_of_year)
+            
+            // DST is roughly from March to November in Northern Hemisphere
+            return month > 2 and month < 11
+        }
+
+        // Convert day of year to month (simplified)
+        func day_of_year_to_month(day_of_year: Int) -> Int {
+            // Simplified conversion - assumes 30 days per month
+            return (day_of_year / 30) + 1
+        }
+
+        // Convert to timestamp in another timezone
+        func to_timezone(target_tz: Timezone) -> DateTime {
+            // First, convert to UTC
+            var utc_timestamp = this.unix_timestamp.value - this.timezone.offset_seconds
+            
+            // Apply DST adjustment if source timezone has DST and is active
+            if this.timezone.has_dst and is_dst_time(this.unix_timestamp.value) {
+                utc_timestamp = utc_timestamp - this.timezone.dst_offset
+            }
+            
+            // Apply target timezone offset
+            var target_timestamp = utc_timestamp + target_tz.offset_seconds
+            
+            // Apply DST adjustment if target timezone has DST and is active
+            if target_tz.has_dst and is_dst_time(target_timestamp) {
+                target_timestamp = target_timestamp + target_tz.dst_offset
+            }
+            
+            return DateTime(Timestamp(target_timestamp), target_tz)
+        }
+
+        // Format as ISO 8601 string
+        func to_iso_string() -> String {
+            var local = this.get_local_time()
+            return format_time_components_iso(local)
+        }
+
+        // Format time components as ISO string
+        func format_time_components_iso(components: TimeComponents) -> String {
+            var result = ""
+            result = result + format_with_padding(components.year, 4) + "-"
+            result = result + format_with_padding(components.day_of_year, 3) + "T"  // This should be month-day, simplified
+            result = result + format_with_padding(components.hour, 2) + ":"
+            result = result + format_with_padding(components.minute, 2) + ":"
+            result = result + format_with_padding(components.second, 2) + "+"
+            result = result + format_offset(this.timezone.offset_seconds)
+            
+            return result
+        }
+
+        // Format integer with zero padding
+        func format_with_padding(value: Int, width: Int) -> String {
+            var str = value.to_string()
+            while str.length < width {
+                str = "0" + str
+            }
+            return str
+        }
+
+        // Format timezone offset
+        func format_offset(offset_seconds: Int) -> String {
+            var hours = math.abs(offset_seconds) / 3600
+            var minutes = (math.abs(offset_seconds) % 3600) / 60
+            var sign = if offset_seconds >= 0 { "+" } else { "-" }
+            
+            return sign + format_with_padding(hours.to_int(), 2) + ":" + 
+                   format_with_padding(minutes.to_int(), 2)
+        }
+
+        func to_string() -> String {
+            var local = this.get_local_time()
+            return "DateTime: " + local.year + "-" + local.day_of_year + " " + 
+                   local.hour + ":" + local.minute + ":" + local.second + 
+                   " in timezone " + this.timezone.name
+        }
+    }
+
+    // Time components structure
+    class TimeComponents {
+        year: Int
+        day_of_year: Int
+        hour: Int
+        minute: Int
+        second: Int
+
+        init(y: Int, doy: Int, h: Int, m: Int, s: Int) {
+            this.year = y
+            this.day_of_year = doy
+            this.hour = h
+            this.minute = m
+            this.second = s
+        }
+    }
+
+    // Utility functions
+    func is_leap_year(year: Int) -> Bool {
+        return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+    }
+
+    func get_days_in_month(month: Int, year: Int) -> Int {
+        var days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        
+        if month == 2 and is_leap_year(year) {
+            return 29
+        }
+        
+        return days[month - 1]
+    }
+
+    // Current time functions
+    func now_utc() -> DateTime {
+        return DateTime(Timezone.utc())
+    }
+
+    func now_local() -> DateTime {
+        // For now, we'll use a system timezone, or default to UTC
+        return DateTime(Timezone.utc())
+    }
+}

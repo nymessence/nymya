@@ -1,0 +1,349 @@
+// Advanced Mathematical Functions Library for NymyaLang
+// Provides multiple precision complex numbers, tetration, special functions, and more
+// Based on Hypercalc implementation with extensions
+
+import math
+import math.hypercalc
+
+namespace math {
+    namespace functions {
+
+        // Multiple precision complex number representation
+        // Using a structure for higher precision than standard Complex
+        class MPC {
+            real: Float
+            imag: Float
+            precision: Int  // Precision level indicator
+
+            init(r: Float, i: Float, prec: Int) {
+                this.real = r
+                this.imag = i
+                this.precision = prec
+            }
+
+            init(r: Float, i: Float) {
+                this.init(r, i, 16)  // Default precision
+            }
+
+            func add(other: MPC) -> MPC {
+                return MPC(this.real + other.real, this.imag + other.imag, 
+                          math.min(this.precision, other.precision))
+            }
+
+            func multiply(other: MPC) -> MPC {
+                var new_real = this.real * other.real - this.imag * other.imag
+                var new_imag = this.real * other.imag + this.imag * other.real
+                return MPC(new_real, new_imag, 
+                          math.min(this.precision, other.precision))
+            }
+
+            func pow(exp: MPC) -> MPC {
+                // z^w = e^(w * ln(z))
+                var ln_z = this.log()
+                var exp_result = exp.multiply(ln_z)
+                return exp_result.exp()
+            }
+
+            func exp() -> MPC {
+                // e^(a+bi) = e^a * (cos(b) + i*sin(b))
+                var magnitude = math.exp(this.real)
+                var new_real = magnitude * math.cos(this.imag)
+                var new_imag = magnitude * math.sin(this.imag)
+                return MPC(new_real, new_imag, this.precision)
+            }
+
+            func log() -> MPC {
+                // ln(a+bi) = ln(|z|) + i*arg(z)
+                var magnitude = math.sqrt(this.real * this.real + this.imag * this.imag)
+                var arg = math.atan2(this.imag, this.real)
+                return MPC(math.log(magnitude), arg, this.precision)
+            }
+
+            func magnitude() -> Float {
+                return math.sqrt(this.real * this.real + this.imag * this.imag)
+            }
+
+            func conjugate() -> MPC {
+                return MPC(this.real, -this.imag, this.precision)
+            }
+        }
+
+        // Tetration function: a^^n (a to the power of itself n times)
+        func tetration(base: Float, height: Int) -> Float {
+            if height <= 0 {
+                return 1.0  // By definition, a^^0 = 1
+            }
+            if height == 1 {
+                return base  // a^^1 = a
+            }
+            
+            // For higher heights, we need to be careful about overflow
+            var result = base
+            var n = height - 1
+            
+            while n > 0 {
+                // Check for potential overflow before computing
+                if result > 100.0 {  // Prevent extreme overflow
+                    return math.hypercalc.POS_HUGE
+                }
+                
+                result = math.hypercalc.pow(base, result)
+                n = n - 1
+            }
+            
+            return result
+        }
+
+        // Complex tetration
+        func tetration_complex(base: MPC, height: Int) -> MPC {
+            if height <= 0 {
+                return MPC(1.0, 0.0, base.precision)
+            }
+            if height == 1 {
+                return base
+            }
+            
+            var result = base
+            var n = height - 1
+            
+            while n > 0 {
+                // For complex tetration we use the formula: z^^n = base^(z^^(n-1))
+                // This is a simplified approach - true complex tetration is more complex
+                result = base.pow(result)
+                
+                // Check for overflow in magnitude
+                if result.magnitude() > 100.0 {
+                    return MPC(math.hypercalc.POS_HUGE, 0.0, result.precision)
+                }
+                
+                n = n - 1
+            }
+            
+            return result
+        }
+
+        // Hyperfactorial: H(n) = 1^1 * 2^2 * 3^3 * ... * n^n
+        func hyperfactorial(n: Int) -> Float {
+            if n <= 0 {
+                return 1.0
+            }
+            
+            var result = 1.0
+            for i in range(1, n + 1) {
+                var term = math.hypercalc.pow(i.toFloat(), i.toFloat())
+                result = result * term
+            }
+            
+            return result
+        }
+
+        // Superfactorial: sf(n) = 1! * 2! * 3! * ... * n!
+        func superfactorial(n: Int) -> Float {
+            if n <= 0 {
+                return 1.0
+            }
+            
+            var result = 1.0
+            for i in range(1, n + 1) {
+                var factorial_i = math.hypercalc.factorial(i.toFloat())
+                result = result * factorial_i
+            }
+            
+            return result
+        }
+
+        // Termial: n? = 1 + 2 + 3 + ... + n = n(n+1)/2
+        func termial(n: Int) -> Float {
+            if n <= 0 {
+                return 0.0
+            }
+            
+            return (n.toFloat() * (n + 1).toFloat()) / 2.0
+        }
+
+        // Riemann Zeta Function (simplified implementation)
+        // For s > 1, zeta(s) = sum of 1/n^s for n=1 to infinity
+        func riemann_zeta(s: Float) -> Float {
+            if s == 1.0 {
+                return math.hypercalc.POS_HUGE  // Diverges at s=1
+            }
+            if s < 1.0 {
+                // Use functional equation for analytic continuation
+                return riemann_zeta_analytic_continuation(s)
+            }
+            
+            // For s > 1, use the series definition
+            var sum = 0.0
+            var n = 1.0
+            var max_iter = 1000.0  // Limit iterations for practicality
+            
+            while n <= max_iter {
+                var term = math.hypercalc.divide(1.0, math.hypercalc.pow(n, s))
+                sum = sum + term
+                n = n + 1.0
+            }
+            
+            return sum
+        }
+
+        // Riemann Zeta with analytic continuation for s < 1
+        func riemann_zeta_analytic_continuation(s: Float) -> Float {
+            if s == 1.0 {
+                return math.hypercalc.POS_HUGE  // Pole at s=1
+            }
+            
+            // Use the functional equation: zeta(s) = 2^s * pi^(s-1) * sin(pi*s/2) * Gamma(1-s) * zeta(1-s)
+            var factor1 = math.hypercalc.pow(2.0, s)
+            var factor2 = math.hypercalc.pow(math.PI, s - 1.0)
+            var factor3 = math.sin(math.PI * s / 2.0)
+            var factor4 = math.hypercalc.gamma(1.0 - s)
+            var factor5 = riemann_zeta(1.0 - s)  // Recursively call for the convergent region
+            
+            return factor1 * factor2 * factor3 * factor4 * factor5
+        }
+
+        // Dirichlet eta function (alternating zeta): eta(s) = sum of (-1)^(n+1)/n^s
+        func dirichlet_eta(s: Float) -> Float {
+            if s == 1.0 {
+                return math.log(2.0)  // ln(2) is the value at s=1
+            }
+            
+            var sum = 0.0
+            var n = 1.0
+            var max_iter = 1000.0
+            var sign = 1.0
+            
+            while n <= max_iter {
+                var term = math.hypercalc.divide(sign, math.hypercalc.pow(n, s))
+                sum = sum + term
+                sign = -sign  // Alternate signs
+                n = n + 1.0
+            }
+            
+            return sum
+        }
+
+        // Digamma function (logarithmic derivative of gamma)
+        func digamma(x: Float) -> Float {
+            if x <= 0.0 {
+                // Use recurrence relation: psi(x) = psi(x+1) - 1/x
+                if x == math.floor(x) and x <= 0.0 {  // At poles
+                    return math.hypercalc.NAN_REP
+                }
+                
+                var n = math.ceil(-x) + 1.0
+                var y = x + n
+                var result = digamma(y)
+                
+                var k = 0.0
+                while k < n {
+                    result = result - math.hypercalc.divide(1.0, x + k)
+                    k = k + 1.0
+                }
+                
+                return result
+            }
+            
+            // For positive x, use asymptotic expansion
+            if x > 10.0 {
+                var x_recip = math.hypercalc.divide(1.0, x)
+                var x_sq_recip = x_recip * x_recip
+                
+                return math.log(x) - 0.5 * x_recip - x_sq_recip / 12.0 + x_sq_recip * x_recip / 120.0
+            }
+            
+            // Use recurrence relation: psi(x) = psi(x+1) - 1/x
+            var y = x
+            var result = 0.0
+            
+            while y < 10.0 {
+                result = result - math.hypercalc.divide(1.0, y)
+                y = y + 1.0
+            }
+            
+            // Calculate at y using asymptotic expansion
+            var y_recip = math.hypercalc.divide(1.0, y)
+            var y_sq_recip = y_recip * y_recip
+            
+            result = result + math.log(y) - 0.5 * y_recip - y_sq_recip / 12.0 + y_sq_recip * y_recip / 120.0
+            
+            return result
+        }
+
+        // Beta function: B(x, y) = Gamma(x) * Gamma(y) / Gamma(x+y)
+        func beta(x: Float, y: Float) -> Float {
+            var gamma_x = math.hypercalc.gamma(x)
+            var gamma_y = math.hypercalc.gamma(y)
+            var gamma_xy = math.hypercalc.gamma(x + y)
+            
+            return math.hypercalc.divide(math.hypercalc.multiply(gamma_x, gamma_y), gamma_xy)
+        }
+
+        // Error function with higher precision
+        func erf_precise(x: Float) -> Float {
+            if x == 0.0 {
+                return 0.0
+            }
+            if x > 6.0 {
+                return 1.0
+            }
+            if x < -6.0 {
+                return -1.0
+            }
+            
+            // Use Taylor series for small x
+            if math.abs(x) < 2.0 {
+                var sum = x
+                var term = x
+                var x_sq = x * x
+                var n = 1.0
+                
+                while math.abs(term) > 1e-15 {
+                    term = term * (-x_sq) * (2.0 * n - 1.0) / ((2.0 * n + 1.0) * n)
+                    sum = sum + term
+                    n = n + 1.0
+                }
+                
+                return 2.0 * sum / math.sqrt(math.PI)
+            }
+            
+            // For larger x, use continued fraction or complementary error function
+            return math.hypercalc.erf(x)
+        }
+
+        // Polygamma function: psi^(n)(x) is the (n+1)th derivative of ln(Gamma(x))
+        func polygamma(n: Int, x: Float) -> Float {
+            if n == 0 {
+                return digamma(x)
+            }
+            
+            if x <= 0.0 {
+                return math.hypercalc.NAN_REP  // Undefined for non-positive x
+            }
+            
+            // Use recurrence relation and asymptotic expansion
+            var y = x
+            var result = 0.0
+            var sign = if (n % 2) == 1 { -1.0 } else { 1.0 }
+            
+            // Recurrence to raise x for better convergence
+            while y < 10.0 {
+                var denom = math.hypercalc.pow(y, n.toFloat() + 1.0)
+                result = result - math.hypercalc.divide(math.factorial(n).toFloat(), denom)
+                y = y + 1.0
+            }
+            
+            // Asymptotic expansion
+            var recip_y = math.hypercalc.divide(1.0, y)
+            var recip_y_power = math.hypercalc.pow(recip_y, n.toFloat() + 1.0)
+            var factorial_n = math.factorial(n).toFloat()
+            
+            // First term of the expansion
+            result = result + sign * factorial_n / ((n + 1).toFloat() * recip_y_power)
+            
+            // Additional terms of asymptotic expansion can be added here
+            
+            return result
+        }
+    }
+}

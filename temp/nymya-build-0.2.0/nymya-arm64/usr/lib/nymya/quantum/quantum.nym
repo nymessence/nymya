@@ -1,0 +1,77 @@
+// Quantum Library - Quantum Computing Utilities
+// Provides quantum gates, algorithms, and physics utilities
+// Naming inspired by Taygetan linguistic structures and metaphysical concepts
+
+namespace quantum
+
+// Quantum state representation
+class Qubit {
+    // Represents a quantum bit with complex amplitudes
+    alpha: math.Complex  // |0⟩ amplitude
+    beta: math.Complex   // |1⟩ amplitude
+    
+    init(alpha: math.Complex, beta: math.Complex) {
+        // Normalize the qubit state
+        var norm = math.sqrt(alpha.magnitude() * alpha.magnitude() + 
+                            beta.magnitude() * beta.magnitude())
+        this.alpha = math.Complex(alpha.real / norm, alpha.imag / norm)
+        this.beta = math.Complex(beta.real / norm, beta.imag / norm)
+    }
+    
+    // Standard basis states
+    static func zero() -> Qubit {
+        return Qubit(math.Complex(1.0, 0.0), math.Complex(0.0, 0.0))
+    }
+    
+    static func one() -> Qubit {
+        return Qubit(math.Complex(0.0, 0.0), math.Complex(1.0, 0.0))
+    }
+    
+    static func plus() -> Qubit {
+        // |+⟩ = (|0⟩ + |1⟩)/√2
+        var norm = math.sqrt(2.0)
+        return Qubit(
+            math.Complex(1.0 / norm, 0.0), 
+            math.Complex(1.0 / norm, 0.0)
+        )
+    }
+    
+    static func minus() -> Qubit {
+        // |-⟩ = (|0⟩ - |1⟩)/√2
+        var norm = math.sqrt(2.0)
+        return Qubit(
+            math.Complex(1.0 / norm, 0.0), 
+            math.Complex(-1.0 / norm, 0.0)
+        )
+    }
+}
+
+// Quantum register
+class QRegister {
+    qubits: List[Qubit]
+    
+    init(size: Int) {
+        this.qubits = []
+        for i in range(size) {
+            this.qubits.append(Qubit.zero())
+        }
+    }
+    
+    func size() -> Int {
+        return this.qubits.length
+    }
+    
+    func get(index: Int) -> Qubit {
+        return this.qubits[index]
+    }
+    
+    func set(index: Int, qubit: Qubit) -> Void {
+        this.qubits[index] = qubit
+    }
+}
+
+// Import quantum gates
+import quantum.gate
+
+// Import quantum algorithms
+import quantum.alg

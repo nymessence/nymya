@@ -1,0 +1,11 @@
+// System Commands Library Entry Point
+// Provides unified access to all system commands and utilities
+
+import system.echo
+import system.cat
+import system.ls
+import system.cp  
+import system.mv
+import ml.ai_ml  // Include the AI/ML library
+
+namespace system

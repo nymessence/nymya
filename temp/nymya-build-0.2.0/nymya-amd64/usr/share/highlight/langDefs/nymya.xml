@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style-scheme id="nymya" _name="NymyaLang" version="1.0">
+  <author>Erick</author>
+  <_description>Syntax highlighting for NymyaLang (.nym) files</_description>
+
+  <!-- Color definitions -->
+  <color name="nym-comment" value="#608B4E"/>
+  <color name="nym-keyword" value="#569CD6"/>
+  <color name="nym-function" value="#DCDCAA"/>
+  <color name="nym-type" value="#4EC9B0"/>
+  <color name="nym-string" value="#CE9178"/>
+  <color name="nym-number" value="#B5CEA8"/>
+  <color name="nym-operator" value="#C586C0"/>
+  <color name="nym-builtin" value="#4FC1FF"/>
+  <color name="nym-identifier" value="#9CDCFE"/>
+  <color name="nym-background" value="#1E1E1E"/>
+  <color name="nym-foreground" value="#DCDCDC"/>
+
+  <!-- Bracket Matching -->
+  <style name="bracket-match" foreground="nym-keyword" bold="true"/>
+  <style name="bracket-mismatch" foreground="red" bold="true"/>
+
+  <!-- Comments -->
+  <style name="def:comment" foreground="nym-comment"/>
+  <style name="def:shebang" foreground="nym-comment" bold="true"/>
+
+  <!-- Literals -->
+  <style name="def:string" foreground="nym-string"/>
+  <style name="def:character" foreground="nym-string"/>
+  <style name="def:special-char" foreground="nym-keyword"/>
+  <style name="def:number" foreground="nym-number"/>
+  <style name="def:decimal" foreground="nym-number"/>
+  <style name="def:base-n-integer" foreground="nym-number"/>
+  <style name="def:floating-point" foreground="nym-number"/>
+  <style name="def:complex" foreground="nym-number"/>
+
+  <!-- Keywords and Types -->
+  <style name="def:keyword" foreground="nym-keyword" bold="true"/>
+  <style name="def:type" foreground="nym-type"/>
+  <style name="def:builtin" foreground="nym-builtin"/>
+  <style name="def:identifier" foreground="nym-identifier"/>
+  <style name="def:function" foreground="nym-function"/>
+
+  <!-- Operators and Statements -->
+  <style name="def:operator" foreground="nym-operator"/>
+  <style name="def:statement" foreground="nym-keyword" bold="true"/>
+
+  <!-- Others -->
+  <style name="def:preprocessor" foreground="nym-builtin"/>
+  <style name="def:error" foreground="red" bold="true"/>
+  <style name="def:note" foreground="yellow" bold="true"/>
+  <style name="def:warning" foreground="orange" bold="true"/>
+  <style name="def:underlined" italic="true" underline="true"/>
+  
+  <!-- UI Elements -->
+  <style name="text" foreground="nym-foreground" background="nym-background"/>
+  <style name="selection" foreground="nym-foreground" background="#264F78"/>
+  <style name="cursor" foreground="nym-foreground"/>
+  <style name="current-line" background="#2A2D2E"/>
+  <style name="line-numbers" foreground="#5A5A5A" background="#1E1E1E"/>
+</style-scheme>

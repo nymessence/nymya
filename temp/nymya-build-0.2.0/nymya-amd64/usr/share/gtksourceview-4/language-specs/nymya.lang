@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="nymya"
+          name="NymyaLang"
+          version="2.0"
+          section="Sources"
+          extensions=".nym"
+          mimetype="text/x-nymya">
+
+  <metadata>
+    <property name="description">NymyaLang Programming Language</property>
+    <property name="globs">*.nym</property>
+    <property name="priority">10</property>
+  </metadata>
+
+  <styles>
+    <style id="comment" name="Comment" map-to="def:comment"/>
+    <style id="string" name="String" map-to="def:string"/>
+    <style id="number" name="Number" map-to="def:number"/>
+    <style id="keyword" name="Keyword" map-to="def:keyword"/>
+    <style id="operator" name="Operator" map-to="def:operator"/>
+    <style id="function" name="Function" map-to="def:function"/>
+    <style id="type" name="Type" map-to="def:type"/>
+    <style id="builtin" name="Built-in" map-to="def:builtin"/>
+    <style id="identifier" name="Identifier" map-to="def:identifier"/>
+    <style id="statement" name="Statement" map-to="def:statement"/>
+    <style id="special-char" name="Special Char" map-to="def:special-char"/>
+  </styles>
+
+  <definitions>
+    <context id="nymya" style-ref="def:text">
+      <include>
+        <context ref="def:comments"/>
+        <context ref="strings"/>
+        <context ref="keywords"/>
+        <context ref="types"/>
+        <context ref="builtins"/>
+        <context ref="numbers"/>
+        <context ref="operators"/>
+        <context ref="functions"/>
+      </include>
+    </context>
+
+    <context id="strings" style-ref="string">
+      <start>"</start>
+      <end>"</end>
+      <include>
+        <context ref="string-escape"/>
+        <context ref="def:generic-string"/>
+      </include>
+    </context>
+
+    <context id="string-escape">
+      <match>\.</match>
+    </context>
+
+    <context id="keywords">
+      <keyword style-ref="keyword">import</keyword>
+      <keyword style-ref="keyword">func</keyword>
+      <keyword style-ref="keyword">init</keyword>
+      <keyword style-ref="keyword">class</keyword>
+      <keyword style-ref="keyword">struct</keyword>
+      <keyword style-ref="keyword">namespace</keyword>
+      <keyword style-ref="keyword">var</keyword>
+      <keyword style-ref="keyword">val</keyword>
+      <keyword style-ref="keyword">static</keyword>
+      <keyword style-ref="keyword">export</keyword>
+      <keyword style-ref="keyword">extern</keyword>
+      <keyword style-ref="keyword">macro</keyword>
+      <keyword style-ref="keyword">if</keyword>
+      <keyword style-ref="keyword">else</keyword>
+      <keyword style-ref="keyword">elif</keyword>
+      <keyword style-ref="keyword">while</keyword>
+      <keyword style-ref="keyword">for</keyword>
+      <keyword style-ref="keyword">range</keyword>
+      <keyword style-ref="keyword">return</keyword>
+      <keyword style-ref="keyword">break</keyword>
+      <keyword style-ref="keyword">continue</keyword>
+      <keyword style-ref="keyword">this</keyword>
+      <keyword style-ref="keyword">-></keyword>
+      <keyword style-ref="keyword">Void</keyword>
+      <keyword style-ref="keyword">Any</keyword>
+      <keyword style-ref="keyword">Int</keyword>
+      <keyword style-ref="keyword">Float</keyword>
+      <keyword style-ref="keyword">String</keyword>
+      <keyword style-ref="keyword">Char</keyword>
+      <keyword style-ref="keyword">Bool</keyword>
+      <keyword style-ref="keyword">List</keyword>
+      <keyword style-ref="keyword">Any</keyword>
+      <keyword style-ref="keyword">Type</keyword>
+      <keyword style-ref="keyword">true</keyword>
+      <keyword style-ref="keyword">false</keyword>
+    </context>
+
+    <context id="types" style-ref="type">
+      <keyword>Type</keyword>
+      <keyword>Int</keyword>
+      <keyword>Float</keyword>
+      <keyword>String</keyword>
+      <keyword>Char</keyword>
+      <keyword>Bool</keyword>
+      <keyword>Void</keyword>
+      <keyword>List</keyword>
+      <keyword>Any</keyword>
+    </context>
+
+    <context id="builtins" style-ref="builtin">
+      <keyword>length</keyword>
+      <keyword>append</keyword>
+      <keyword>remove</keyword>
+      <keyword>copy</keyword>
+      <keyword>reverse</keyword>
+      <keyword>sort</keyword>
+      <keyword>to_string</keyword>
+      <keyword>to_int</keyword>
+      <keyword>to_float</keyword>
+      <keyword>to_list</keyword>
+      <keyword>range</keyword>
+      <keyword>size</keyword>
+      <keyword>push</keyword>
+      <keyword>pop</keyword>
+      <keyword>top</keyword>
+      <keyword>empty</keyword>
+      <keyword>clear</keyword>
+      <keyword>contains</keyword>
+      <keyword>find</keyword>
+      <keyword>split</keyword>
+      <keyword>join</keyword>
+      <keyword>trim</keyword>
+      <keyword>upper</keyword>
+      <keyword>lower</keyword>
+      <keyword>count</keyword>
+      <keyword>index</keyword>
+    </context>
+
+    <context id="functions" style-ref="function">
+      <start>\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()</start>
+      <end>(?=\s|[(),{}])</end>
+    </context>
+
+    <context id="numbers" style-ref="number">
+      <match>\b\d+(\.\d+)?([eE][+-]?\d+)?\b</match>
+    </context>
+
+    <context id="operators" style-ref="operator">
+      <match>\+</match>
+      <match>-</match>
+      <match>\*</match>
+      <match>/</match>
+      <match>%</match>
+      <match>=</match>
+      <match>==</match>
+      <match>!=</match>
+      <match>&lt;</match>
+      <match>&gt;</match>
+      <match>&lt;=</match>
+      <match>&gt;=</match>
+      <match>&amp;&amp;</match>
+      <match>\|\|</match>
+      <match>!</match>
+      <match>&amp;</match>
+      <match>\|</match>
+      <match>\^</match>
+      <match>~</match>
+      <match>&lt;&lt;</match>
+      <match>&gt;&gt;</match>
+      <match>\+=</match>
+      <match>-=</match>
+      <match>\*=</match>
+      <match>/=</match>
+      <match>%=</match>
+      <match>\+\+</match>
+      <match>--</match>
+    </context>
+  </definitions>
+</language>

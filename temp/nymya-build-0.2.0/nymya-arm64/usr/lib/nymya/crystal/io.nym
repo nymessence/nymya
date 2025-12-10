@@ -1,0 +1,101 @@
+// Crystal I/O Module
+// Provides input/output functionality bridged to C++
+
+namespace crystal {
+    namespace io {
+        
+        // Basic output functions
+        func print(msg: String) -> Void {
+            cpp.iostream.std.cout << msg
+        }
+        
+        func println(msg: String) -> Void {
+            cpp.iostream.std.cout << msg << cpp.iostream.std.endl
+        }
+        
+        // Formatted output
+        func printf(format: String, args: List[Any]) -> Void {
+            // Use crystal's formatting capabilities for proper formatted output
+            var result = format_string(format, args)
+            crystal.io.println(result)
+        }
+
+        // Helper to format strings with arguments (simplified implementation)
+        func format_string(format_str: String, args: List[Any]) -> String {
+            var result = format_str
+            var arg_index = 0
+
+            // Find and replace % placeholders with arguments (simplified approach)
+            for i in range(result.length - 1) {
+                if result[i] == "%" {
+                    // Check if next character is a format specifier
+                    if result[i+1] == "s" {  // String format
+                        if arg_index < args.length {
+                            result = replace_at(result, i, 2, args[arg_index].to_string())
+                            arg_index = arg_index + 1
+                        }
+                    } else if result[i+1] == "d" { // Decimal format
+                        if arg_index < args.length {
+                            result = replace_at(result, i, 2, args[arg_index].to_int().to_string())
+                            arg_index = arg_index + 1
+                        }
+                    } else if result[i+1] == "f" { // Float format
+                        if arg_index < args.length {
+                            result = replace_at(result, i, 2, args[arg_index].to_float().to_string())
+                            arg_index = arg_index + 1
+                        }
+                    }
+                }
+            }
+
+            return result
+        }
+
+        // Helper function to replace substring at position
+        func replace_at(str: String, pos: Int, length: Int, replacement: String) -> String {
+            var result = ""
+            for i in range(pos) {
+                result = result + str[i]
+            }
+            result = result + replacement
+            for i in range(pos + length, str.length) {
+                result = result + str[i]
+            }
+            return result
+        }
+        
+        // Basic input functions
+        func get_line() -> String {
+            var input: String
+            cpp.iostream.std.cin >> input
+            return input
+        }
+        
+        // File operations
+        namespace file {
+            func read(path: String) -> String {
+                var file: cpp.fstream.std.ifstream = cpp.fstream.std.ifstream(path)
+                var content: String = ""
+                var line: String
+
+                while !file.eof() {
+                    cpp.fstream.std.getline(file, line)
+                    content = content + line + "\n"
+                }
+
+                file.close()
+                return content
+            }
+            
+            func write(path: String, content: String) -> Bool {
+                var file: cpp.fstream.std.ofstream = cpp.fstream.std.ofstream(path)
+                if file.is_open() {
+                    file << content
+                    file.close()
+                    return true
+                }
+                return false
+            }
+        }
+    }
+}
