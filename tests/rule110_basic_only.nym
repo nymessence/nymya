@@ -1,0 +1,56 @@
+import crystal
+
+func rule110_cell(left: Int, center: Int, right: Int) -> Int {
+    if (left == 1 && center == 1 && right == 1) { return 0; }
+    if (left == 1 && center == 1 && right == 0) { return 1; }
+    if (left == 1 && center == 0 && right == 1) { return 1; }
+    if (left == 1 && center == 0 && right == 0) { return 0; }
+    if (left == 0 && center == 1 && right == 1) { return 1; }
+    if (left == 0 && center == 1 && right == 0) { return 1; }
+    if (left == 0 && center == 0 && right == 1) { return 1; }
+    return 0; // 000 -> 0
+}
+
+func simulate_basic() -> Void {
+    // Initialize a small row for testing
+    var row = []
+    row.append(1)
+    row.append(1) 
+    row.append(0)
+    
+    var width = 3
+    
+    // Output first generation with simple method
+    var i = 0
+    while (i < width) {
+        var element = row[i]
+        crystal.manifest("Element " + i.to_string() + " is " + element.to_string())
+        i = i + 1
+    }
+    
+    // Perform one generation
+    var new_row = []
+    var k = 0
+    while (k < width) {
+        var left = 0
+        var right = 0
+        var center = row[k]
+        
+        if (k > 0) { left = row[k - 1] }
+        if (k < width - 1) { right = row[k + 1] }
+        
+        var new_val = rule110_cell(left, center, right)
+        new_row.append(new_val)
+        k = k + 1
+    }
+    
+    // Output new generation
+    var j = 0
+    while (j < width) {
+        var new_element = new_row[j]
+        crystal.manifest("New Element " + j.to_string() + " is " + new_element.to_string())
+        j = j + 1
+    }
+}
+
+simulate_basic()

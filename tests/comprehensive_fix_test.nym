@@ -1,0 +1,18 @@
+import crystal
+
+// Basic functionality test
+crystal.manifest("Basic functionality test...")
+crystal.manifest("Hello World from fixed compiler!")
+
+// Test array operations
+var test_list = []
+test_list.append(1)
+test_list.append(2)
+test_list.append(3)
+
+var list_len = test_list.length
+crystal.manifest("List length: " + list_len.to_string())
+
+// Test array access
+var first_item = test_list[0]
+crystal.manifest("First item: " + first_item.to_string())

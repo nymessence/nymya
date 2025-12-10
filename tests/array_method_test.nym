@@ -1,0 +1,6 @@
+import crystal
+
+var test_list = []
+test_list.append(42)
+var list_len = test_list.length
+crystal.manifest("List length is: " + list_len.to_string())

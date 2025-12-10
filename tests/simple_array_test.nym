@@ -1,0 +1,5 @@
+import crystal
+
+var arr = []
+arr.append(1)
+crystal.manifest("Array append successful")

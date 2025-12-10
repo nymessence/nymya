@@ -204,6 +204,14 @@ fn parse(source: &str) -> Vec<Statement> {
                         function,
                         args
                     });
+                } else if function == "append" || function == "length" || function == "size" ||
+                          function == "get" || function == "at" || function == "set" {
+                    // This is an array method call on a variable (like list.length or list.append(value))
+                    statements.push(Statement::ArrayMethodCall {
+                        array_var: object,
+                        method: function,
+                        args
+                    });
                 } else {
                     // This is a general method call on a variable (not a module.function)
                     // Create an expression statement for the method call
@@ -604,7 +612,7 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 // Handle array method calls properly - need to distinguish between initialization and method calls
                 match expression {
                     Expression::ArrayMethodCall { array, method, args } => {
-                        // This is an array method call like list.append(item) or list.length
+                        // This is an array method call like list.length or list.get(index) that returns a value
                         let array_cpp = generate_cpp_for_expression(array.as_ref());
                         let args_cpp: Vec<String> = args.iter()
                             .map(|arg| {
@@ -618,22 +626,30 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                             })
                             .collect();
 
-                        // Map NymyaLang array methods to C++ equivalents
+                        // Map NymyaLang array methods to C++ equivalents - these methods return values for assignment
                         let method_call = match method.as_str() {
-                            "append" => format!("{}.push_back({})", array_cpp, args_cpp.join(", ")),
-                            "length" | "size" => format!("{}.size()", array_cpp),
-                            "get" | "at" => format!("{}[{}]", array_cpp, args_cpp.join(", ")),
+                            "append" => format!("{}.push_back({})", array_cpp, args_cpp.join(", ")), // Side-effect, returns void
+                            "length" | "size" => format!("{}.size()", array_cpp), // Returns size value
+                            "get" | "at" => format!("{}[{}]", array_cpp, args_cpp.join(", ")), // Returns element value
                             "set" => {
                                 if args_cpp.len() >= 2 {
-                                    format!("{}[{}] = {}", array_cpp, args_cpp[0], args_cpp[1])
+                                    format!("{}[{}] = {}", array_cpp, args_cpp[0], args_cpp[1]) // Assignment, returns void
                                 } else {
                                     format!("{}[0] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()))
                                 }
                             },
-                            _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
+                            _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // General method call
                         };
 
-                        cpp_code.push_str(&format!("    {};\n", method_call));
+                        // For method calls that return values (length, get, at), generate assignment
+                        // For side-effect calls (append, set), we might need special handling
+                        if method == "append" || method == "set" {
+                            // These are void-returning operations that modify the array
+                            cpp_code.push_str(&format!("    {};\n", method_call));
+                        } else {
+                            // These return values for assignment
+                            cpp_code.push_str(&format!("    auto {} = {};\n", var_name, method_call));
+                        }
                     },
                     Expression::ArrayAccess { array, index } => {
                         // This is an array access like array[index]
@@ -654,26 +670,30 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
             },
             Statement::FunctionCall { module, function, args } => {
                 if module == "crystal" && function == "manifest" && args.len() == 1 {
-                    // Extract string content from the argument (remove quotes)
+                    // Extract string content from the argument (remove quotes if simple string literal)
                     let arg = &args[0];
-                    if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
-                        // Remove surrounding quotes (either single or double)
+
+                    // Check if it's a simple string literal (surrounded by quotes)
+                    if (arg.starts_with("\"") && arg.ends_with("\"")) || (arg.starts_with("\'") && arg.ends_with("\'")) {
                         let content = &arg[1..arg.len()-1]; // Remove surrounding quotes
                         cpp_code.push_str(&format!("    crystal::manifest(\"{}\");\n", content));
                     } else {
-                        // If not a string literal, just output the argument as is
+                        // For complex expressions like "text" + x.to_string(), output as-is
+                        // These should be already in proper C++ expression format after parsing
                         cpp_code.push_str(&format!("    crystal::manifest({});\n", arg));
                     }
                 } else {
                     // Generic function call generation
                     let args_cpp: Vec<String> = args.iter()
                         .map(|arg| {
-                            if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
-                                // Convert single quotes to double quotes for C++
+                            // Handle different types of arguments
+                            if (arg.starts_with("\"") && arg.ends_with("\"")) || (arg.starts_with("\'") && arg.ends_with("\'")) {
+                                // String literals - convert single quotes to double quotes for C++
                                 let content = &arg[1..arg.len()-1];
                                 format!("\"{}\"", content)
                             } else {
-                                arg.to_string() // Variables or other expressions
+                                // Variables or complex expressions - output as-is
+                                arg.to_string()
                             }
                         })
                         .collect();

@@ -1,0 +1,5 @@
+import crystal
+
+crystal.manifest("Testing basic functionality")
+var x = 5
+crystal.manifest("Value of x: " + x.to_string())

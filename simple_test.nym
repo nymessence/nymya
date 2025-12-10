@@ -1,9 +1,4 @@
 import crystal
 
-// Simplest possible test to verify compiler is generating executable code
-crystal.manifest("NymyaLang Turing Completeness Verification")
-crystal.manifest("Test 1: Basic compilation works")
-crystal.manifest("Test 2: Multiple statements execute in sequence")
-crystal.manifest("Test 3: Conditional operations possible")
-crystal.manifest("Test 4: Loop structures possible")
-crystal.manifest("Turing completeness demonstrated via compiler functionality")
+var x = 42
+crystal.manifest("Hello " + x.to_string())
