@@ -1,0 +1,6 @@
+import crystal
+
+var x = 42
+// This would be a method call as a statement
+// For now, testing without the method call to see if var assignment works
+crystal.manifest("Variable x has been assigned")

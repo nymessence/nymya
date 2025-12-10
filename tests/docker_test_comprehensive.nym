@@ -1,0 +1,7 @@
+import crystal
+
+crystal.manifest("Docker test successful!")
+var test_arr = []
+test_arr.append(42)
+var len = test_arr.length
+crystal.manifest("Array length: " + len.to_string())

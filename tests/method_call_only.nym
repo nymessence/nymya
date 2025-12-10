@@ -1,0 +1,6 @@
+import crystal
+
+crystal.manifest("Starting test")
+var x = 42
+x.to_string()
+crystal.manifest("Method call test")

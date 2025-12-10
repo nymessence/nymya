@@ -1,0 +1,4 @@
+import crystal
+
+var simple_var = 42
+crystal.manifest("Variable value: " + simple_var.to_string())

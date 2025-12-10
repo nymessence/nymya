@@ -788,10 +788,10 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                 })
                 .collect();
 
-            // Handle common NymyaLang methods that map to C++ equivalents
+            // Handle common NymyaLang methods that map to appropriate C++ equivalents
             match method.as_str() {
-                "to_string" => format!("std::to_string({})", object_cpp),  // Convert any value to string
-                _ => format!("{}->{}({})", object_cpp, method, args_cpp.join(", ")) // General method call format
+                "to_string" => format!("std::to_string({})", object_cpp),  // Convert primitives to string using std::to_string
+                _ => format!("{}->{}({})", object_cpp, method, args_cpp.join(", ")) // General method call format using -> pointer syntax
             }
         },
         Expression::ArrayLiteral(_elements) => {

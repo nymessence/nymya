@@ -1,0 +1,4 @@
+import crystal
+
+var x = 42
+crystal.manifest("Value: " + x.to_string())

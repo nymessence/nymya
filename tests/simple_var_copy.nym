@@ -1,0 +1,5 @@
+import crystal
+
+var x = 42
+var y = x
+crystal.manifest("Value copied")

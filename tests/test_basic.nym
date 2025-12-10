@@ -1,0 +1,2 @@
+import crystal
+crystal.manifest("Basic test successful!")
