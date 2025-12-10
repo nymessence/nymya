@@ -175,6 +175,10 @@ fn parse(source: &str) -> Vec<Statement> {
                     }
                     i += 1;
                 }
+
+                if i < tokens.len() && tokens[i] == ")" {
+                    i += 1; // Skip ')'
+                }
             }
 
             // Check if this is an array method call (when object is a variable name starting with lowercase)
@@ -187,6 +191,17 @@ fn parse(source: &str) -> Vec<Statement> {
                     array_var: object,
                     method: function,
                     args
+                });
+            } else if object.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
+                // This is a general method call on a variable (not a module.function)
+                // Create an expression statement for the method call
+                let method_call_expr = Expression::MethodCall {
+                    object: Box::new(Expression::Variable(object)),
+                    method: function,
+                    args
+                };
+                statements.push(Statement::ExpressionStmt {
+                    expression: method_call_expr
                 });
             } else {
                 // This is a regular module.function() call
@@ -511,6 +526,11 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
 
                 cpp_code.push_str(&format!("    {};\n", method_call));
             }
+            Statement::ExpressionStmt { expression } => {
+                // Generate C++ code for expression statements (like obj.method() calls that are statements)
+                let expr_cpp = generate_cpp_for_expression(expression);
+                cpp_code.push_str(&format!("    {};\n", expr_cpp));
+            }
         }
     }
 
@@ -566,6 +586,26 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                     }
                 },
                 _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
+            }
+        },
+        Expression::MethodCall { object, method, args } => {
+            let object_cpp = generate_cpp_for_expression(object.as_ref());
+            let args_cpp: Vec<String> = args.iter()
+                .map(|arg| {
+                    if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                        // Convert single quotes to double quotes for C++
+                        let content = &arg[1..arg.len()-1];
+                        format!("\"{}\"", content)
+                    } else {
+                        arg.to_string() // Variables or other expressions
+                    }
+                })
+                .collect();
+
+            // Handle common NymyaLang methods that map to C++ equivalents
+            match method.as_str() {
+                "to_string" => format!("std::to_string({})", object_cpp),  // Convert any value to string
+                _ => format!("{}->{}({})", object_cpp, method, args_cpp.join(", ")) // General method call format
             }
         },
         Expression::ArrayLiteral(_elements) => {
