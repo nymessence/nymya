@@ -219,44 +219,32 @@ fn parse(source: &str) -> Vec<Statement> {
     statements
 }
 
-// Helper function to parse expressions
+// Helper function to parse expressions with basic precedence and method chaining support
 fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
-    // Look for complex expressions like function calls or binary operations
-    if *i < tokens.len() {
-        // Handle array literal: []
-        if *i < tokens.len() && &tokens[*i] == "[" {
-            if *i + 1 < tokens.len() && &tokens[*i + 1] == "]" {
-                *i += 2; // Skip '[' and ']'
-                return Expression::ArrayLiteral(vec![]); // Return an empty array literal
-            } else {
-                // If there are elements, this should be handled in the extended version
-                // For now, treat as a simple case
-                return parse_simple_expression(tokens, i);
-            }
-        }
-        // Handle array access like: array[index]
-        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
-            let array_expr = parse_simple_expression(tokens, i); // Parse the array identifier
-            *i += 1; // Skip '['
-            let index_expr = parse_simple_expression(tokens, i);
-            if *i < tokens.len() && &tokens[*i] == "]" {
-                *i += 1; // Skip ']'
-                return Expression::ArrayAccess {
-                    array: Box::new(array_expr),
-                    index: Box::new(index_expr)
-                };
-            }
-        }
-        // Handle function calls like: module.function() or array.method()
-        else if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
-            let module_or_array = tokens[*i].clone();
-            let function = tokens[*i + 2].clone();
-            *i += 3; // Skip module_or_array.function
+    if *i >= tokens.len() {
+        return Expression::StringLiteral("".to_string());
+    }
 
-            let mut args = Vec::new();
+    // Parse primary expression (variable, literal, array access, etc.)
+    let mut expr = parse_primary_expression_expr(tokens, i);
+
+    // Handle method calls and accessors (chaining like obj.method().field)
+    while *i < tokens.len() {
+        if &tokens[*i] == "." {
+            *i += 1; // Skip '.'
+
+            if *i >= tokens.len() {
+                break; // No more tokens after '.'
+            }
+
+            let method_name = tokens[*i].clone();
+            *i += 1;
+
             if *i < tokens.len() && &tokens[*i] == "(" {
+                // This is a method call: obj.method(args)
                 *i += 1; // Skip '('
 
+                let mut args = Vec::new();
                 while *i < tokens.len() && &tokens[*i] != ")" {
                     if &tokens[*i] != "," {
                         args.push(tokens[*i].clone());
@@ -268,58 +256,145 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
                     *i += 1; // Skip ')'
                 }
 
-                // Check if this is an array method call - only for known array methods
-                if module_or_array.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&  // Variable names start with lowercase
-                   (function == "append" || function == "length" || function == "size" ||
-                    function == "get" || function == "at" || function == "set") {  // Known array methods
-                    let array_var = Expression::Variable(module_or_array);
-                    return Expression::ArrayMethodCall {
-                        array: Box::new(array_var),
-                        method: function,
-                        args
-                    };
+                // Determine if this is an array method call or general method call
+                if method_name == "append" || method_name == "length" || method_name == "size" ||
+                   method_name == "get" || method_name == "at" || method_name == "set" {
+                    // Check if the target is a variable that looks like an array (starts with lowercase)
+                    if let Expression::Variable(var_name) = &expr {
+                        if var_name.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
+                            expr = Expression::ArrayMethodCall {
+                                array: Box::new(expr),
+                                method: method_name,
+                                args
+                            };
+                            continue;
+                        }
+                    }
                 }
-                // Otherwise treat as a regular function call (could be user-defined function, module.function, etc.)
-                else {
-                    return Expression::FunctionCall {
-                        module: module_or_array,
-                        function,
-                        args
-                    };
-                }
-            }
-        } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
-            // String literal
-            let content = tokens[*i][1..tokens[*i].len()-1].to_string(); // Remove quotes
-            *i += 1;
-            return Expression::StringLiteral(content);
-        } else if tokens[*i].parse::<f64>().is_ok() {
-            // Number literal
-            let num = tokens[*i].parse::<f64>().unwrap();
-            *i += 1;
-            return Expression::Number(num);
-        } else if *i + 1 < tokens.len() && &tokens[*i + 1] == "+" {
-            // Handle binary operations like "text + variable"
-            let left_expr = parse_simple_expression(tokens, i);
-            if *i < tokens.len() && &tokens[*i] == "+" {
-                *i += 1; // Skip "+"
-                let right_expr = parse_simple_expression(tokens, i);
-                return Expression::BinaryOperation {
-                    left: Box::new(left_expr),
-                    operator: "+".to_string(),
-                    right: Box::new(right_expr)
+
+                // General method call (like to_string, etc.)
+                expr = Expression::MethodCall {
+                    object: Box::new(expr),
+                    method: method_name,
+                    args
                 };
+            } else {
+                // This would be field access (obj.field), but since we don't have that,
+                // we'll handle it as a chained call if followed by method call
+                // For now, we'll just break to keep it simple
+                break;
             }
         } else {
-            // Simple variable name
-            let var_name = tokens[*i].clone();
-            *i += 1;
-            return Expression::Variable(var_name);
+            // Not a dot, so not a method call
+            break;
         }
     }
 
-    // Default return if nothing matches
-    Expression::StringLiteral("".to_string())
+    // Check for binary operators (right now just focusing on '+')
+    if *i < tokens.len() && &tokens[*i] == "+" {
+        return parse_binary_op(tokens, i, expr, "+".to_string());
+    }
+
+    expr
+}
+
+// Parse primary expressions (variables, literals, array access)
+fn parse_primary_expression_expr(tokens: &[String], i: &mut usize) -> Expression {
+    if *i >= tokens.len() {
+        return Expression::StringLiteral("".to_string());
+    }
+
+    let token = &tokens[*i];
+
+    // String literals
+    if (token.starts_with('"') && token.ends_with('"')) || (token.starts_with('\'') && token.ends_with('\'')) {
+        *i += 1;
+        return Expression::StringLiteral(token[1..token.len()-1].to_string());
+    }
+
+    // Numeric literals
+    if let Ok(num) = token.parse::<f64>() {
+        *i += 1;
+        return Expression::Number(num);
+    }
+
+    // Array access: array[index]
+    if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
+        let array_name = tokens[*i].clone();
+        *i += 2; // Skip array name and '['
+
+        let index_expr = parse_expression(tokens, i);
+
+        if *i < tokens.len() && &tokens[*i] == "]" {
+            *i += 1; // Skip ']'
+            let array_var = Expression::Variable(array_name);
+            return Expression::ArrayAccess {
+                array: Box::new(array_var),
+                index: Box::new(index_expr)
+            };
+        } else {
+            // Malformed array access
+            return Expression::Variable(array_name);
+        }
+    }
+
+    // Function call: module.function(args) or object.method(args) - this is handled in the main loop but also here for completion
+    if *i + 2 < tokens.len() && &tokens[*i + 1] == "." && &tokens[*i + 2] != "(" {
+        // Handle: module.function() pattern
+        let module = tokens[*i].clone();
+        let function = tokens[*i + 2].clone();
+        *i += 3; // Skip module.function
+
+        if *i < tokens.len() && &tokens[*i] == "(" {
+            *i += 1; // Skip '('
+
+            let mut args = Vec::new();
+            while *i < tokens.len() && &tokens[*i] != ")" {
+                if &tokens[*i] != "," {
+                    args.push(tokens[*i].clone());
+                }
+                *i += 1;
+            }
+
+            if *i < tokens.len() && &tokens[*i] == ")" {
+                *i += 1; // Skip ')'
+            }
+
+            return Expression::FunctionCall {
+                module,
+                function,
+                args
+            };
+        }
+    }
+
+    // Array literal: [] (handled as separate tokens)
+    if token == "[" && *i + 1 < tokens.len() && &tokens[*i + 1] == "]" {
+        *i += 2; // Skip '[' and ']'
+        return Expression::ArrayLiteral(vec![]);
+    }
+
+    // Regular variable name
+    let var_name = tokens[*i].clone();
+    *i += 1;
+    Expression::Variable(var_name)
+}
+
+// Parse binary operations
+fn parse_binary_op(tokens: &[String], i: &mut usize, left: Expression, operator: String) -> Expression {
+    if *i < tokens.len() && &tokens[*i] == operator {
+        *i += 1; // Skip operator
+
+        let right = parse_expression(tokens, i);
+
+        return Expression::BinaryOperation {
+            left: Box::new(left),
+            operator,
+            right: Box::new(right)
+        };
+    }
+
+    left
 }
 
 // Helper to parse simple expressions (non-binary)
@@ -328,8 +403,8 @@ fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
         // Handle array literal: []
         if *i + 1 < tokens.len() && &tokens[*i] == "[" && &tokens[*i + 1] == "]" {
             *i += 2; // Skip '[' and ']'
-            // Return initialization of an empty vector
-            return Expression::StringLiteral("std::vector<int>()".to_string()); // For now, return a C++ vector initialization
+            // Return an actual ArrayLiteral expression
+            return Expression::ArrayLiteral(vec![]); // Empty array literal
         }
         // Handle array access like: array[index]
         else if *i + 2 < tokens.len() && &tokens[*i + 1] == "[" {
