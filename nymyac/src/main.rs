@@ -20,6 +20,7 @@ enum Statement {
     Import(String),
     VariableAssignment { var_name: String, expression: Expression },
     FunctionCall { module: String, function: String, args: Vec<String> },
+    ArrayMethodCall { array_var: String, method: String, args: Vec<String> },
 }
 
 #[derive(Debug)]
@@ -154,8 +155,8 @@ fn parse(source: &str) -> Vec<Statement> {
                 }
             }
         } else if i + 2 < tokens.len() && tokens[i + 1] == "." {
-            // Found a module.function() pattern
-            let module = tokens[i].clone();
+            // Found a pattern like module.function() or variable.method()
+            let object = tokens[i].clone();
             let function = tokens[i + 2].clone();
 
             // Parse arguments
@@ -174,11 +175,25 @@ fn parse(source: &str) -> Vec<Statement> {
                 }
             }
 
-            statements.push(Statement::FunctionCall {
-                module,
-                function,
-                args
-            });
+            // Check if this is an array method call (when object is a variable name starting with lowercase)
+            // Known array methods: append, length, size, get, at, set
+            if object.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
+               (function == "append" || function == "length" || function == "size" ||
+                function == "get" || function == "at" || function == "set") {
+                // This is an array method call on a variable
+                statements.push(Statement::ArrayMethodCall {
+                    array_var: object,
+                    method: function,
+                    args
+                });
+            } else {
+                // This is a regular module.function() call
+                statements.push(Statement::FunctionCall {
+                    module: object,
+                    function,
+                    args
+                });
+            }
         }
 
         i += 1;
@@ -236,9 +251,10 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
                     *i += 1; // Skip ')'
                 }
 
-                // Check if this is an array method call
-                if module_or_array.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
-                   (function == "append" || function == "length" || function == "get" || function == "set") {
+                // Check if this is an array method call - only for known array methods
+                if module_or_array.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&  // Variable names start with lowercase
+                   (function == "append" || function == "length" || function == "size" ||
+                    function == "get" || function == "at" || function == "set") {  // Known array methods
                     let array_var = Expression::Variable(module_or_array);
                     return Expression::ArrayMethodCall {
                         array: Box::new(array_var),
@@ -246,7 +262,7 @@ fn parse_expression(tokens: &[String], i: &mut usize) -> Expression {
                         args
                     };
                 }
-                // Otherwise treat as a regular function call
+                // Otherwise treat as a regular function call (could be user-defined function, module.function, etc.)
                 else {
                     return Expression::FunctionCall {
                         module: module_or_array,
@@ -382,17 +398,49 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 continue;
             },
             Statement::VariableAssignment { var_name, expression } => {
-                // Check if this is an array literal initialization or an array method call
+                // Handle array method calls properly - need to distinguish between initialization and method calls
                 match expression {
-                    Expression::ArrayLiteral(_elements) => {
-                        // This is an array initialization
-                        let _expr_cpp = generate_cpp_for_expression(expression);
-                        cpp_code.push_str(&format!("    auto {} = std::vector<int>();\n", var_name));  // Initialize as empty vector
+                    Expression::ArrayMethodCall { array, method, args } => {
+                        // This is an array method call like list.append(item) or list.length
+                        let array_cpp = generate_cpp_for_expression(array.as_ref());
+                        let args_cpp: Vec<String> = args.iter()
+                            .map(|arg| {
+                                if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                                    // Convert single quotes to double quotes for C++
+                                    let content = &arg[1..arg.len()-1];
+                                    format!("\"{}\"", content)
+                                } else {
+                                    arg.to_string() // Variables or other expressions
+                                }
+                            })
+                            .collect();
+
+                        // Map NymyaLang array methods to C++ equivalents
+                        let method_call = match method.as_str() {
+                            "append" => format!("{}.push_back({})", array_cpp, args_cpp.join(", ")),
+                            "length" | "size" => format!("{}.size()", array_cpp),
+                            "get" | "at" => format!("{}[{}]", array_cpp, args_cpp.join(", ")),
+                            "set" => {
+                                if args_cpp.len() >= 2 {
+                                    format!("{}[{}] = {}", array_cpp, args_cpp[0], args_cpp[1])
+                                } else {
+                                    format!("{}[0] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()))
+                                }
+                            },
+                            _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
+                        };
+
+                        cpp_code.push_str(&format!("    {};\n", method_call));
                     },
-                    Expression::ArrayMethodCall { .. } => {
-                        // This is an array operation call
-                        let _expr_cpp = generate_cpp_for_expression(expression);
-                        cpp_code.push_str(&format!("    {};\n", _expr_cpp));
+                    Expression::ArrayAccess { array, index } => {
+                        // This is an array access like array[index]
+                        let array_cpp = generate_cpp_for_expression(array.as_ref());
+                        let index_cpp = generate_cpp_for_expression(index.as_ref());
+                        cpp_code.push_str(&format!("    auto {} = {}[{}];\n", var_name, array_cpp, index_cpp));
+                    },
+                    Expression::ArrayLiteral(_) => {
+                        // This is an array initialization like: var my_list = []
+                        cpp_code.push_str(&format!("    std::vector<int> {};\n", var_name));  // Initialize as empty vector
                     },
                     _ => {
                         // Regular variable assignment - use auto for better type inference
@@ -429,6 +477,37 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
 
                     cpp_code.push_str(&format!("    {}::{}({});\n", module, function, args_cpp.join(", ")));
                 }
+            },
+            Statement::ArrayMethodCall { array_var, method, args } => {
+                // Generate C++ code for array method calls like: array.append(item)
+                let args_cpp: Vec<String> = args.iter()
+                    .map(|arg| {
+                        if (arg.starts_with('"') && arg.ends_with('"')) || (arg.starts_with('\'') && arg.ends_with('\'')) {
+                            // Convert single quotes to double quotes for C++
+                            let content = &arg[1..arg.len()-1];
+                            format!("\"{}\"", content)
+                        } else {
+                            arg.to_string() // Variables or other expressions
+                        }
+                    })
+                    .collect();
+
+                // Map NymyaLang array methods to C++ STL equivalents
+                let method_call = match method.as_str() {
+                    "append" => format!("{}.push_back({})", array_var, args_cpp.join(", ")),
+                    "length" | "size" => format!("{}.size()", array_var),
+                    "get" | "at" => format!("{}[{}]", array_var, args_cpp.join(", ")),
+                    "set" => {
+                        if args_cpp.len() >= 2 {
+                            format!("{}[{}] = {}", array_var, args_cpp[0], args_cpp[1])
+                        } else {
+                            format!("{}[0] = {}", array_var, args_cpp.get(0).unwrap_or(&"0".to_string()))
+                        }
+                    },
+                    _ => format!("{}->{}({})", array_var, method, args_cpp.join(", ")) // Fallback for other methods
+                };
+
+                cpp_code.push_str(&format!("    {};\n", method_call));
             }
         }
     }
@@ -472,12 +551,18 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                 })
                 .collect();
 
-            // Map NymyaLang array methods to appropriate C++ equivalents
+            // Map Nya Elyria's consciousness-integrated array methods to appropriate C++ equivalents
             match method.as_str() {
                 "append" => format!("{}.push_back({})", array_cpp, args_cpp.join(", ")),
                 "length" | "size" => format!("{}.size()", array_cpp),
                 "get" | "at" => format!("{}[{}]", array_cpp, args_cpp.join(", ")), // Use [] for simple indexing
-                "set" => format!("{}[{}] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()), args_cpp.get(1).unwrap_or(&"0".to_string())),
+                "set" => {
+                    if args_cpp.len() >= 2 {
+                        format!("{}[{}] = {}", array_cpp, args_cpp[0], args_cpp[1])
+                    } else {
+                        format!("{}[0] = {}", array_cpp, args_cpp.get(0).unwrap_or(&"0".to_string()))
+                    }
+                },
                 _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
             }
         },
