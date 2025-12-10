@@ -386,13 +386,13 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                 match expression {
                     Expression::ArrayLiteral(_elements) => {
                         // This is an array initialization
-                        let expr_cpp = generate_cpp_for_expression(expression);
+                        let _expr_cpp = generate_cpp_for_expression(expression);
                         cpp_code.push_str(&format!("    auto {} = std::vector<int>();\n", var_name));  // Initialize as empty vector
                     },
                     Expression::ArrayMethodCall { .. } => {
                         // This is an array operation call
-                        let expr_cpp = generate_cpp_for_expression(expression);
-                        cpp_code.push_str(&format!("    {};\n", expr_cpp));
+                        let _expr_cpp = generate_cpp_for_expression(expression);
+                        cpp_code.push_str(&format!("    {};\n", _expr_cpp));
                     },
                     _ => {
                         // Regular variable assignment - use auto for better type inference
@@ -481,9 +481,9 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                 _ => format!("{}->{}({})", array_cpp, method, args_cpp.join(", ")) // Fallback for other methods
             }
         },
-        Expression::ArrayLiteral(elements) => {
+        Expression::ArrayLiteral(_elements) => {
             // For now, represent empty array initialization as a default constructor
-            "std::vector<any>".to_string()  // For empty arrays represented as []
+            "std::vector<int>{}".to_string()  // For empty arrays represented as []
         },
         Expression::Variable(name) => name.clone(),
         Expression::Number(val) => val.to_string(),
