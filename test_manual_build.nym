@@ -1,0 +1,6 @@
+import crystal
+
+var test_list = []
+test_list.append(42)
+var item = test_list[0]
+crystal.manifest("Value: " + item.to_string())

@@ -1,0 +1,7 @@
+import crystal
+crystal.manifest("Verification test after documentation updates")
+var test_list = []
+test_list.append(42)
+crystal.manifest("Appended value to list")
+var first_val = test_list[0]
+crystal.manifest("Retrieved first value: " + first_val.to_string())

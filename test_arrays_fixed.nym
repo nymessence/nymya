@@ -1,0 +1,12 @@
+import crystal
+
+// Test array functionality
+crystal.manifest("Testing array operations...")
+var my_list = []
+my_list.append(1)
+my_list.append(2)
+var first = my_list[0]
+crystal.manifest("First element: " + first.to_string())
+var list_size = my_list.length
+crystal.manifest("List size: " + list_size.to_string())
+crystal.manifest("Array test completed successfully!")

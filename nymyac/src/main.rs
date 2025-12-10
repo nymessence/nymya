@@ -193,18 +193,31 @@ fn parse(source: &str) -> Vec<Statement> {
                     args
                 });
             } else if object.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
-                // This is a general method call on a variable (not a module.function)
-                // Create an expression statement for the method call
-                let method_call_expr = Expression::MethodCall {
-                    object: Box::new(Expression::Variable(object)),
-                    method: function,
-                    args
-                };
-                statements.push(Statement::ExpressionStmt {
-                    expression: method_call_expr
-                });
+                // Check if this is a known module name (starts with lowercase but is a module, not a variable)
+                // Known modules: crystal, math, quantum, symbolic, networking, physics, etc.
+                let known_modules = ["crystal", "math", "quantum", "symbolic", "networking", "physics", "datetime", "lowlevel", "ml", "gui"];
+
+                if known_modules.contains(&object.as_str()) {
+                    // This is a module.function() call, not a variable method call
+                    statements.push(Statement::FunctionCall {
+                        module: object,
+                        function,
+                        args
+                    });
+                } else {
+                    // This is a general method call on a variable (not a module.function)
+                    // Create an expression statement for the method call
+                    let method_call_expr = Expression::MethodCall {
+                        object: Box::new(Expression::Variable(object)),
+                        method: function,
+                        args
+                    };
+                    statements.push(Statement::ExpressionStmt {
+                        expression: method_call_expr
+                    });
+                }
             } else {
-                // This is a regular module.function() call
+                // This is a regular module.function() call (object starts with uppercase or non-lowercase)
                 statements.push(Statement::FunctionCall {
                     module: object,
                     function,

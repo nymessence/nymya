@@ -1,0 +1,3 @@
+import crystal
+crystal.manifest("Testing array init")
+var my_list = []
