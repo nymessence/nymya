@@ -1,0 +1,88 @@
+// Pleiades Star Cluster Visualization in PLY Format (Version 3 - Final)
+// Creates a 3D model of the Pleiades (Seven Sisters) star cluster
+// Each star is represented as a 3D star tetrahedron scaled according to luminosity
+// Using Gaia data for positions and luminosities
+
+import graphics.ply_basic
+import math
+import crystal
+
+// Define star data for Pleiades cluster (with pre-converted coordinates)
+class StarData {
+    var name: String
+    var distance_ly: Float     // Distance in light years
+    var ra_deg: Float          // Right Ascension in degrees
+    var dec_deg: Float         // Declination in degrees
+    var luminosity_sol: Float  // Luminosity relative to Sun (L☉)
+
+    init(n: String, dist: Float, ra: Float, dec: Float, lum: Float) {
+        self.name = n
+        self.distance_ly = dist
+        self.ra_deg = ra
+        self.dec_deg = dec
+        self.luminosity_sol = lum
+    }
+}
+
+func main() -> Void {
+    crystal.manifest("Creating Pleiades star cluster visualization...")
+    
+    // Define the Pleiades stars with pre-converted coordinates
+    var stars = [
+        StarData("Alcyone", 440.0, 56.871, 24.105, 1750.0),      // Brightest star
+        StarData("Maia", 444.0, 56.454, 24.368, 501.0),
+        StarData("Electra", 444.0, 56.217, 24.113, 940.0),
+        StarData("Merope", 440.0, 56.549, 23.948, 927.0),
+        StarData("Taygeta", 440.0, 56.275, 24.467, 600.0),
+        StarData("Celaeno", 434.0, 56.200, 24.290, 350.0),
+        StarData("Sterope", 437.5, 56.475, 24.555, 100.0)       // Binary pair average
+    ]
+    
+    // Create a PLY model for the cluster
+    var model = graphics.ply_basic.PlyModel()
+    
+    // Process each star
+    for star in stars {
+        crystal.manifest("Processing star")
+        
+        // Calculate 3D position in space (Cartesian coordinates)
+        var pos = graphics.ply_basic.spherical_to_cartesian(star.ra_deg, star.dec_deg, star.distance_ly)
+        
+        crystal.manifest("Calculated position")
+        
+        // Scale factor for the star tetrahedron based on luminosity
+        var scale_factor = math.pow(star.luminosity_sol, 1.0/3.0) * 2.0  // Cube root for volume scaling
+        
+        crystal.manifest("Calculated scale")
+        
+        // Determine color based on star type (simplified)
+        var r, g, b = 255, 255, 200  // Default yellow-white
+        
+        if star.luminosity_sol > 1000 {
+            r, g, b = 255, 200, 100  // Bright yellow-orange for very luminous stars
+        } else if star.luminosity_sol > 500 {
+            r, g, b = 255, 220, 150  // Yellow for bright stars
+        } else {
+            r, g, b = 255, 240, 220  // White-yellow for moderate stars
+        }
+        
+        // Add star tetrahedron to the model
+        model.add_star_tetrahedron(pos.x, pos.y, pos.z, scale_factor, r, g, b)
+    }
+    
+    crystal.manifest("All stars processed")
+    
+    // Write the final model to a PLY file
+    var success = model.write_ply("pleiades_cluster.ply")
+    
+    if success {
+        crystal.manifest("Pleiades visualization completed successfully")
+    } else {
+        crystal.manifest("Pleiades visualization failed")
+    }
+    
+    // Report model statistics
+    crystal.manifest("Visualization complete")
+}
+
+main()
