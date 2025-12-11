@@ -1,0 +1,188 @@
+// Pleiades Star Cluster Visualization in STL Format for 3D Printing
+// Creates a 3D printable model of the Pleiades (Seven Sisters) star cluster
+// Each star is represented as a 3D star tetrahedron scaled according to luminosity
+// Stars are connected by bars to form a single printable piece
+// Using Gaia data for positions and luminosities
+
+import graphics.stl_basic
+import graphics.ply_basic  // For coordinate transformations
+import math
+import crystal
+
+// Define a basic 3D point structure (copied from PLY library for consistency)
+class Point3D {
+    var x
+    var y
+    var z
+
+    func init(x_val: Float, y_val: Float, z_val: Float) -> Void {
+        self.x = x_val
+        self.y = y_val
+        self.z = z_val
+    }
+}
+
+// Define STL Triangle structure (redefined for this file)
+class STLTriangle {
+    var normal    // Normal vector (Point3D)
+    var v1        // First vertex (Point3D)
+    var v2        // Second vertex (Point3D) 
+    var v3        // Third vertex (Point3D)
+
+    func init(normal_vec: Point3D, vertex1: Point3D, vertex2: Point3D, vertex3: Point3D) -> Void {
+        self.normal = normal_vec
+        self.v1 = vertex1
+        self.v2 = vertex2
+        self.v3 = vertex3
+    }
+}
+
+// Define star data for Pleiades cluster (with pre-converted coordinates)
+class StarData {
+    var name: String
+    var distance_ly: Float     // Distance in light years
+    var ra_deg: Float          // Right Ascension in degrees
+    var dec_deg: Float         // Declination in degrees
+    var luminosity_sol: Float  // Luminosity relative to Sun (L☉)
+    var position: Point3D      // 3D position calculated from coordinates
+
+    init(n: String, dist: Float, ra: Float, dec: Float, lum: Float) {
+        self.name = n
+        self.distance_ly = dist
+        self.ra_deg = ra
+        self.dec_deg = dec
+        self.luminosity_sol = lum
+        self.position = graphics.ply_basic.spherical_to_cartesian(ra, dec, dist)
+    }
+}
+
+func main() -> Void {
+    crystal.manifest("Creating 3D printable Pleiades star cluster...")
+    
+    // Define the Pleiades stars with pre-converted coordinates
+    var stars = [
+        StarData("Alcyone", 440.0, 56.871, 24.105, 1750.0),      // Brightest star
+        StarData("Maia", 444.0, 56.454, 24.368, 501.0),
+        StarData("Electra", 444.0, 56.217, 24.113, 940.0),
+        StarData("Merope", 440.0, 56.549, 23.948, 927.0),
+        StarData("Taygeta", 440.0, 56.275, 24.467, 600.0),
+        StarData("Celaeno", 434.0, 56.200, 24.290, 350.0),
+        StarData("Sterope", 437.5, 56.475, 24.555, 100.0)       // Binary pair average
+    ]
+    
+    // Create an STL model for the cluster
+    var model = graphics.stl_basic.STLModel()
+    
+    // Add star tetrahedrons for each star
+    for star in stars {
+        crystal.manifest("Adding star: " + star.name)
+        
+        // Scale factor for the star tetrahedron based on luminosity
+        var scale_factor = math.pow(star.luminosity_sol, 1.0/3.0) * 0.5  // Smaller scale for 3D printing
+        
+        crystal.manifest("Scale factor: " + graphics.stl_basic.float_to_string(scale_factor))
+        
+        // Add star tetrahedron to the model at the star's position
+        add_star_tetrahedron_to_stl(model, star.position.x, star.position.y, star.position.z, scale_factor, 220, 220, 150)  // Star color
+    }
+    
+    // Now connect all stars with bars to make it a single printable piece
+    crystal.manifest("Adding connecting bars between stars...")
+    
+    // Connect each star to at least one other star to form a connected structure
+    // We'll use a minimal spanning tree approach or just connect neighbors
+    var bar_radius = 0.2  // Radius of connecting bars
+    
+    // Connect each star to its nearest neighbor to ensure one connected piece
+    for i in range(0, stars.length()) {
+        var current_star = stars[i]
+        var nearest_distance = 999999.0
+        var nearest_idx = -1
+        
+        for j in range(0, stars.length()) {
+            if i != j {  // Don't connect to self
+                var other_star = stars[j]
+                var dx = current_star.position.x - other_star.position.x
+                var dy = current_star.position.y - other_star.position.y
+                var dz = current_star.position.z - other_star.position.z
+                var distance = math.sqrt(dx*dx + dy*dy + dz*dz)
+                
+                if distance < nearest_distance {
+                    nearest_distance = distance
+                    nearest_idx = j
+                }
+            }
+        }
+        
+        if nearest_idx != -1 {
+            var other_star = stars[nearest_idx]
+            // Add a bar between the current star and its nearest neighbor
+            model.add_bar(current_star.position, other_star.position, bar_radius, 6)  // Use fewer segments for simpler model
+        }
+    }
+    
+    // Write the final model to an STL file
+    var success = model.write_stl("pleiades_3d_printable.stl")
+    
+    if success {
+        crystal.manifest("3D printable Pleiades visualization completed successfully")
+    } else {
+        crystal.manifest("3D printable Pleiades visualization failed")
+    }
+    
+    crystal.manifest("STL model contains " + graphics.stl_basic.int_to_string(model.triangles.length()) + " triangles")
+    crystal.manifest("3D printing model ready")
+}
+
+// Helper function to add a star tetrahedron to an STL model
+func add_star_tetrahedron_to_stl(stl_model: STLModel, center_x: Float, center_y: Float, center_z: Float, scale: Float, r: Int = 255, g: Int = 255, b: Int = 255) -> Void {
+    // Create the first tetrahedron
+    var v0 = Point3D(center_x, center_y + scale, center_z)          // Top
+    var v1 = Point3D(center_x - scale, center_y - scale, center_z - scale)  // Bottom left
+    var v2 = Point3D(center_x + scale, center_y - scale, center_z - scale)  // Bottom right
+    var v3 = Point3D(center_x, center_y - scale, center_z + scale)          // Bottom front
+
+    // Add faces for the first tetrahedron
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v0, v2, v1), v0, v2, v1))  // Front face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v0, v1, v3), v0, v1, v3))  // Left face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v0, v3, v2), v0, v3, v2))  // Right face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v1, v2, v3), v1, v2, v3))  // Bottom face
+
+    // Create the second inverted tetrahedron (star tetrahedron)
+    var v4 = Point3D(center_x, center_y - scale, center_z)                // Bottom
+    var v5 = Point3D(center_x - scale, center_y + scale, center_z + scale) // Top left
+    var v6 = Point3D(center_x + scale, center_y + scale, center_z + scale) // Top right
+    var v7 = Point3D(center_x, center_y + scale, center_z - scale)         // Top back
+
+    // Add faces for the second tetrahedron
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v4, v5, v6), v4, v5, v6))  // Bottom face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v4, v6, v7), v4, v6, v7))  // Right face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v4, v7, v5), v4, v7, v5))  // Left face
+    stl_model.add_triangle(STLTriangle(calculate_normal_for_triangle(v5, v7, v6), v5, v7, v6))  // Top face
+}
+
+// Helper function to calculate normal for a triangle
+func calculate_normal_for_triangle(v1: Point3D, v2: Point3D, v3: Point3D) -> Point3D {
+    var dx1 = v2.x - v1.x
+    var dy1 = v2.y - v1.y
+    var dz1 = v2.z - v1.z
+    
+    var dx2 = v3.x - v1.x
+    var dy2 = v3.y - v1.y
+    var dz2 = v3.z - v1.z
+    
+    var nx = dy1 * dz2 - dz1 * dy2
+    var ny = dz1 * dx2 - dx1 * dz2
+    var nz = dx1 * dy2 - dy1 * dx2
+    
+    var length = math.sqrt(nx*nx + ny*ny + nz*nz)
+    if length > 0.0 {
+        nx = nx / length
+        ny = ny / length
+        nz = nz / length
+    }
+    
+    return Point3D(nx, ny, nz)
+}
+
+main()
