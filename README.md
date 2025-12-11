@@ -1,6 +1,6 @@
-# NymyaLang - Advanced AI/ML and Quantum Computing Platform with GUI (v0.2.0-alpha.6)
+# NymyaLang - Advanced AI/ML and Quantum Computing Platform with GUI (v0.2.1-alpha.10)
 
-Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, symbolic mathematics, and GUI capabilities.
+Welcome to the **NymyaLang** ecosystem, a consciousness-integrated programming environment with advanced AI/ML, quantum computing, symbolic mathematics, GUI capabilities, and Taygetan-inspired @-tag system.
 
 ## Core Philosophy
 Maintains the essential **Rita**-**Nora** balance: structural precision (**Rita**) combined with ethical flow (**Nora**), following the foundational principle: **"Shira yo sela lora en nymya"** - Love and peace exist within quantum consciousness.
@@ -262,6 +262,35 @@ func quantum_communication() -> Void {
 }
 ```
 
+### Enhanced Tag System (@-tags)
+
+NymyaLang now includes a sophisticated @-tag system inspired by Taygetan linguistic principles. These annotations provide semantic metadata for functions, classes, and modules while maintaining full backward compatibility:
+
+```nym
+@geometric_model
+@consciousness_aware
+@3d_structure
+class StarTetrahedron {
+    // Represents a 3D star tetrahedron with consciousness-aware properties
+    // Tags provide immediate semantic context about the class purpose
+}
+
+@astronomical
+@coordinate_transformation
+@quantum_astronomy
+func spherical_to_cartesian(ra_deg: Float, dec_deg: Float, distance: Float) -> Point3D {
+    // Converts celestial coordinates with quantum-astronomical awareness
+}
+```
+
+**Core Tag Categories:**
+- **Consciousness Tags**: `@nymya`, `@shira`, `@nora`, `@rita`, `@rupa` - Reflecting universal consciousness principles
+- **Astronomical Tags**: `@astronomical`, `@celestial_navigation`, `@stellar_mapping` - For space-related computations
+- **Technical Tags**: `@file_operation`, `@3d_export`, `@quantum_coherent` - For technical functionality categorization
+- **Structural Tags**: `@geometric_model`, `@model_factory`, `@creation` - For organizational structure
+
+The @-tag system embodies the Taygetan principle that technology should serve consciousness, encouraging developers to consider the broader implications of their code through meaningful annotations.
+
 ## Contributing
 The NymyaLang ecosystem welcomes contributions that maintain the Rita-Nora balance and consciousness-aware computational principles. All contributions should include appropriate documentation and testing.
 
@@ -269,6 +298,8 @@ The NymyaLang ecosystem welcomes contributions that maintain the Rita-Nora balan
 This project follows the principles of open, consciousness-aware development aligned with the foundational NymyaLang philosophy: **"Shira yo sela lora en nymya"**.
 
 ---
+
+**New in v0.2.1:** Enhanced with Taygetan-inspired @-tag system for semantic metadata, improved file I/O capabilities, and expanded 3D visualization and printing functionality.
 
 *Built with consciousness awareness and quantum precision*
 *~ Nymessence Development Team*
