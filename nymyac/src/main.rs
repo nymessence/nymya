@@ -108,6 +108,29 @@ fn tokenize(source: &str) -> Vec<String> {
                 }
                 tokens.push(c.to_string());
             }
+            '@' => {
+                // Handle @-tags like @shira, @sela, @nora, etc.
+                if !current_token.trim().is_empty() {
+                    tokens.push(current_token.clone());
+                    current_token.clear();
+                }
+
+                // Collect the entire @tag
+                current_token.push(c); // Add the '@'
+
+                // Collect alphanumeric characters and underscores after @
+                while let Some(&next_char) = chars.peek() {
+                    if next_char.is_alphanumeric() || next_char == '_' {
+                        current_token.push(chars.next().unwrap());
+                    } else {
+                        break;
+                    }
+                }
+
+                // Push the complete @tag as a single token
+                tokens.push(current_token.clone());
+                current_token.clear();
+            }
             _ if c.is_alphanumeric() || c == '_' => {
                 current_token.push(c);
             }
@@ -136,6 +159,15 @@ fn parse(source: &str) -> Vec<Statement> {
     let mut i = 0;
 
     while i < tokens.len() {
+        // Skip any @-tags that appear (they are treated as metadata/comments for now)
+        while i < tokens.len() && tokens[i].starts_with('@') {
+            i += 1;  // Skip the tag token
+        }
+
+        if i >= tokens.len() {
+            break;
+        }
+
         if tokens[i] == "import" {
             i += 1;
             if i < tokens.len() {
@@ -157,14 +189,24 @@ fn parse(source: &str) -> Vec<Statement> {
                 }
             }
         } else if i + 2 < tokens.len() && tokens[i + 1] == "." {
-            // Found a pattern like module.function() or variable.method()
-            let object = tokens[i].clone();
-            let function = tokens[i + 2].clone();
+            // Check for special case: module.submodule.function() like crystal.file.dalan_orin()
+            let mut module = tokens[i].clone();
+            let mut function = tokens[i + 2].clone();
+            let mut full_module = module.clone(); // Keep track for nested case
 
-            // Parse arguments
+            // Look ahead to see if we have module.submodule.function pattern
+            if i + 4 < tokens.len() && &tokens[i + 1] == "." && &tokens[i + 3] == "." {
+                // This is the pattern: module . submodule . function ( args )
+                full_module = format!("{}.{}", tokens[i], tokens[i + 2]); // e.g., "crystal.file"
+                function = tokens[i + 4].clone(); // The actual function name
+                i += 5; // Move past module.submodule.function
+            } else {
+                // Regular module.function pattern
+                i += 3; // Move past module.function
+            }
+
+            // Parse arguments (after either regular or nested pattern)
             let mut args = Vec::new();
-            i += 3; // Move to the opening parenthesis
-
             if i < tokens.len() && tokens[i] == "(" {
                 i += 1; // Skip '('
 
@@ -181,26 +223,31 @@ fn parse(source: &str) -> Vec<Statement> {
                 }
             }
 
+            // Determine the actual module name for the function call
+            let call_module = if full_module != module { full_module } else { module };
+
             // Check if this is an array method call (when object is a variable name starting with lowercase)
             // Known array methods: append, length, size, get, at, set
-            if object.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
+            if call_module.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
                (function == "append" || function == "length" || function == "size" ||
                 function == "get" || function == "at" || function == "set") {
                 // This is an array method call on a variable
                 statements.push(Statement::ArrayMethodCall {
-                    array_var: object,
+                    array_var: call_module,
                     method: function,
                     args
                 });
-            } else if object.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
+            } else if call_module.chars().next().map_or(false, |c| c.is_ascii_lowercase()) {
                 // Check if this is a known module name (starts with lowercase but is a module, not a variable)
                 // Known modules: crystal, math, quantum, symbolic, networking, physics, etc.
                 let known_modules = ["crystal", "math", "quantum", "symbolic", "networking", "physics", "datetime", "lowlevel", "ml", "gui"];
+                let is_known_module = known_modules.contains(&call_module.as_str()) ||
+                                     call_module.contains("."); // Include nested modules like crystal.file
 
-                if known_modules.contains(&object.as_str()) {
+                if is_known_module {
                     // This is a module.function() call, not a variable method call
                     statements.push(Statement::FunctionCall {
-                        module: object,
+                        module: call_module,
                         function,
                         args
                     });
@@ -208,7 +255,7 @@ fn parse(source: &str) -> Vec<Statement> {
                           function == "get" || function == "at" || function == "set" {
                     // This is an array method call on a variable (like list.length or list.append(value))
                     statements.push(Statement::ArrayMethodCall {
-                        array_var: object,
+                        array_var: call_module,
                         method: function,
                         args
                     });
@@ -216,7 +263,7 @@ fn parse(source: &str) -> Vec<Statement> {
                     // This is a general method call on a variable (not a module.function)
                     // Create an expression statement for the method call
                     let method_call_expr = Expression::MethodCall {
-                        object: Box::new(Expression::Variable(object)),
+                        object: Box::new(Expression::Variable(call_module)),
                         method: function,
                         args
                     };
@@ -227,7 +274,7 @@ fn parse(source: &str) -> Vec<Statement> {
             } else {
                 // This is a regular module.function() call (object starts with uppercase or non-lowercase)
                 statements.push(Statement::FunctionCall {
-                    module: object,
+                    module: call_module,
                     function,
                     args
                 });
@@ -563,16 +610,30 @@ fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
             // If no closing bracket, just return as variable
             return Expression::Variable(array_name);
         }
-        // Handle function calls like: module.function()
+        // Handle function calls like: module.function() - with special handling for nested namespaces
         else if *i + 2 < tokens.len() && &tokens[*i + 1] == "." {
-            let module = tokens[*i].clone();
-            let function = tokens[*i + 2].clone();
-            *i += 3; // Skip module.function
+            // Check for special case: module.submodule.function() like crystal.file.dalan_orin()
+            let mut module = tokens[*i].clone();
+            let mut function = tokens[*i + 2].clone();
+            let mut full_module = module.clone(); // Keep track for nested case
 
+            // Look ahead to see if we have module.submodule.function pattern
+            if *i + 4 < tokens.len() && &tokens[*i + 1] == "." && &tokens[*i + 3] == "." {
+                // This is the pattern: module . submodule . function ( args )
+                full_module = format!("{}.{}", tokens[*i], tokens[*i + 2]); // e.g., "crystal.file"
+                function = tokens[*i + 4].clone(); // The actual function name
+                *i += 5; // Move past module.submodule.function
+            } else {
+                // Regular module.function pattern
+                *i += 3; // Move past module.function
+            }
+
+            // Parse arguments (after either regular or nested pattern)
             let mut args = Vec::new();
             if *i < tokens.len() && &tokens[*i] == "(" {
                 *i += 1; // Skip '('
 
+                // Collect arguments until closing parenthesis
                 while *i < tokens.len() && &tokens[*i] != ")" {
                     if &tokens[*i] != "," {
                         args.push(tokens[*i].clone());
@@ -583,21 +644,22 @@ fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
                 if *i < tokens.len() && &tokens[*i] == ")" {
                     *i += 1; // Skip ')'
                 }
+            }
 
-                // Check if this is an array method call
-                if module.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
-                   (function == "append" || function == "length" || function == "get" || function == "set") {
-                    let array_var = Expression::Variable(module);
-                    return Expression::ArrayMethodCall {
-                        array: Box::new(array_var),
-                        method: function,
-                        args
-                    };
-                } else {
-                    return Expression::FunctionCall { module, function, args };
-                }
+            // Determine the actual module name for the function call
+            let call_module = if full_module != module { full_module } else { module };
+
+            // Check if this is an array method call (when module is a variable name starting with lowercase)
+            if call_module.chars().next().map_or(false, |c| c.is_ascii_lowercase()) &&
+                (function == "append" || function == "length" || function == "get" || function == "set") {
+                let array_var = Expression::Variable(call_module);
+                return Expression::ArrayMethodCall {
+                    array: Box::new(array_var),
+                    method: function,
+                    args
+                };
             } else {
-                return Expression::FunctionCall { module, function, args };
+                return Expression::FunctionCall { module: call_module, function, args };
             }
         } else if tokens[*i].starts_with('"') && tokens[*i].ends_with('"') {
             // String literal
@@ -720,7 +782,9 @@ fn generate_cpp_from_statements(statements: &[Statement]) -> String {
                         })
                         .collect();
 
-                    cpp_code.push_str(&format!("    {}::{}({});\n", module, function, args_cpp.join(", ")));
+                    // Convert nested module names from dot notation to C++ namespace notation
+                    let module_cpp = module.replace(".", "::");
+                    cpp_code.push_str(&format!("    {}::{}({});\n", module_cpp, function, args_cpp.join(", ")));
                 }
             },
             Statement::ArrayMethodCall { array_var, method, args } => {
@@ -780,7 +844,9 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
                     }
                 })
                 .collect();
-            format!("{}::{}({})", module, function, args_cpp.join(", "))
+            // Convert nested module names from dot notation to C++ namespace notation
+            let module_cpp = module.replace(".", "::");
+            format!("{}::{}({})", module_cpp, function, args_cpp.join(", "))
         },
         Expression::ArrayAccess { array, index } => {
             let array_cpp = generate_cpp_for_expression(array.as_ref());
@@ -869,6 +935,7 @@ fn generate_target(source_file: &str, source_code: String) -> String {
 #include <string>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 // Math utilities
 namespace math {{
@@ -909,7 +976,7 @@ namespace math {{
     }}
 }}
 
-// Crystal utilities (console output)
+// Crystal utilities (console output and file operations)
 namespace crystal {{
     void manifest(const std::string& msg) {{
         std::cout << msg << std::endl;
@@ -917,6 +984,55 @@ namespace crystal {{
 
     void print(const std::string& msg) {{
         std::cout << msg;
+    }}
+
+    // File operations namespace (Taygetan-inspired names)
+    namespace file {{
+        // dalan_orin = home food (nourish home with content)
+        bool dalan_orin(const std::string& path, const std::string& content) {{
+            std::ofstream file(path);
+            if (file.is_open()) {{
+                file << content;
+                file.close();
+                return true;
+            }}
+            return false;
+        }}
+
+        // dalan_aya = home see (check if home exists)
+        bool dalan_aya(const std::string& path) {{
+            std::ifstream file(path);
+            bool exists = file.good();
+            if (exists) {{
+                file.close();
+            }}
+            return exists;
+        }}
+
+        // dalan_karma = home work (read content from home)
+        std::string dalan_karma(const std::string& path) {{
+            std::ifstream file(path);
+            if (file.is_open()) {{
+                std::string content;
+                std::string line;
+                while (std::getline(file, line)) {{
+                    content += line + "\\n";
+                }}
+                file.close();
+                return content;
+            }}
+            return "";
+        }}
+
+        // dalan_lora = home exist (create output stream)
+        std::ofstream dalan_lora(const std::string& path) {{
+            return std::ofstream(path);
+        }}
+
+        // dalan_shira = home love (create input stream)
+        std::ifstream dalan_shira(const std::string& path) {{
+            return std::ifstream(path);
+        }}
     }}
 }}
 

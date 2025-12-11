@@ -7,6 +7,9 @@ import system.file
 
 namespace graphics
 
+@dala
+@shira
+@ora
 // Define a basic 3D point structure
 class Point3D {
     var x
@@ -20,6 +23,9 @@ class Point3D {
     }
 }
 
+@vertex
+@color
+@dala
 // Define a vertex for PLY files
 class Vertex {
     var x
@@ -48,6 +54,10 @@ class Face {
     }
 }
 
+@geometric_model
+@3d_structure
+@polymer
+@consciousness_aware
 // PLY Model structure
 class PlyModel {
     var vertices
@@ -58,12 +68,12 @@ class PlyModel {
         self.faces = []
     }
 
-    // Add a vertex to the model
+    // Add a vertex to the model (outside class context - not valid here)
     func add_vertex(self, vertex: Vertex) -> Void {
         self.vertices.append(vertex)
     }
 
-    // Add a face to the model
+    // Add a face to the model (outside class context - not valid here)
     func add_face(self, face: Face) -> Void {
         self.faces.append(face)
     }
@@ -163,7 +173,7 @@ class PlyModel {
         }
         crystal.manifest("Faces added, attempting to write file...")
 
-        // Write to file using crystal.file.dalan_orin
+        // Write to file using crystal.file.dalan_orin (used in working system code)
         var result = crystal.file.dalan_orin(filename, content)
 
         // Log the result for debugging
@@ -239,6 +249,10 @@ class PlyModel {
     }
 }
 
+@model_factory
+@creation
+@nymya
+@quantum_coherent
 // Create a new PLY model
 func create_model() -> PlyModel {
     return PlyModel()
@@ -252,6 +266,10 @@ func create_star_tetrahedron_ply(center_x: Float, center_y: Float, center_z: Flo
     return model.write_ply(filename)
 }
 
+@astronomical
+@coordinate_transformation
+@quantum_astronomy
+@celestial_navigation
 // Convert RA (Right Ascension) from HMS format to degrees
 func ra_hms_to_degrees(ra_hms: String) -> Float {
     // Parse format "HHhMMmSSs" like "03h47m29s"
@@ -300,6 +318,10 @@ func ra_hms_to_degrees(ra_hms: String) -> Float {
     return (hours + minutes/60.0 + seconds/3600.0) * 15.0
 }
 
+@astronomical
+@coordinate_transformation
+@quantum_astronomy
+@celestial_navigation
 // Convert DEC (Declination) from DMS format to degrees
 func dec_dms_to_degrees(dec_dms: String) -> Float {
     // Parse format "±DD°MM′SS″" like "+24°06′19″" or "-24°06′19″
@@ -357,6 +379,11 @@ func dec_dms_to_degrees(dec_dms: String) -> Float {
 
 // Find position of character in string - not needed anymore with manual parsing
 
+@astronomical
+@3d_transformation
+@spherical_geometry
+@stellar_mapping
+@consciousness_aware
 // Calculate 3D coordinates from RA, Dec, and distance
 func spherical_to_cartesian(ra_deg: Float, dec_deg: Float, distance: Float) -> Point3D {
     // Convert degrees to radians

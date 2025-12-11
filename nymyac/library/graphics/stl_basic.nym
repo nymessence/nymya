@@ -1,3 +1,7 @@
+@3d_printing
+@manufacturing
+@stereolithography
+@quantum_fabrication
 // STL (Stereolithography) Library for NymyaLang
 // Provides functions to create and write STL files for 3D printing
 // stl_basic.nym
@@ -175,6 +179,11 @@ class STLModel {
         return Point3D(nx, ny, nz)
     }
 
+    @file_operation
+    @output_generation
+    @stereolithography
+    @3d_export
+    @manufacturing_ready
     // Write the STL model to a file in ASCII format
     func write_stl(self, filename: String) -> Bool {
         var content = "solid NymyaSTL\n"
@@ -199,7 +208,7 @@ class STLModel {
 
         content += "endsolid NymyaSTL\n"
 
-        // Write to file using the same approach as in PLY library
+        // Write to file using crystal.file.dalan_orin (used in working system code)
         var result = crystal.file.dalan_orin(filename, content)
         if result {
             crystal.manifest("STL file successfully written to: " + filename)
@@ -274,6 +283,10 @@ func digit_to_char(digit: Int) -> String {
 }
 
 // Create a new STL model
+@model_factory
+@creation
+@stereolithography
+@3d_printing_ready
 func create_model() -> STLModel {
     return STLModel()
 }
