@@ -1,0 +1,14 @@
+@constants
+@kernel
+@entry
+
+# Entry point for constants library
+# Exposes all kernel-related constants
+
+import constants.constants
+import crystal
+
+namespace constants.entry {
+  # This provides access to all kernel constants
+  # Import with: import constants
+}
