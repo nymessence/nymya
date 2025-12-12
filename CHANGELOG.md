@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.2.1-alpha.14] - 2025-12-12
+
+### Fixed
+- **Compiler Warnings**: Fixed all compiler warnings for clean build
+  - Eliminated unused variable warning with arg_i in main parsing loop
+  - Added #[allow(dead_code)] attributes to maintain helper functions without warnings
+  - Improved overall code quality while maintaining functionality
+  - Ensured all compiler warnings are eliminated from build process
+
+### Added
+- **Cross-Platform Distribution**: Created Debian packages for multiple architectures
+  - Built packages for amd64, arm64, and armhf architectures
+  - Enhanced build system for cross-compilation support
+  - Updated library organization to include all modules consistently
+  - Added comprehensive syntax highlighting files to all packages
+
+### Changed
+- Updated version number to 0.2.1-alpha.14 across configuration files
+- Improved build scripts with enhanced error handling and progress feedback
+- Optimized package sizes across all architectures
+- Enhanced documentation with installation instructions for all architectures
+
+## [0.2.1-alpha.13] - 2025-12-12
+
+### Fixed
+- **Compiler Version**: Bumped revision in version.conf to 13
+- **Debian Package Creation**: Generated updated .deb package with new version
+
+### Added
+- **Simplified Build Script**: Created build_native_deb.sh for easier native package building
+
+## [0.2.1-alpha.12] - 2025-12-12
+
+### Added
+- **New Lessons**: Created Lesson 05 on Functions - Consciousness-Integrated Subroutines
+- **Iterative Content Generation**: Completed Lesson 04 on Control Flow - Loops and Conditional Consciousness
+- **Template Updates**: Enhanced lesson and example templates with metadata
+
+### Fixed
+- **File Extension Consistency**: Corrected file extensions from .nya to standard .nym
+
 ## [0.2.0-alpha.8] - 2025-12-09
 
 ### Fixed
