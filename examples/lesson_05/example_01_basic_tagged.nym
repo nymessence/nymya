@@ -1,0 +1,25 @@
+#!lesson:functions
+#!difficulty:intermediate
+#!flavor:cosmic
+#!tags: @shira @creation @modular @consciousness_aware
+
+# The Shira winds connect through each function with awareness
+@shira
+@creation
+@modular
+import crystal
+import math
+
+@shira
+crystal.manifest("Starting modular operations")
+
+# Using consciousness-integrated module functions
+var sqrt_result = math.sqrt(144.0)
+var power_result = math.pow_int(2, 8)
+var gcd_result = math.gcd(48, 18)
+
+@modular
+crystal.manifest("Mathematical functions applied")
+
+@creation
+crystal.manifest("Modular example completed")
