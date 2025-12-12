@@ -1072,6 +1072,26 @@ fn generate_cpp_for_expression(expr: &Expression) -> String {
         Expression::BinaryOperation { left, operator, right } => {
             let left_cpp = generate_cpp_for_expression(left.as_ref());
             let right_cpp = generate_cpp_for_expression(right.as_ref());
+
+            // Handle string concatenation specially since C++ doesn't allow direct concatenation
+            // of string literals with other types
+            if operator == "+" {
+                // Only apply special handling when one side is an actual string literal
+                if left_cpp.starts_with('"') || right_cpp.starts_with('"') {
+                    let left_str = if left_cpp.starts_with('"') {
+                        format!("std::string({})", left_cpp)
+                    } else {
+                        left_cpp
+                    };
+                    let right_str = if right_cpp.starts_with('"') {
+                        format!("std::string({})", right_cpp)
+                    } else {
+                        right_cpp
+                    };
+                    return format!("{} + {}", left_str, right_str);
+                }
+            }
+
             format!("{} {} {}", left_cpp, operator, right_cpp)
         },
     }
