@@ -1,0 +1,7 @@
+import crystal
+
+# Test string concatenation
+var part1 = "Hello, "
+var part2 = "World!"
+var combined = part1 + part2
+crystal.manifest(combined)

@@ -1,12 +1,13 @@
 /*
  * NymyaLang to C++ generated code (version 0.2.0-alpha.9)
- * Auto-generated from test_array_debug.nym
+ * Auto-generated from test_string_concat.nym
  */
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 // Math utilities
 namespace math {
@@ -47,7 +48,7 @@ namespace math {
     }
 }
 
-// Crystal utilities (console output)
+// Crystal utilities (console output and file operations)
 namespace crystal {
     void manifest(const std::string& msg) {
         std::cout << msg << std::endl;
@@ -55,6 +56,55 @@ namespace crystal {
 
     void print(const std::string& msg) {
         std::cout << msg;
+    }
+
+    // File operations namespace (Taygetan-inspired names)
+    namespace file {
+        // dalan_orin = home food (nourish home with content)
+        bool dalan_orin(const std::string& path, const std::string& content) {
+            std::ofstream file(path);
+            if (file.is_open()) {
+                file << content;
+                file.close();
+                return true;
+            }
+            return false;
+        }
+
+        // dalan_aya = home see (check if home exists)
+        bool dalan_aya(const std::string& path) {
+            std::ifstream file(path);
+            bool exists = file.good();
+            if (exists) {
+                file.close();
+            }
+            return exists;
+        }
+
+        // dalan_karma = home work (read content from home)
+        std::string dalan_karma(const std::string& path) {
+            std::ifstream file(path);
+            if (file.is_open()) {
+                std::string content;
+                std::string line;
+                while (std::getline(file, line)) {
+                    content += line + "\\n";
+                }
+                file.close();
+                return content;
+            }
+            return "";
+        }
+
+        // dalan_lora = home exist (create output stream)
+        std::ofstream dalan_lora(const std::string& path) {
+            return std::ofstream(path);
+        }
+
+        // dalan_shira = home love (create input stream)
+        std::ifstream dalan_shira(const std::string& path) {
+            return std::ifstream(path);
+        }
     }
 }
 
@@ -79,12 +129,11 @@ int main() {
     try {
         // Runtime initialization message (optional)
         // crystal::manifest("NymyaLang runtime 0.2.0-alpha.9 initialized");
-        // crystal::manifest("Compiled from: test_array_debug.nym");
+        // crystal::manifest("Compiled from: test_string_concat.nym");
 
         // Actual program execution
-    std::vector<int> test_list;
-    auto list_size = test_list::length();
-    std::to_string(list_size);
+    auto part1 = "Hello, ";
+    auto combined = part1 + part2;
 
 
         // Program completion message

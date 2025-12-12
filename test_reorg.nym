@@ -1,2 +1,0 @@
-import crystal
-crystal.manifest("Hello from reorganized NymyaLang!")

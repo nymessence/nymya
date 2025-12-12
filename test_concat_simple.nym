@@ -1,0 +1,4 @@
+import crystal
+
+var num = 42
+crystal.manifest("The number is: " + "42")  # String concatenation test

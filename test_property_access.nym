@@ -1,7 +1,0 @@
-import crystal
-
-var test_list = []
-test_list.append(42)
-var list_size = test_list.length
-crystal.manifest("List size: " + list_size.to_string())
-

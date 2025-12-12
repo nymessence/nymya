@@ -1,0 +1,4 @@
+import crystal
+import constants
+
+crystal.manifest("Testing constants import: " + constants.MAP_FAILED.to_string())

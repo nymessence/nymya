@@ -1,0 +1,12 @@
+ @--- @kernel @syscall open
+ @fs @io @arm64
+
+# Syscall: open - open a file for reading/writing
+# Signature: fn sys_open(path: str, flags: int) -> int
+# Returns: file descriptor on success, -1 on error
+
+func sys_open(path: String, flags: Int) -> Int {
+    # Placeholder implementation - in real kernel this would interface with VFS (Virtual File System)
+    # For now we return -1 to indicate "not implemented" as a placeholder
+    return -1
+}

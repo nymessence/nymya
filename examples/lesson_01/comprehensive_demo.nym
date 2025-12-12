@@ -1,0 +1,31 @@
+@consciousness_aware
+@creation
+import crystal
+import math
+
+# Demonstration of core NymyaLang capabilities
+
+# Basic I/O
+crystal.manifest("NymyaLang Capabilities Demonstration")
+
+# Variable assignment and arithmetic
+var a = 15
+var b = 4
+var sum = a + b
+crystal.manifest("Arithmetic operations working")
+
+# Array operations
+var numbers = []
+numbers.append(100)
+numbers.append(200)
+numbers.append(300)
+var count = numbers.size()  # Using method call (not property access)
+crystal.manifest("Array operations working")
+
+# Mathematical functions
+var sqrt_val = math.sqrt(144.0)
+var gcd_val = math.gcd(60, 48)
+crystal.manifest("Mathematical operations working")
+
+# All operations completed
+crystal.manifest("NymyaLang demonstration complete")

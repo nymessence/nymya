@@ -1,0 +1,15 @@
+ @--- @kernel @syscall write
+ @io @arm64
+
+import crystal
+import constants
+
+# Syscall: write - write to a file descriptor
+# Signature: fn sys_write(fd: int, buf: ptr, count: size_t) -> ssize_t  
+# Returns: number of bytes written on success, -1 on error
+
+func sys_write(fd: Int, buf: Ptr, count: SizeT) -> SSsizeT {
+    # Placeholder implementation - in real kernel this would interface with file operations
+    crystal.manifest("Write syscall invoked")
+    return constants.EIO  # Return error code for now
+}

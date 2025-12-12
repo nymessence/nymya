@@ -1,6 +1,6 @@
 /*
  * NymyaLang to C++ generated code (version 0.2.0-alpha.9)
- * Auto-generated from test_specific_pattern.nym
+ * Auto-generated from test_constants.nym
  */
 
 #include <iostream>
@@ -129,11 +129,10 @@ int main() {
     try {
         // Runtime initialization message (optional)
         // crystal::manifest("NymyaLang runtime 0.2.0-alpha.9 initialized");
-        // crystal::manifest("Compiled from: test_specific_pattern.nym");
+        // crystal::manifest("Compiled from: test_constants.nym");
 
         // Actual program execution
-    crystal::manifest("Testing specific pattern");
-    auto model = graphics::stl_basic::STLModel();
+    crystal::manifest("Testing constants import: ", +, constants, ., MAP_FAILED, ., to_string, ();
 
 
         // Program completion message
