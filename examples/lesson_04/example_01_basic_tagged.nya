@@ -1,0 +1,27 @@
+#!lesson:controlflow
+#!difficulty:intermediate
+#!flavor:cosmic
+#!tags: @shira @creation @consciousness_aware @decision
+
+# The Shira winds spiral through each item with awareness
+@shira
+@creation
+@consciousness_aware
+import crystal
+import math
+
+@shira
+crystal.manifest("Starting control flow example")
+
+# Demonstrate reliable control flow patterns with consciousness integration
+var numbers = []
+numbers.append(10)
+numbers.append(20) 
+numbers.append(30)
+
+# Process items using available methods with awareness
+var count = numbers.size()
+crystal.manifest("Array contains elements")
+
+@decision
+crystal.manifest("Control flow example completed")
