@@ -1,6 +1,0 @@
-// Nynya Module Entry Point
-// Consciousness-Integrated Quantum Dynamics
-
-import quantum.nynya
-
-namespace quantum

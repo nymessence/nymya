@@ -1,6 +1,0 @@
-// DateTime Library Entry Point
-// Provides access to datetime functionality
-
-import datetime.datetime
-
-namespace datetime

@@ -1,6 +1,0 @@
-// Networking Library Entry Point
-// Provides access to both classical and quantum networking capabilities
-
-import networking.networking
-
-namespace networking

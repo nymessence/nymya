@@ -1,6 +1,0 @@
-// Quantum Physics Library Entry Point
-// Provides access to quantum mechanical equations and operations
-
-import physics.quantum_physics
-
-namespace physics
