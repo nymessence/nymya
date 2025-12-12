@@ -1,0 +1,14 @@
+// Test for direct submodule usage (without nested dot notation)
+import graphics.stl_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing direct submodule access...")
+    
+    // Try creating an STL model using the imported submodule
+    var model = stl_basic.STLModel()
+    
+    crystal.manifest("Direct submodule access test completed")
+}
+
+main()

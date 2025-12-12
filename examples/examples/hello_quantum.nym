@@ -1,0 +1,16 @@
+// Hello Quantum World Example
+import crystal
+import quantum
+import math
+
+func main() -> Void {
+    crystal.manifest("Hello, Quantum Consciousness!")
+    crystal.manifest("Shira yo sela lora en nymya")
+    
+    var circuit = quantum.sim.create_circuit(2)
+    quantum.gate.h(circuit, 0)
+    quantum.gate.cx(circuit, 0, 1)
+    
+    var measurement = quantum.sim.measure_all(circuit)
+    crystal.manifest("Quantum entanglement result: " + measurement.join(", "))
+}

@@ -1,0 +1,89 @@
+// Symbolic Subsystem Tests - Prime Numbers
+// Tests for the prime number symbolism
+
+import symbolic
+import crystal
+
+namespace test_primes {
+
+    func test_prime_detection() -> Void {
+        crystal.manifest("Testing prime detection...")
+        
+        var test_cases = [[2, true], [3, true], [4, false], [5, true], [6, false], 
+                         [7, true], [8, false], [9, false], [10, false], [11, true], 
+                         [13, true], [17, true], [19, true], [23, true], [29, true], 
+                         [31, true], [37, true], [41, true], [43, true], [47, true],
+                         [100, false], [101, true]]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected = test_case[1]
+            var is_prime_result = symbolic.is_prime(n)
+            crystal.manifest("Number " + n + " is prime: " + is_prime_result)
+            
+            if is_prime_result == expected {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected: " + expected)
+            }
+        }
+    }
+
+    func test_prime_classifications() -> Void {
+        crystal.manifest("\nTesting prime classifications...")
+        
+        // Test that 2 is classified as a special prime
+        var prime_symbol_2 = symbolic.get_prime_symbol(2)
+        crystal.manifest("Prime 2 classification: " + prime_symbol_2.symbolic_meaning)
+        
+        // Test that 3 is classified with divine traits
+        var prime_symbol_3 = symbolic.get_prime_symbol(3)
+        crystal.manifest("Prime 3 classification: " + prime_symbol_3.symbolic_meaning)
+        
+        // Test that 11 is a master number prime
+        var prime_symbol_11 = symbolic.get_prime_symbol(11)
+        crystal.manifest("Prime 11 classification: " + prime_symbol_11.symbolic_meaning)
+        
+        // Test that 17 has vortex properties
+        var prime_symbol_17 = symbolic.get_prime_symbol(17)
+        crystal.manifest("Prime 17 classification: " + prime_symbol_17.symbolic_meaning)
+        
+        // Test that 37 has recursion properties
+        var prime_symbol_37 = symbolic.get_prime_symbol(37)
+        crystal.manifest("Prime 37 classification: " + prime_symbol_37.symbolic_meaning)
+    }
+
+    func test_twin_primes() -> Void {
+        crystal.manifest("\nTesting twin primes...")
+        
+        var twin_pairs = [[3, 5], [5, 7], [11, 13], [17, 19], [29, 31], [41, 43]]
+        
+        for pair in twin_pairs {
+            var p1 = pair[0]
+            var p2 = pair[1]
+            
+            var is_prime_p1 = symbolic.is_prime(p1)
+            var is_prime_p2 = symbolic.is_prime(p2)
+            var are_twins = symbolic.primes.are_twin_primes(p1, p2)
+            
+            crystal.manifest("Twin primes " + p1 + "," + p2 + ": both prime=" + 
+                           (is_prime_p1 and is_prime_p2) + ", are twins=" + are_twins)
+            
+            if is_prime_p1 and is_prime_p2 and are_twins {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL")
+            }
+        }
+    }
+
+    func run_tests() -> Void {
+        crystal.manifest("=== PRIME NUMBER SUBSYSTEM TESTS ===")
+        test_prime_detection()
+        test_prime_classifications()
+        test_twin_primes()
+        crystal.manifest("=== PRIME NUMBER TESTS COMPLETE ===\n")
+    }
+}
+
+test_primes.run_tests()

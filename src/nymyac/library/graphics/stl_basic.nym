@@ -1,0 +1,360 @@
+@3d_printing
+@manufacturing
+@stereolithography
+@quantum_fabrication
+// STL (Stereolithography) Library for NymyaLang
+// Provides functions to create and write STL files for 3D printing
+// stl_basic.nym
+
+import crystal
+import graphics.ply_basic  // Use common 3D structures from PLY library
+import math
+
+namespace graphics
+
+// Import the Point3D and Vertex classes from PLY library for consistency
+// Note: These would typically be in a shared 3D geometry library
+
+// STL Triangle structure 
+class STLTriangle {
+    var normal    // Normal vector (Point3D)
+    var v1        // First vertex (Point3D)
+    var v2        // Second vertex (Point3D) 
+    var v3        // Third vertex (Point3D)
+
+    func init(normal_vec: Point3D, vertex1: Point3D, vertex2: Point3D, vertex3: Point3D) -> Void {
+        self.normal = normal_vec
+        self.v1 = vertex1
+        self.v2 = vertex2
+        self.v3 = vertex3
+    }
+}
+
+// STL Model structure
+class STLModel {
+    var triangles
+
+    func init() -> Void {
+        self.triangles = []
+    }
+
+    // Add a triangle to the model
+    func add_triangle(self, triangle: STLTriangle) -> Void {
+        self.triangles.append(triangle)
+    }
+
+    // Create a bar (cylinder) between two points
+    func add_bar(self, start: Point3D, end: Point3D, radius: Float, segments: Int = 8, r: Int = 128, g: Int = 128, b: Int = 128) -> Void {
+        // Calculate the direction vector
+        var dx = end.x - start.x
+        var dy = end.y - start.y
+        var dz = end.z - start.z
+        var length = math.sqrt(dx*dx + dy*dy + dz*dz)
+
+        // Calculate a perpendicular vector to the bar to define the radius direction
+        var perp_x, perp_y, perp_z = 1.0, 0.0, 0.0  // Default perpendicular vector
+
+        // If bar is aligned with X axis, use different perpendicular vector
+        if math.abs(dx) > math.abs(dy) and math.abs(dx) > math.abs(dz) {
+            perp_x, perp_y, perp_z = 0.0, 1.0, 0.0
+        }
+
+        // Calculate the perpendicular vector more accurately
+        var dot_product = dx*perp_x + dy*perp_y + dz*perp_z
+        perp_x = perp_x - dot_product * dx / (length * length)
+        perp_y = perp_y - dot_product * dy / (length * length)
+        perp_z = perp_z - dot_product * dz / (length * length)
+
+        // Normalize the perpendicular vector
+        var perp_length = math.sqrt(perp_x*perp_x + perp_y*perp_y + perp_z*perp_z)
+        if perp_length > 0.0 {
+            perp_x = perp_x / perp_length
+            perp_y = perp_y / perp_length
+            perp_z = perp_z / perp_length
+        } else {
+            // If the bar is aligned with our initial perpendicular vector, use another
+            perp_x, perp_y, perp_z = 0.0, 1.0, 0.0
+        }
+
+        // Calculate the cross product to get the second perpendicular vector
+        var cross_x = dy*perp_z - dz*perp_y
+        var cross_y = dz*perp_x - dx*perp_z
+        var cross_z = dx*perp_y - dy*perp_x
+
+        // Normalize the cross vector
+        var cross_length = math.sqrt(cross_x*cross_x + cross_y*cross_y + cross_z*cross_z)
+        if cross_length > 0.0 {
+            cross_x = cross_x / cross_length
+            cross_y = cross_y / cross_length
+            cross_z = cross_z / cross_length
+        } else {
+            // If the bar is aligned with both vectors, use a default
+            cross_x, cross_y, cross_z = 0.0, 0.0, 1.0
+        }
+
+        // Create vertices around the circumference at start and end points
+        var start_vertices = []
+        var end_vertices = []
+
+        for i in range(0, segments) {
+            var angle = i as Float * 2.0 * math.PI / segments as Float
+
+            var x = radius * math.cos(angle)
+            var y = radius * math.sin(angle)
+
+            var start_x = start.x + x * perp_x + y * cross_x
+            var start_y = start.y + x * perp_y + y * cross_y
+            var start_z = start.z + x * perp_z + y * cross_z
+
+            var end_x = end.x + x * perp_x + y * cross_x
+            var end_y = end.y + x * perp_y + y * cross_y
+            var end_z = end.z + x * perp_z + y * cross_z
+
+            start_vertices.append(Point3D(start_x, start_y, start_z))
+            end_vertices.append(Point3D(end_x, end_y, end_z))
+        }
+
+        // Create the side faces of the cylinder
+        for i in range(0, segments) {
+            var next_i = if i + 1 < segments { i + 1 } else { 0 }
+
+            // Side face triangles
+            self.add_triangle(STLTriangle(
+                calculate_normal(start_vertices[i], start_vertices[next_i], end_vertices[i]),
+                start_vertices[i], start_vertices[next_i], end_vertices[i]
+            ))
+
+            self.add_triangle(STLTriangle(
+                calculate_normal(start_vertices[next_i], end_vertices[next_i], end_vertices[i]),
+                start_vertices[next_i], end_vertices[next_i], end_vertices[i]
+            ))
+        }
+
+        // Create the end caps if needed
+        // Start cap
+        var start_center = Point3D(start.x, start.y, start.z)
+        for i in range(0, segments) {
+            var next_i = if i + 1 < segments { i + 1 } else { 0 }
+            self.add_triangle(STLTriangle(
+                calculate_normal(start_center, start_vertices[next_i], start_vertices[i]),
+                start_center, start_vertices[next_i], start_vertices[i]
+            ))
+        }
+
+        // End cap
+        var end_center = Point3D(end.x, end.y, end.z)
+        for i in range(0, segments) {
+            var next_i = if i + 1 < segments { i + 1 } else { 0 }
+            self.add_triangle(STLTriangle(
+                calculate_normal(end_center, end_vertices[i], end_vertices[next_i]),
+                end_center, end_vertices[i], end_vertices[next_i]
+            ))
+        }
+    }
+
+    // Calculate normal vector for a triangle
+    func calculate_normal(self, v1: Point3D, v2: Point3D, v3: Point3D) -> Point3D {
+        // Calculate vectors
+        var ax = v2.x - v1.x
+        var ay = v2.y - v1.y
+        var az = v2.z - v1.z
+
+        var bx = v3.x - v1.x
+        var by = v3.y - v1.y
+        var bz = v3.z - v1.z
+
+        // Cross product
+        var nx = ay * bz - az * by
+        var ny = az * bx - ax * bz
+        var nz = ax * by - ay * bx
+
+        // Normalize
+        var length = math.sqrt(nx*nx + ny*ny + nz*nz)
+        if length > 0.0 {
+            nx = nx / length
+            ny = ny / length
+            nz = nz / length
+        }
+
+        return Point3D(nx, ny, nz)
+    }
+
+    @file_operation
+    @output_generation
+    @stereolithography
+    @3d_export
+    @manufacturing_ready
+    // Write the STL model to a file in ASCII format
+    func write_stl(self, filename: String) -> Bool {
+        var content = "solid NymyaSTL\n"
+
+        for triangle in self.triangles {
+            content += "  facet normal " + float_to_string(triangle.normal.x) + " " + 
+                                     float_to_string(triangle.normal.y) + " " + 
+                                     float_to_string(triangle.normal.z) + "\n"
+            content += "    outer loop\n"
+            content += "      vertex " + float_to_string(triangle.v1.x) + " " + 
+                                       float_to_string(triangle.v1.y) + " " + 
+                                       float_to_string(triangle.v1.z) + "\n"
+            content += "      vertex " + float_to_string(triangle.v2.x) + " " + 
+                                       float_to_string(triangle.v2.y) + " " + 
+                                       float_to_string(triangle.v2.z) + "\n"
+            content += "      vertex " + float_to_string(triangle.v3.x) + " " + 
+                                       float_to_string(triangle.v3.y) + " " + 
+                                       float_to_string(triangle.v3.z) + "\n"
+            content += "    endloop\n"
+            content += "  endfacet\n"
+        }
+
+        content += "endsolid NymyaSTL\n"
+
+        // Write to file using crystal.file.dalan_orin (used in working system code)
+        var result = crystal.file.dalan_orin(filename, content)
+        if result {
+            crystal.manifest("STL file successfully written to: " + filename)
+        } else {
+            crystal.manifest("Failed to write STL file to: " + filename)
+        }
+
+        return result
+    }
+}
+
+// Helper function to convert float to string (reusing from PLY library approach)
+func float_to_string(num: Float) -> String {
+    // For now, just convert the integer part (this is a simplified approach)
+    var int_part = num as Int
+    var result = int_to_string(int_part)
+    
+    // Add decimal part if needed (simplified - only 2 decimal places)
+    var frac_part = (num - int_part as Float) * 100.0
+    if frac_part < 0 {
+        frac_part = -frac_part
+    }
+    var frac_int = frac_part as Int
+    
+    // Only add decimal part if it's not zero
+    if frac_int != 0 {
+        result = result + "." + int_to_string(frac_int)
+    }
+    
+    return result
+}
+
+// Helper function to convert integer to string (reusing from PLY library approach)
+func int_to_string(num: Int) -> String {
+    if num == 0 {
+        return "0"
+    }
+    
+    var is_negative = False
+    if num < 0 {
+        is_negative = True
+        num = -num
+    }
+    
+    var result = ""
+    while num > 0 {
+        var digit = num % 10
+        result = digit_to_char(digit) + result
+        num = num / 10
+    }
+    
+    if is_negative {
+        result = "-" + result
+    }
+    
+    return result
+}
+
+// Helper function to convert single digit to character
+func digit_to_char(digit: Int) -> String {
+    if digit == 0 { return "0" }
+    else if digit == 1 { return "1" }
+    else if digit == 2 { return "2" }
+    else if digit == 3 { return "3" }
+    else if digit == 4 { return "4" }
+    else if digit == 5 { return "5" }
+    else if digit == 6 { return "6" }
+    else if digit == 7 { return "7" }
+    else if digit == 8 { return "8" }
+    else if digit == 9 { return "9" }
+    else { return "0" } // default
+}
+
+// Create a new STL model
+@model_factory
+@creation
+@stereolithography
+@3d_printing_ready
+func create_model() -> STLModel {
+    return STLModel()
+}
+
+// Create a basic cube as an example STL model
+func create_cube_stl(center_x: Float, center_y: Float, center_z: Float, size: Float, filename: String) -> Bool {
+    var model = STLModel()
+    
+    var half_size = size / 2.0
+    
+    // Define the 8 vertices of the cube
+    var v0 = Point3D(center_x - half_size, center_y - half_size, center_z - half_size)  // (-,-,-)
+    var v1 = Point3D(center_x + half_size, center_y - half_size, center_z - half_size)  // (+,-,-)
+    var v2 = Point3D(center_x + half_size, center_y + half_size, center_z - half_size)  // (+,+,-)
+    var v3 = Point3D(center_x - half_size, center_y + half_size, center_z - half_size)  // (-,+,-)
+    var v4 = Point3D(center_x - half_size, center_y - half_size, center_z + half_size)  // (-,-,+)
+    var v5 = Point3D(center_x + half_size, center_y - half_size, center_z + half_size)  // (+,-,+)
+    var v6 = Point3D(center_x + half_size, center_y + half_size, center_z + half_size)  // (+,+,+)
+    var v7 = Point3D(center_x - half_size, center_y + half_size, center_z + half_size)  // (-,+,+)
+    
+    // Define the 12 triangles (6 faces, 2 triangles each)
+    // Front face (z = -size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v0, v1, v2), v0, v1, v2))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v0, v2, v3), v0, v2, v3))
+    
+    // Back face (z = +size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v5, v4, v7), v5, v4, v7))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v5, v7, v6), v5, v7, v6))
+    
+    // Left face (x = -size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v4, v0, v3), v4, v0, v3))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v4, v3, v7), v4, v3, v7))
+    
+    // Right face (x = +size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v1, v5, v6), v1, v5, v6))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v1, v6, v2), v1, v6, v2))
+    
+    // Bottom face (y = -size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v0, v4, v5), v0, v4, v5))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v0, v5, v1), v0, v5, v1))
+    
+    // Top face (y = +size/2)
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v3, v2, v6), v3, v2, v6))
+    model.add_triangle(STLTriangle(calculate_normal_for_face(v3, v6, v7), v3, v6, v7))
+    
+    return model.write_stl(filename)
+}
+
+// Helper function to calculate normal for a face
+func calculate_normal_for_face(v1: Point3D, v2: Point3D, v3: Point3D) -> Point3D {
+    var dx1 = v2.x - v1.x
+    var dy1 = v2.y - v1.y
+    var dz1 = v2.z - v1.z
+    
+    var dx2 = v3.x - v1.x
+    var dy2 = v3.y - v1.y
+    var dz2 = v3.z - v1.z
+    
+    var nx = dy1 * dz2 - dz1 * dy2
+    var ny = dz1 * dx2 - dx1 * dz2
+    var nz = dx1 * dy2 - dy1 * dx2
+    
+    var length = math.sqrt(nx*nx + ny*ny + nz*nz)
+    if length > 0.0 {
+        nx = nx / length
+        ny = ny / length
+        nz = nz / length
+    }
+    
+    return Point3D(nx, ny, nz)
+}

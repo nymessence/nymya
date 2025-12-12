@@ -1,0 +1,9 @@
+import symbolic
+import crystal
+crystal.manifest("Testing symbolic mathematics...")
+var meaning_33 = symbolic.numerology.get_meaning(33)
+crystal.manifest("Numerological meaning of 33: " + meaning_33.meaning)
+var sacred_geom = symbolic.sacred_geometry.find_geometries_for_number(19)
+crystal.manifest("Sacred geometry for 19: " + sacred_geom.length + " found")
+var is_prime_23 = symbolic.primes.is_prime(23)
+crystal.manifest("Is 23 prime (symbolic): " + is_prime_23)

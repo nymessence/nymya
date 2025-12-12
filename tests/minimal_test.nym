@@ -1,0 +1,9 @@
+import crystal
+
+crystal.manifest("Testing array functionality")
+var test_array = []
+test_array.append(1)
+test_array.append(2)
+var element_0 = test_array[0]
+var arr_len = test_array.length
+crystal.manifest("Array test completed")

@@ -1,0 +1,22 @@
+// Data Structures Library Entry Point
+// Provides access to all data structure implementations
+
+import data_structures.data_structures
+
+namespace data_structures {
+    // Export commonly used data structures
+    using data_structures.BST
+    using data_structures.Queue  
+    using data_structures.MinHeap
+    using data_structures.LinkedList
+    using data_structures.ListNode
+    using data_structures.Tuple2
+    using data_structures.Tuple3
+    using data_structures.Tuple4
+    using data_structures.Stack
+    using data_structures.testing.assert
+    using data_structures.testing.assert_equal
+    using data_structures.testing.assert_not_equal
+    using data_structures.testing.assert_true
+    using data_structures.testing.assert_false
+}

@@ -1,0 +1,114 @@
+// Test file for advanced mathematical functions and datetime library
+
+import math
+import math.functions
+import datetime
+import crystal
+
+func test_advanced_math_functions() -> Void {
+    crystal.manifest("Testing advanced mathematical functions...")
+    
+    // Test multiple precision complex numbers
+    var mpc1 = math.functions.MPC(1.0, 2.0)
+    var mpc2 = math.functions.MPC(3.0, 4.0)
+    var mpc_sum = mpc1.add(mpc2)
+    crystal.manifest("MPC addition: (1+2i) + (3+4i) = " + mpc_sum.real + " + " + mpc_sum.imag + "i")
+    
+    var mpc_prod = mpc1.multiply(mpc2)
+    crystal.manifest("MPC multiplication: (1+2i) * (3+4i) = " + mpc_prod.real + " + " + mpc_prod.imag + "i")
+    
+    // Test tetration
+    var tet4 = math.functions.tetration(2.0, 4)  // 2^^(4) = 2^(2^(2^2)) = 2^16 = 65536
+    crystal.manifest("Tetration 2^^(4): " + tet4)
+    
+    var tet3 = math.functions.tetration(3.0, 3)  // 3^^(3) = 3^(3^3) = 3^27 (very large number)
+    crystal.manifest("Tetration 3^^(3): " + tet3)
+    
+    // Test hyperfactorial
+    var hyp5 = math.functions.hyperfactorial(5)  // H(5) = 1^1 * 2^2 * 3^3 * 4^4 * 5^5
+    crystal.manifest("Hyperfactorial H(5): " + hyp5)
+    
+    // Test superfactorial
+    var sf4 = math.functions.superfactorial(4)  // sf(4) = 1! * 2! * 3! * 4!
+    crystal.manifest("Superfactorial sf(4): " + sf4)
+    
+    // Test termial
+    var term5 = math.functions.termial(5)  // 5? = 5*6/2 = 15
+    crystal.manifest("Termial 5?: " + term5)
+    
+    // Test Riemann zeta function
+    var zeta2 = math.functions.riemann_zeta(2.0)  // Should be π²/6 ≈ 1.644934
+    crystal.manifest("Riemann Zeta ζ(2): " + zeta2)
+    
+    var zeta3 = math.functions.riemann_zeta(3.0)  // Apery's constant ≈ 1.2020569
+    crystal.manifest("Riemann Zeta ζ(3): " + zeta3)
+    
+    // Test Dirichlet eta function
+    var eta1 = math.functions.dirichlet_eta(1.0)  // Should be ln(2) ≈ 0.693
+    crystal.manifest("Dirichlet eta η(1): " + eta1)
+    
+    // Test digamma function
+    var psi1 = math.functions.digamma(1.0)  // Should be -γ (negative Euler-Mascheroni constant)
+    crystal.manifest("Digamma ψ(1): " + psi1)
+    
+    // Test beta function
+    var beta_05_05 = math.functions.beta(0.5, 0.5)  // Should be π
+    crystal.manifest("Beta B(0.5, 0.5): " + beta_05_05)
+    
+    crystal.manifest("Advanced math function tests completed!")
+}
+
+func test_datetime_functionality() -> Void {
+    crystal.manifest("Testing datetime functionality...")
+    
+    // Create current time
+    var now = datetime.DateTime()
+    crystal.manifest("Current time (UTC): " + now.to_string())
+    
+    // Create time in different timezone
+    var est_time = datetime.DateTime(datetime.Timezone.est())
+    crystal.manifest("Current time (EST): " + est_time.to_string())
+    
+    // Convert between timezones
+    var utc_time = now
+    var pst_time = utc_time.to_timezone(datetime.Timezone.pst())
+    crystal.manifest("UTC to PST conversion: " + pst_time.to_string())
+    
+    // Test timestamp functionality
+    var timestamp = utc_time.unix_timestamp
+    crystal.manifest("Unix timestamp: " + timestamp.value)
+    
+    // Add time to timestamp
+    var future = timestamp.add_days(7)
+    var future_dt = datetime.DateTime(future, datetime.Timezone.utc())
+    crystal.manifest("Date 7 days from now: " + future_dt.to_string())
+    
+    // Test ISO string formatting
+    var iso_string = utc_time.to_iso_string()
+    crystal.manifest("ISO string: " + iso_string)
+    
+    crystal.manifest("Datetime tests completed!")
+}
+
+func test_import_functionality() -> Void {
+    crystal.manifest("Testing import functionality...")
+    
+    // Test that functions can be imported and used as math.functions.function_name
+    var result = math.functions.termial(10)
+    crystal.manifest("Testing import: math.functions.termial(10) = " + result)
+    
+    // Test complex number operations
+    var mpc = math.functions.MPC(5.0, 3.0)
+    var mpc_ln = mpc.log()
+    crystal.manifest("Testing MPC log operation: ln(5+3i) magnitude approx: " + mpc_ln.magnitude())
+    
+    crystal.manifest("Import functionality tests completed!")
+}
+
+func main() -> Void {
+    test_import_functionality()
+    test_advanced_math_functions()
+    test_datetime_functionality()
+    
+    crystal.manifest("All tests completed successfully!")
+}

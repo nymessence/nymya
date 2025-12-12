@@ -1,0 +1,8 @@
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing compiler in Docker-compatible environment")
+    crystal.manifest("Basic functionality working")
+}
+
+main()

@@ -1,0 +1,12 @@
+// Test with full namespace qualified access
+import graphics
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing graphics module...")
+    
+    // Try to access nested functionality
+    crystal.manifest("Test completed")
+}
+
+main()

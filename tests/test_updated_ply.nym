@@ -1,0 +1,24 @@
+// Test the updated PLY file writing function
+import graphics.ply_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing updated PLY file writing")
+    
+    // Create a simple PLY model
+    var model = graphics.ply_basic.PlyModel()
+    
+    // Add a simple tetrahedron
+    model.add_tetrahedron(0.0, 0.0, 0.0, 1.0, 255, 200, 150)
+    
+    // Write to file
+    var success = model.write_ply("test_updated_ply.ply")
+    
+    if success {
+        crystal.manifest("PLY file created successfully")
+    } else {
+        crystal.manifest("PLY file creation failed")
+    }
+}
+
+main()

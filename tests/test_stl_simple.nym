@@ -1,0 +1,19 @@
+// Simple test for STL functionality
+import graphics.stl_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing STL functionality")
+    
+    // Create a simple model
+    var model = graphics.stl_basic.STLModel()
+    
+    crystal.manifest("Model created")
+    
+    // Write to STL file
+    var success = model.write_stl("simple_test.stl")
+    
+    crystal.manifest("STL creation complete")
+}
+
+main()

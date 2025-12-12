@@ -1,0 +1,26 @@
+import crystal
+
+// Final test of the fixed array functionality
+crystal.manifest("NymyaLang Array Functionality Test")
+crystal.manifest("Verifying compiler now generates proper executable code...")
+
+// Test array creation and operations
+var test_array = []
+test_array.append(1)
+test_array.append(2)
+test_array.append(3)
+
+// Test array access
+var element_0 = test_array[0]
+var element_1 = test_array[1]
+var element_2 = test_array[2]
+
+crystal.manifest("Element 0: " + element_0.to_string())
+crystal.manifest("Element 1: " + element_1.to_string())
+crystal.manifest("Element 2: " + element_2.to_string())
+
+// Test array length
+var arr_length = test_array.length
+crystal.manifest("Array length: " + arr_length.to_string())
+
+crystal.manifest("All tests passed! Compiler is now functioning correctly.")

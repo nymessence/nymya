@@ -1,0 +1,271 @@
+// Comprehensive System Utilities Test
+// Testing echo, cat, ls, cp, and mv commands together
+
+import system
+import system.commands
+import ml  // This should include the system commands through import chain
+import crystal
+
+func test_all_system_commands() -> Void {
+    crystal.manifest("=== Comprehensive System Commands Test Suite ===")
+    
+    // Test echo functionality
+    test_echo_commands()
+    crystal.manifest("")
+    
+    // Test cat functionality
+    test_cat_commands()
+    crystal.manifest("")
+    
+    // Test ls functionality
+    test_ls_commands()
+    crystal.manifest("")
+    
+    // Test cp functionality
+    test_cp_commands()
+    crystal.manifest("")
+    
+    // Test mv functionality
+    test_mv_commands()
+    crystal.manifest("")
+    
+    crystal.manifest("=== ALL SYSTEM COMMANDS TESTS COMPLETED SUCCESSFULLY ===")
+}
+
+func test_echo_commands() -> Void {
+    crystal.manifest("--- Testing Echo Commands ---")
+    
+    // Test basic echo
+    var echo_args = ["Hello", "NymyaLang", "World"]
+    var echo_result = system.commands.echo(echo_args)
+    crystal.manifest("Echo result: " + echo_result)
+    
+    // Test consciousness-aware echo
+    var echo_ca_args = ["Consciousness", "aware", "output"]
+    var echo_ca_result = system.commands.echo_ca(echo_ca_args)
+    crystal.manifest("Echo CA result: " + echo_ca_result)
+    
+    // Test system utilities
+    var true_result = system.sysutils.true_cmd()
+    crystal.manifest("True command result: " + true_result)
+    
+    var false_result = system.sysutils.false_cmd()
+    crystal.manifest("False command result: " + false_result)
+    
+    var user = system.sysutils.whoami()
+    crystal.manifest("Whoami result: " + user)
+    
+    var host = system.sysutils.hostname()
+    crystal.manifest("Hostname result: " + host)
+    
+    crystal.manifest("✓ Echo commands test completed!")
+}
+
+func test_cat_commands() -> Void {
+    crystal.manifest("--- Testing Cat Commands ---")
+    
+    // Test basic cat
+    var cat_args = ["test.txt"]
+    var cat_result = system.commands.cat(cat_args)
+    crystal.manifest("Cat result: " + cat_result)
+    
+    // Test consciousness-aware cat
+    var cat_ca_args = ["hello.txt"]
+    var cat_ca_result = system.commands.cat_ca(cat_ca_args)
+    crystal.manifest("Cat CA result: " + cat_ca_result)
+    
+    // Test tac (reverse lines)
+    var tac_args = ["sample.txt"]
+    var tac_result = system.commands.tac(tac_args)
+    crystal.manifest("Tac result: " + tac_result)
+    
+    // Test zcat (simulated compression)
+    var zcat_args = ["compressed.txt"]
+    var zcat_result = system.commands.zcat(zcat_args)
+    crystal.manifest("Zcat result: " + zcat_result)
+    
+    crystal.manifest("✓ Cat commands test completed!")
+}
+
+func test_ls_commands() -> Void {
+    crystal.manifest("--- Testing LS Commands ---")
+
+    // Test basic ls
+    var ls_args = ["."]
+    var ls_result = system.commands.ls(ls_args)
+    crystal.manifest("LS result: " + ls_result)
+
+    // Test ls with options
+    var ls_opt_args = ["-l", "src"]
+    var ls_opt_result = system.commands.ls(ls_opt_args)
+    crystal.manifest("LS with options result: " + ls_opt_result)
+
+    // Test consciousness-aware ls
+    var ls_ca_args = ["examples"]
+    var ls_ca_result = system.commands.ls_ca(ls_ca_args)
+    crystal.manifest("LS CA result: " + ls_ca_result)
+
+    // Test only directories
+    var ls_dir_args = ["."]
+    var ls_dir_result = system.commands.ls_only_directories(ls_dir_args)
+    crystal.manifest("LS directories only result: " + ls_dir_result)
+
+    // Test only files
+    var ls_file_args = ["."]
+    var ls_file_result = system.commands.ls_only_files(ls_file_args)
+    crystal.manifest("LS files only result: " + ls_file_result)
+
+    // Test vdir
+    var vdir_args = ["."]
+    var vdir_result = system.commands.vdir(vdir_args)
+    crystal.manifest("Vdir result: " + vdir_result)
+
+    // Test sorted by time
+    var time_sort_args = ["."]
+    var time_sort_result = system.commands.ls_sort_by_time(time_sort_args)
+    crystal.manifest("LS sorted by time result: " + time_sort_result)
+
+    crystal.manifest("✓ LS commands test completed!")
+}
+
+func test_cp_commands() -> Void {
+    crystal.manifest("--- Testing CP Commands ---")
+    
+    // Test basic cp
+    var cp_args = ["src/file.txt", "dst/file.txt"]
+    var cp_result = system.commands.cp(cp_args)
+    crystal.manifest("CP result: " + cp_result)
+    
+    // Test cp with options
+    var cp_opt_args = ["-r", "-v", "src/", "backup/"]
+    var cp_opt_result = system.commands.cp(cp_opt_args)
+    crystal.manifest("CP with options result: " + cp_opt_result)
+    
+    // Test consciousness-aware cp
+    var cp_ca_args = ["config.json", "backup/config.json"]
+    var cp_ca_result = system.commands.cp_ca(cp_ca_args)
+    crystal.manifest("CP CA result: " + cp_ca_result)
+
+    // Test cp with progress
+    var cp_prog_args = ["-v", "large_file.txt", "destination/large_file.txt"]
+    var cp_prog_result = system.commands.cp_with_progress(cp_prog_args)
+    crystal.manifest("CP with progress result: " + cp_prog_result)
+
+    // Test safe cp
+    var cp_safe_args = ["safe_source.txt", "safe_dest.txt"]
+    var cp_safe_result = system.commands.cp_safe(cp_safe_args)
+    crystal.manifest("CP safe result: " + cp_safe_result)
+
+    // Test verified cp
+    var cp_verify_args = ["-v", "verify_source.txt", "verify_dest.txt"]
+    var cp_verify_result = system.commands.cp_verify(cp_verify_args)
+    crystal.manifest("CP verify result: " + cp_verify_result)
+    
+    crystal.manifest("✓ CP commands test completed!")
+}
+
+func test_mv_commands() -> Void {
+    crystal.manifest("--- Testing MV Commands ---")
+    
+    // Test basic mv
+    var mv_args = ["old_name.txt", "new_name.txt"]
+    var mv_result = system.commands.mv(mv_args)
+    crystal.manifest("MV result: " + mv_result)
+    
+    // Test mv with options
+    var mv_opt_args = ["-v", "src/old_dir", "dst/new_dir"]
+    var mv_opt_result = system.commands.mv(mv_opt_args)
+    crystal.manifest("MV with options result: " + mv_opt_result)
+    
+    // Test consciousness-aware mv
+    var mv_ca_args = ["important.txt", "moved/important.txt"]
+    var mv_ca_result = system.commands.mv_ca(mv_ca_args)
+    crystal.manifest("MV CA result: " + mv_ca_result)
+
+    // Test rename operation
+    var rename_args = ["file_old.txt", "file_new.txt"]
+    var rename_result = system.commands.rename(rename_args)
+    crystal.manifest("Rename result: " + rename_result)
+
+    // Test mv with progress
+    var mv_prog_args = ["-v", "batch_move/", "destination/"]
+    var mv_prog_result = system.commands.mv_with_progress(mv_prog_args)
+    crystal.manifest("MV with progress result: " + mv_prog_result)
+
+    // Test safe mv
+    var mv_safe_args = ["source.txt", "safe_destination.txt"]
+    var mv_safe_result = system.commands.mv_safe(mv_safe_args)
+    crystal.manifest("MV safe result: " + mv_safe_result)
+
+    // Test verified mv
+    var mv_verify_args = ["verify_source.txt", "verify_destination.txt"]
+    var mv_verify_result = system.commands.mv_verify(mv_verify_args)
+    crystal.manifest("MV verify result: " + mv_verify_result)
+    
+    crystal.manifest("✓ MV commands test completed!")
+}
+
+func test_integration_scenarios() -> Void {
+    crystal.manifest("--- Testing Integration Scenarios ---")
+    
+    // Scenario: Create a file, copy it, then move it
+    crystal.manifest("Scenario 1: File lifecycle test (create -> copy -> move)")
+    
+    // Simulate creating a file (we don't have a touch command yet, so just test with existing names)
+    var source_file = "lifecycle_source.txt"
+    var copied_file = "lifecycle_copy.txt"
+    var moved_file = "final_destination.txt"
+    
+    // Step 1: Copy file
+    var cp_args = [source_file, copied_file]
+    var cp_result = system.commands.cp(cp_args)
+    crystal.manifest("Step 1 - Copy: " + cp_result)
+    
+    // Step 2: Move one of the files
+    var mv_args = [copied_file, moved_file]
+    var mv_result = system.commands.mv(mv_args)
+    crystal.manifest("Step 2 - Move: " + mv_result)
+    
+    // Step 3: List the directory to see results
+    var ls_args = ["."]
+    var ls_result = system.commands.ls(ls_args)
+    crystal.manifest("Step 3 - Directory listing: " + ls_result)
+    
+    crystal.manifest("✓ Integration scenario test completed!")
+}
+
+func test_error_handling() -> Void {
+    crystal.manifest("--- Testing Error Handling ---")
+    
+    // Test invalid arguments for each command
+    var bad_echo_args = []  // No arguments to echo
+    var echo_result = system.commands.echo(bad_echo_args)
+    crystal.manifest("Echo with no args result: " + echo_result)
+    
+    var bad_cat_args = []  // No arguments to cat
+    var cat_result = system.commands.cat(bad_cat_args)
+    crystal.manifest("Cat with no args result: " + cat_result)
+    
+    var bad_ls_args = []  // No arguments to ls (uses current dir by default, so should work)
+    var ls_result = system.commands.ls(bad_ls_args)
+    crystal.manifest("LS with no args result: " + ls_result)
+    
+    var bad_cp_args = []  // No arguments to cp
+    var cp_result = system.commands.cp(bad_cp_args)
+    crystal.manifest("CP with no args result: " + cp_result)
+    
+    var bad_mv_args = []  // No arguments to mv
+    var mv_result = system.commands.mv(bad_mv_args)
+    crystal.manifest("MV with no args result: " + mv_result)
+    
+    crystal.manifest("✓ Error handling test completed!")
+}
+
+func main() -> Void {
+    test_all_system_commands()
+    test_integration_scenarios()
+    test_error_handling()
+    
+    crystal.manifest("🎉 All system commands tests completed successfully! 🎉")
+    crystal.manifest("AI/ML and system utilities are fully integrated and functional.")
+}

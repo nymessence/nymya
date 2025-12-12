@@ -1,0 +1,44 @@
+// Final test of Pleiades visualization with fixed file I/O
+import graphics.ply_basic
+import graphics.stl_basic
+import math
+import crystal
+
+// Define star data for Pleiades cluster (with pre-converted coordinates)
+class StarData {
+    var name: String
+    var distance_ly: Float     // Distance in light years
+    var ra_deg: Float          // Right Ascension in degrees
+    var dec_deg: Float         // Declination in degrees
+    var luminosity_sol: Float  // Luminosity relative to Sun (L☉)
+    var position: Point3D      // 3D position calculated from coordinates
+
+    init(n: String, dist: Float, ra: Float, dec: Float, lum: Float) {
+        self.name = n
+        self.distance_ly = dist
+        self.ra_deg = ra
+        self.dec_deg = dec
+        self.luminosity_sol = lum
+        self.position = graphics.ply_basic.spherical_to_cartesian(ra, dec, dist)
+    }
+}
+
+func main() -> Void {
+    crystal.manifest("Testing final Pleiades implementations")
+    
+    // Create PLY model
+    var ply_model = graphics.ply_basic.PlyModel()
+    ply_model.add_star_tetrahedron(0.0, 0.0, 0.0, 2.0, 255, 200, 100)
+    var ply_success = ply_model.write_ply("final_test_ply.ply")
+    crystal.manifest("PLY model created")
+    
+    // Create STL model
+    var stl_model = graphics.stl_basic.STLModel()
+    stl_model.add_bar(Point3D(0.0, 0.0, 0.0), Point3D(5.0, 0.0, 0.0), 0.5, 6)
+    var stl_success = stl_model.write_stl("final_test_stl.stl")
+    crystal.manifest("STL model created")
+    
+    crystal.manifest("File I/O operations completed")
+}
+
+main()

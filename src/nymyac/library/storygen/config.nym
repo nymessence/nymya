@@ -1,0 +1,94 @@
+// Configuration framework for the Dynamic AI Character Conversation System
+// config.nym
+
+namespace storygen.config
+
+// --- Configuration Variables (to be set by the application) ---
+
+// API Configuration
+var API_KEY = None
+var BASE_URL = None
+var MODEL_NAME = None
+var API_ERROR_MAX_RETRIES = None
+
+// Context Window Management
+var MODEL_CONTEXT_WINDOW = None
+var GENERATION_BUFFER = None
+var MAX_TOTAL_CONTEXT = None
+var MAX_SYSTEM_TOKENS = None
+var MAX_LOREBOOK_TOKENS = None
+var MAX_HISTORY_TOKENS = None
+
+// Conversation Configuration
+var MAX_TURNS = None
+var DELAY_SECONDS = None
+var DEFAULT_SIMILARITY_THRESHOLD = None
+var CRITICAL_REPETITION_THRESHOLD = None
+var EMERGENCY_REPETITION_THRESHOLD = None
+var MAX_ACTION_DESCRIPTIONS = None
+
+// Voice Analysis Descriptions - these are descriptive and can remain
+var FORMALITY_DESC = {
+    "very formal": "highly formal and regal in speech",
+    "formal": "formal and proper in speech",
+    "neutral": "balanced and natural in speech",
+    "casual": "casual and conversational in speech",
+    "very casual": "very informal and relaxed in speech"
+}
+
+var STYLE_DESC = {
+    "direct": "direct and to the point",
+    "descriptive": "rich in descriptive language",
+    "poetic": "poetic and metaphorical",
+    "humorous": "witty and humorous",
+    "philosophical": "thoughtful and introspective",
+    "conversational": "natural and flowing in dialogue"
+}
+
+// Configuration management functions
+func set_api_config(api_key: String, base_url: String, model_name: String, max_retries: Int = 999) -> Void {
+    API_KEY = api_key
+    BASE_URL = base_url
+    MODEL_NAME = model_name
+    API_ERROR_MAX_RETRIES = max_retries
+}
+
+func set_conversation_config(max_turns: Int, delay_seconds: Int,
+                           similarity_threshold: Float, max_actions: Int = 1,
+                           critical_threshold: Float = 0.75,
+                           emergency_threshold: Float = 0.9) -> Void {
+    MAX_TURNS = max_turns
+    DELAY_SECONDS = delay_seconds
+    DEFAULT_SIMILARITY_THRESHOLD = similarity_threshold
+    MAX_ACTION_DESCRIPTIONS = max_actions
+    CRITICAL_REPETITION_THRESHOLD = critical_threshold
+    EMERGENCY_REPETITION_THRESHOLD = emergency_threshold
+}
+
+func set_context_limits(model_context: Int, generation_buffer: Int,
+                       system_tokens: Int, lorebook_tokens: Int, history_tokens: Int) -> Void {
+    MODEL_CONTEXT_WINDOW = model_context
+    GENERATION_BUFFER = generation_buffer
+    MAX_SYSTEM_TOKENS = system_tokens
+    MAX_LOREBOOK_TOKENS = lorebook_tokens
+    MAX_HISTORY_TOKENS = history_tokens
+    MAX_TOTAL_CONTEXT = model_context - generation_buffer
+}
+
+// Initialize with default values if needed
+func init_defaults() -> Void {
+    // Only set defaults if values are still None
+    if API_ERROR_MAX_RETRIES == None { API_ERROR_MAX_RETRIES = 999 }
+    if MODEL_CONTEXT_WINDOW == None { MODEL_CONTEXT_WINDOW = 32000 }
+    if GENERATION_BUFFER == None { GENERATION_BUFFER = 1024 }
+    if MAX_TOTAL_CONTEXT == None { MAX_TOTAL_CONTEXT = 31000 }  // 32000 - 1024
+    if MAX_SYSTEM_TOKENS == None { MAX_SYSTEM_TOKENS = 2048 }
+    if MAX_LOREBOOK_TOKENS == None { MAX_LOREBOOK_TOKENS = 8198 }
+    if MAX_HISTORY_TOKENS == None { MAX_HISTORY_TOKENS = 12288 }
+    if MAX_TURNS == None { MAX_TURNS = 100 }
+    if DELAY_SECONDS == None { DELAY_SECONDS = 0 }
+    if DEFAULT_SIMILARITY_THRESHOLD == None { DEFAULT_SIMILARITY_THRESHOLD = 0.45 }
+    if CRITICAL_REPETITION_THRESHOLD == None { CRITICAL_REPETITION_THRESHOLD = 0.75 }
+    if EMERGENCY_REPETITION_THRESHOLD == None { EMERGENCY_REPETITION_THRESHOLD = 0.9 }
+    if MAX_ACTION_DESCRIPTIONS == None { MAX_ACTION_DESCRIPTIONS = 1 }
+}

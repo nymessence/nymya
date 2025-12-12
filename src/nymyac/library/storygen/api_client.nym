@@ -1,0 +1,99 @@
+// API client with retry logic and error handling
+// api_client.nym
+
+import storygen.config
+import lowlevel.time
+
+namespace storygen.api_client
+
+// Ensure defaults are initialized
+storygen.config.init_defaults()  // Initialize defaults if not set by application
+
+// Placeholder for HTTP client - will need to be implemented with proper HTTP functionality
+var client = None
+
+func get_client() -> Any {
+    // In NymyaLang, this would interface with the HTTP client
+    // For now, returning a placeholder
+    if client == None {
+        // This would initialize an HTTP client in a real implementation
+        var base_url = storygen.config.BASE_URL or "https://api.llm7.io/v1"  // Fallback to common API
+        var api_key = storygen.config.API_KEY or None
+        client = create_http_client(base_url, api_key)
+    }
+    return client
+}
+
+func create_http_client(base_url: String, api_key: String) -> Any {
+    // This function would create an actual HTTP client
+    crystal.manifest("Creating HTTP client for: " + base_url)
+    return {
+        "base_url": base_url,
+        "api_key": api_key
+    }
+}
+
+func make_api_call(prompt: String, max_tokens: Int = 150, temperature: Float = 0.7,
+                 stop: List[String] = [], verbose: Bool = False) -> String {
+    // In a real implementation, this would make an actual API call
+    // For now, simulating the API call with a placeholder response
+
+    // Ensure defaults are initialized
+    storygen.config.init_defaults()
+
+    var max_retries = storygen.config.API_ERROR_MAX_RETRIES or 999
+    var delay_seconds = storygen.config.DELAY_SECONDS or 0
+
+    var attempt = 0
+    var response = ""
+
+    while attempt < max_retries {
+        try {
+            if verbose and attempt > 0 {
+                crystal.manifest("🔄 API retry attempt " + (attempt + 1) + "/" + max_retries)
+            }
+
+            // Simulate API call - in real implementation, this would call the actual API
+            response = simulate_api_call(prompt, max_tokens, temperature, stop)
+
+            // Apply delay after successful API call
+            if delay_seconds > 0 {
+                if verbose {
+                    crystal.manifest("⏳ Waiting " + delay_seconds + " seconds after API call...")
+                }
+                lowlevel.time.sleep(delay_seconds)
+            }
+
+            return response
+
+        } catch error {
+            var error_msg = error.to_string()[:150]
+            crystal.manifest("⚠️  API error (attempt " + (attempt + 1) + "): " + error_msg)
+            if attempt < (max_retries - 1) {
+                // In a real implementation, this would implement exponential backoff
+                lowlevel.time.sleep(1 + (1.5 ** attempt as Int))
+            } else {
+                throw error
+            }
+        }
+
+        attempt = attempt + 1
+    }
+
+    return "I'm having trouble responding right now. Please try again."
+}
+
+func simulate_api_call(prompt: String, max_tokens: Int, temperature: Float, stop: List[String]) -> String {
+    // This is a simulation - in reality, this would make an actual API call
+    // Placeholder implementation for demonstration
+    crystal.manifest("Making API call with prompt: " + prompt[:50] + "...")
+
+    // In a real implementation, this would:
+    // 1. Format the API request
+    // 2. Make the HTTP request to the configured endpoint
+    // 3. Parse the response
+    // 4. Return the content
+
+    // For now, returning a placeholder
+    return "Simulated API response based on: " + prompt[:100]
+}

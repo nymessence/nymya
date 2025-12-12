@@ -1,0 +1,13 @@
+// Test program with @-tags properly placed before function definitions
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing proper @-tag placement")
+    test_function()
+}
+
+@shira
+@nora
+func test_function() -> Void {
+    crystal.manifest("Test function with @-tags")
+}

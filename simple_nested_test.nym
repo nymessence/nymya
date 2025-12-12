@@ -1,0 +1,10 @@
+import graphics.stl_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing simple case")
+    var model = graphics.stl_basic.STLModel()
+    crystal.manifest("Success")
+}
+
+main()

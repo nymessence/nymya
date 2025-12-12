@@ -1,0 +1,200 @@
+// Small QML Circuit Test
+// Demonstrates quantum machine learning capabilities with a basic quantum circuit
+
+import quantum
+import quantum.sim
+import quantum.gate
+import ml
+import ml.quantum_ml
+import math
+import crystal
+
+func create_simple_qml_circuit() -> Void {
+    crystal.manifest("=== Creating Simple Quantum ML Circuit ===")
+    
+    // Create a quantum circuit with 3 qubits for our ML task
+    var circuit = quantum.sim.create_circuit(3)
+    crystal.manifest("Created 3-qubit quantum circuit for ML operations")
+    
+    // Initialize parameters for our variational circuit
+    var params = [0.6, 1.2, 0.9, 0.3, 2.1, 1.8]  // 6 parameters for our 3-qubit circuit
+    
+    // Apply parameterized rotations - this is the "learning" part of our quantum model
+    for i in range(3) {
+        // First set of parameterized rotations
+        var idx1 = i * 2
+        var idx2 = i * 2 + 1
+        if idx1 < params.length and idx2 < params.length {
+            quantum.gate.ry(circuit, i, params[idx1])
+            quantum.gate.rz(circuit, i, params[idx2])
+        }
+    }
+    
+    // Apply entangling operations to create quantum correlations
+    quantum.gate.cx(circuit, 0, 1)
+    quantum.gate.cx(circuit, 1, 2)
+    quantum.gate.cx(circuit, 0, 2)
+    
+    // Apply second layer of parameterized rotations
+    for i in range(3) {
+        var idx = i + 3  // Use parameters from second half
+        if idx < params.length {
+            quantum.gate.rx(circuit, i, params[idx])
+        }
+    }
+    
+    // Measure to extract classical information for ML processing
+    var measurements = quantum.sim.measure_all(circuit)
+    crystal.manifest("Quantum circuit measurements: [" + measurements.join(", ") + "]")
+    
+    // Calculate probabilities from multiple runs (simulate quantum statistics)
+    var runs = 100
+    var counts = [0, 0, 0, 0, 0, 0, 0, 0]  // For 3 qubits (2^3 = 8 possible states)
+    for run in range(runs) {
+        var temp_circuit = quantum.sim.create_circuit(3)
+        
+        // Rebuild the circuit with same parameters for this run
+        for i in range(3) {
+            var idx1 = i * 2
+            var idx2 = i * 2 + 1
+            if idx1 < params.length and idx2 < params.length {
+                quantum.gate.ry(temp_circuit, i, params[idx1])
+                quantum.gate.rz(temp_circuit, i, params[idx2])
+            }
+        }
+        
+        quantum.gate.cx(temp_circuit, 0, 1)
+        quantum.gate.cx(temp_circuit, 1, 2)
+        quantum.gate.cx(temp_circuit, 0, 2)
+        
+        for i in range(3) {
+            var idx = i + 3
+            if idx < params.length {
+                quantum.gate.rx(temp_circuit, i, params[idx])
+            }
+        }
+        
+        var run_measurements = quantum.sim.measure_all(temp_circuit)
+        // Convert 3-bit result to index (e.g., [1,0,1] = 5)
+        var state_idx = run_measurements[0] * 4 + run_measurements[1] * 2 + run_measurements[2]
+        if state_idx < 8 {
+            counts[state_idx] = counts[state_idx] + 1
+        }
+    }
+    
+    crystal.manifest("Statistical results from " + runs + " runs:")
+    for i in range(8) {
+        var prob = counts[i].toFloat() / runs.toFloat()
+        var state_str = format_state_as_binary(i, 3)
+        crystal.manifest("  |" + state_str + "⟩: " + prob + " (" + counts[i] + "/" + runs + ")")
+    }
+    
+    crystal.manifest("Simple QML circuit demonstration completed!")
+}
+
+func format_state_as_binary(state_index: Int, num_qubits: Int) -> String {
+    var result = ""
+    var value = state_index
+    for i in range(num_qubits) {
+        result = (value % 2).to_string() + result
+        value = value // 2  // Integer division - should be math.floor(value / 2.0).to_int()
+    }
+    return result
+}
+
+func test_quantum_variational_classifier() -> Void {
+    crystal.manifest("=== Testing Quantum Variational Classifier ===")
+    
+    // Create a variational quantum classifier
+    var qvc = ml.quantum_ml.VariationalClassifier(2, 2)  // 2 qubits, 2 classes
+    crystal.manifest("Created quantum variational classifier")
+    
+    // Test with sample data
+    var input_data = [0.7, 0.3]  // 2-dimensional input
+    var outputs = qvc.forward(input_data)
+    var prediction = qvc.predict(input_data)
+    
+    crystal.manifest("Input: [" + input_data.join(", ") + "]")
+    crystal.manifest("Output probabilities: [" + outputs.join(", ") + "]")
+    crystal.manifest("Predicted class: " + prediction)
+    
+    // Test with different input to see variation
+    var input_data2 = [0.1, 0.9]
+    var outputs2 = qvc.forward(input_data2)
+    var prediction2 = qvc.predict(input_data2)
+    
+    crystal.manifest("Input: [" + input_data2.join(", ") + "]")
+    crystal.manifest("Output probabilities: [" + outputs2.join(", ") + "]")
+    crystal.manifest("Predicted class: " + prediction2)
+    
+    crystal.manifest("Quantum variational classifier test completed!")
+}
+
+func test_parameterized_quantum_circuit() -> Void {
+    crystal.manifest("=== Testing Parameterized Quantum Circuit ===")
+    
+    // Create parameterized circuit
+    var pqc = ml.quantum_ml.ParameterizedCircuit(2)  // 2 qubits
+    crystal.manifest("Created parameterized quantum circuit with 2 qubits")
+    
+    // Get initial parameters
+    var initial_params = pqc.get_parameters()
+    crystal.manifest("Initial parameters: " + initial_params.length + " parameters")
+    
+    // Apply circuit and measure
+    var measurements = pqc.measure_all()
+    crystal.manifest("Initial measurements: [" + measurements.join(", ") + "]")
+    
+    // Update parameters to new values
+    var new_params = []
+    for i in range(initial_params.length) {
+        new_params.append(initial_params[i] + 0.5)  // Add offset to each parameter
+    }
+    
+    pqc.update_parameters(new_params)
+    var new_measurements = pqc.measure_all()
+    crystal.manifest("Measurements with updated parameters: [" + new_measurements.join(", ") + "]")
+    
+    crystal.manifest("Parameterized quantum circuit test completed!")
+}
+
+func test_quantum_neural_layer() -> Void {
+    crystal.manifest("=== Testing Quantum Neural Layer ===")
+    
+    // Create quantum neural layer
+    var qnl = ml.quantum_ml.QuantumNeuralLayer(2)  // 2-qubit neural layer
+    crystal.manifest("Created quantum neural layer with 2 qubits")
+    
+    // Test forward pass with input
+    var input_signals = [0.6, 0.8]
+    var output_signals = qnl.forward(input_signals)
+    
+    crystal.manifest("Input signals: [" + input_signals.join(", ") + "]")
+    crystal.manifest("Output signals: [" + output_signals.join(", ") + "]")
+    
+    // Update layer parameters and test again
+    var new_params = [0.5, 1.0]  // New parameter values
+    qnl.update_params(new_params)
+    
+    var new_outputs = qnl.forward(input_signals)
+    crystal.manifest("New parameters applied")
+    crystal.manifest("Output signals (updated): [" + new_outputs.join(", ") + "]")
+    
+    crystal.manifest("Quantum neural layer test completed!")
+}
+
+func main() -> Void {
+    create_simple_qml_circuit()
+    crystal.manifest("")
+    
+    test_quantum_variational_classifier()
+    crystal.manifest("")
+    
+    test_parameterized_quantum_circuit()
+    crystal.manifest("")
+    
+    test_quantum_neural_layer()
+    crystal.manifest("")
+    
+    crystal.manifest("=== ALL QML CIRCUIT TESTS COMPLETED SUCCESSFULLY! ===")
+}

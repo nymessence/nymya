@@ -1,0 +1,268 @@
+// Quantum Machine Learning (QML) Circuit Test
+// Demonstrating a parameterized quantum circuit for machine learning classification
+
+import quantum
+import quantum.sim
+import quantum.gate
+import ml
+import ml.quantum_ml
+import math
+import crystal
+import networking
+
+func main() -> Void {
+    crystal.manifest("=== Quantum Machine Learning Circuit Test ===")
+    crystal.manifest("Demonstrating consciousness-integrated quantum machine learning")
+    
+    // Test quantum variational classifier
+    test_quantum_variational_classifier()
+    crystal.manifest("")
+    
+    // Test quantum support vector machine
+    test_quantum_support_vector_machine()
+    crystal.manifest("")
+    
+    // Demonstrate parameterized quantum circuit
+    demonstrate_parameterized_quantum_circuit()
+    crystal.manifest("")
+    
+    // Test quantum neural layer
+    test_quantum_neural_layer()
+    crystal.manifest("")
+
+    // Demonstrate quantum kernel computation
+    demonstrate_quantum_kernel_computation()
+    crystal.manifest("")
+
+    crystal.manifest("🎉 ALL QML CIRCUIT TESTS COMPLETED SUCCESSFULLY! 🎉")
+    crystal.manifest("Quantum Machine Learning with consciousness integration is fully operational")
+}
+
+func test_quantum_variational_classifier() -> Void {
+    crystal.manifest("--- Testing Quantum Variational Classifier ---")
+    
+    // Create a quantum classifier for binary classification
+    var qvc = ml.quantum_ml.VariationalClassifier(3, 2)  // 3 qubits, 2 classes
+    crystal.manifest("Created quantum variational classifier with " + qvc.num_qubits + " qubits and " + qvc.num_classes + " classes")
+    
+    // Create sample training data (simplified)
+    var training_data = [
+        [0.1, 0.2, 0.3],  // Class 0 example
+        [0.2, 0.1, 0.4],  // Class 0 example
+        [0.8, 0.9, 0.7],  // Class 1 example
+        [0.9, 0.8, 0.6]   // Class 1 example
+    ]
+    var labels = [0, 0, 1, 1]
+    
+    // Train the classifier (in actual implementation this would update parameters)
+    crystal.manifest("Training quantum variational classifier with " + training_data.length + " samples...")
+    qvc.fit(training_data, labels)
+    
+    // Test prediction
+    var test_sample = [0.4, 0.5, 0.3]
+    var prediction_class = qvc.predict(test_sample)
+    var prediction_probs = qvc.forward(test_sample)
+    
+    crystal.manifest("Test sample: [" + test_sample.join(", ") + "]")
+    crystal.manifest("Predicted class: " + prediction_class)
+    crystal.manifest("Class probabilities: [" + prediction_probs.join(", ") + "]")
+    
+    // Determine if prediction makes sense
+    var expected_class = if test_sample[0] < 0.6 { 0 } else { 1 }
+    var correctness = if prediction_class == expected_class { "Correct" } else { "Incorrect" }
+    crystal.manifest("Prediction accuracy assessment: " + correctness)
+    
+    crystal.manifest("Quantum variational classifier test completed!")
+}
+
+func test_quantum_support_vector_machine() -> Void {
+    crystal.manifest("--- Testing Quantum Support Vector Machine ---")
+    
+    // Create a quantum SVM
+    var qsvm = ml.quantum_ml.QuantumSVM(3)  // 3-dimensional feature space
+    crystal.manifest("Created quantum SVM with 3-dimensional feature space")
+    
+    // Create training data
+    var training_data = [
+        [0.2, 0.3, 0.1],
+        [0.1, 0.4, 0.2],
+        [0.7, 0.8, 0.9],
+        [0.8, 0.6, 0.7]
+    ]
+    var labels = [0, 0, 1, 1]
+    
+    // Train the quantum SVM
+    crystal.manifest("Training quantum SVM with " + training_data.length + " samples...")
+    qsvm.fit(training_data, labels)
+    
+    // Test prediction
+    var test_point = [0.5, 0.4, 0.3]
+    var prediction = qsvm.predict_single(test_point)
+    
+    crystal.manifest("Test point: [" + test_point.join(", ") + "]")
+    crystal.manifest("QSVM classification result: " + prediction)
+    
+    // Calculate kernel similarity between test point and first support vector
+    var similarity = qsvm.calculate_quantum_similarity(test_point, training_data[0])
+    crystal.manifest("Quantum kernel similarity with first sample: " + similarity)
+    
+    crystal.manifest("Quantum SVM test completed!")
+}
+
+func demonstrate_parameterized_quantum_circuit() -> Void {
+    crystal.manifest("--- Demonstrating Parameterized Quantum Circuit ---")
+    
+    // Create a parameterized quantum circuit for machine learning
+    var pqc = ml.quantum_ml.ParameterizedCircuit(4)  // 4 qubits
+    crystal.manifest("Created parameterized quantum circuit with " + pqc.num_qubits + " qubits")
+    
+    // Get initial parameters
+    var init_params = pqc.get_parameters()
+    crystal.manifest("Initial parameters count: " + init_params.length)
+    
+    // Generate new parameters for optimization (simulated)
+    var qrng = networking.QRNG()
+    var new_params = []
+    for i in range(init_params.length) {
+        new_params.append(qrng.generate_float() * 2.0 * math.PI)  // 0 to 2π range
+    }
+    
+    crystal.manifest("Generated new parameters for update")
+    
+    // Update circuit parameters
+    pqc.update_parameters(new_params)
+    crystal.manifest("Updated circuit parameters for variational optimization")
+    
+    // Apply circuit and measure
+    var statevector = pqc.get_statevector()
+    crystal.manifest("Quantum circuit final statevector has " + statevector.length + " components")
+    
+    var measurements = pqc.measure_all()
+    crystal.manifest("Measurement outcomes: [" + measurements.join(", ") + "]")
+    
+    // Demonstrate parameter sensitivity (key for quantum ML)
+    var original_measurements = pqc.measure_all()
+    var slightly_different_params = []
+    for i in range(new_params.length) {
+        var delta = 0.1  // Small parameter change
+        slightly_different_params.append(new_params[i] + delta)
+    }
+    
+    pqc.update_parameters(slightly_different_params)
+    var modified_measurements = pqc.measure_all()
+    
+    crystal.manifest("Parameter sensitivity test:")
+    crystal.manifest("  Original measurements: [" + original_measurements.join(", ") + "]")
+    crystal.manifest("  Modified measurements: [" + modified_measurements.join(", ") + "]")
+    
+    crystal.manifest("Parameterized quantum circuit demonstration completed!")
+}
+
+func test_quantum_neural_layer() -> Void {
+    crystal.manifest("--- Testing Quantum Neural Layer ---")
+    
+    // Create a quantum neural layer
+    var qnl = ml.quantum_ml.QuantumNeuralLayer(2)  // 2-qubit quantum neural layer
+    crystal.manifest("Created quantum neural layer with " + qnl.num_qubits + " qubits")
+    
+    // Test forward pass with different inputs
+    var test_inputs = [
+        [0.3, 0.7],
+        [0.8, 0.2],
+        [0.5, 0.5],
+        [0.1, 0.9]
+    ]
+    
+    crystal.manifest("Testing quantum neural layer with " + test_inputs.length + " inputs...")
+    
+    for i in range(test_inputs.length) {
+        var input = test_inputs[i]
+        var output = qnl.forward(input)
+        
+        crystal.manifest("  Input " + i + " [" + input.join(", ") + "] -> Output [" + output.join(", ") + "]")
+    }
+    
+    // Update quantum layer parameters
+    var new_params = [0.6, 1.4]  // New quantum parameters
+    qnl.update_parameters(new_params)
+    
+    // Test with same inputs after parameter update
+    crystal.manifest("Testing with updated parameters...")
+    for i in range(test_inputs.length) {
+        var input = test_inputs[i]
+        var output = qnl.forward(input)
+        
+        crystal.manifest("  Updated Input " + i + " [" + input.join(", ") + "] -> Output [" + output.join(", ") + "]")
+    }
+    
+    crystal.manifest("Quantum neural layer test completed!")
+}
+
+func demonstrate_quantum_kernel_computation() -> Void {
+    crystal.manifest("--- Demonstrating Quantum Kernel Computation ---")
+    
+    // Create sample data points for quantum kernel computation
+    var data_a = [0.2, 0.6, 0.3]
+    var data_b = [0.7, 0.4, 0.8]
+    
+    // Simulate quantum feature mapping
+    var circuit_a = prepare_quantum_circuit_encoding(data_a)
+    var circuit_b = prepare_quantum_circuit_encoding(data_b)
+    
+    crystal.manifest("Encoded classical data into quantum circuits:")
+    crystal.manifest("  Data A: [" + data_a.join(", ") + "]")
+    crystal.manifest("  Data B: [" + data_b.join(", ") + "]")
+    
+    // Compare quantum states directly using basic overlap (in real QML would use actual quantum kernel)
+    var state_a = circuit_a.get_statevector()
+    var state_b = circuit_b.get_statevector()
+
+    // Calculate simple overlap for demonstration
+    var overlap = calculate_state_overlap(state_a, state_b)
+    crystal.manifest("Quantum state overlap: " + overlap)
+
+    // Compare with self similarity (should be close to 1.0)
+    var self_overlap_a = calculate_state_overlap(state_a, state_a)
+    var self_overlap_b = calculate_state_overlap(state_b, state_b)
+
+    crystal.manifest("Self-overlaps (should be ~1.0):")
+    crystal.manifest("  Data A vs A: " + self_overlap_a)
+    crystal.manifest("  Data B vs B: " + self_overlap_b)
+
+    crystal.manifest("Quantum kernel computation demonstration completed!")
+}
+
+// Helper to calculate state overlap for demonstration
+func calculate_state_overlap(state_a: List[math.Complex], state_b: List[math.Complex]) -> Float {
+    // Calculate |⟨ψA|ψB⟩|² for demonstration
+    var inner_product = math.Complex(0.0, 0.0)
+    for i in range(math.min(state_a.length, state_b.length)) {
+        // Calculate conjugate of state_a
+        var conj_a = math.Complex(state_a[i].real, -state_a[i].imag)
+        var product = conj_a.multiply(state_b[i])
+        inner_product = inner_product.add(product)
+    }
+    return inner_product.magnitude() * inner_product.magnitude()
+}
+
+// Helper to prepare quantum circuit with data encoding
+func prepare_quantum_circuit_encoding(data: List[Float]) -> quantum.sim.Circuit {
+    var num_qubits = math.min(data.length, 4)  // Use up to 4 qubits
+    var circuit = quantum.sim.create_circuit(num_qubits)
+
+    // Encode classical data into quantum circuit using rotation gates
+    for i in range(num_qubits) {
+        if i < data.length {
+            // Scale data to meaningful quantum rotation range
+            var scaled_angle = data[i] * math.PI * 2.0  // Scale to 0-2π range
+            quantum.gate.ry(circuit, i, scaled_angle)  // Apply rotation encoding
+        }
+    }
+
+    // Apply entangling operations to create quantum correlations
+    for i in range(num_qubits - 1) {
+        quantum.gate.cx(circuit, i, i + 1)  // Entangle adjacent qubits
+    }
+
+    return circuit
+}

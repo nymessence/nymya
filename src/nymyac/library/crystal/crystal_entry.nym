@@ -1,0 +1,30 @@
+// Crystal Library Entry Point
+// Exposes all submodules in the crystal library
+
+import crystal.io
+
+// Re-export commonly used functions
+export func manifest(msg: String) -> Void {
+    crystal.io.println(msg)
+}
+
+export namespace io {
+    export func print(msg: String) -> Void = crystal.io.print(msg)
+    export func println(msg: String) -> Void = crystal.io.println(msg)
+    export func get_line() -> String = crystal.io.get_line()
+}
+
+// Export core types and functions
+export struct Pointer {
+    val address: Int
+}
+
+export struct OutputStream {
+    val handle: Int
+}
+
+export namespace platform {
+    extern func get_system_info() -> String
+    extern func sleep(milliseconds: Int) -> Void
+    extern func get_time() -> Int
+}

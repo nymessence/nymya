@@ -1,0 +1,26 @@
+// Direct test of file write function
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing direct file write")
+    
+    // Test the dalan_orin function directly
+    var content = "Hello, file writing test!\n"
+    var result = crystal.file.dalan_orin("direct_test.txt", content)
+    
+    if result {
+        crystal.manifest("Direct write succeeded")
+    } else {
+        crystal.manifest("Direct write failed")
+    }
+    
+    // Test if file exists
+    var exists = crystal.file.dalan_aya("direct_test.txt")
+    if exists {
+        crystal.manifest("File exists after write")
+    } else {
+        crystal.manifest("File does not exist after write")
+    }
+}
+
+main()

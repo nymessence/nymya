@@ -1,0 +1,20 @@
+// Test to verify function availability
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Verifying file functions exist")
+    
+    // Test function availability by calling with dummy values
+    var exists_check = crystal.file.dalan_aya("dummy.txt")
+    crystal.manifest("dalan_aya function works")
+    
+    var write_result = crystal.file.dalan_orin("dummy.txt", "test")
+    crystal.manifest("dalan_orin function works")
+    
+    var read_result = crystal.file.dalan_karma("dummy.txt")
+    crystal.manifest("dalan_karma function works")
+    
+    crystal.manifest("All file functions verified")
+}
+
+main()

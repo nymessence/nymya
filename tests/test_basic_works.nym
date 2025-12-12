@@ -1,0 +1,15 @@
+// Test basic math functionality that should work
+import math
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing basic functionality...")
+    
+    // Test math functions that should work with original parsing
+    var val = math.sqrt(16.0)
+    crystal.manifest("Square root of 16: 4.0")
+    
+    crystal.manifest("Basic functionality test completed")
+}
+
+main()

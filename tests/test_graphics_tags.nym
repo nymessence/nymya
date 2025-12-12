@@ -1,0 +1,19 @@
+// Test program using tagged graphics library functions
+import graphics.ply_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing graphics library with @-tags...")
+    
+    // Use the tagged functions
+    var model = graphics.ply_basic.create_model()
+    crystal.manifest("Model created using tagged factory function")
+    
+    // Test coordinate transformations
+    var pos = graphics.ply_basic.spherical_to_cartesian(45.0, 30.0, 100.0)
+    crystal.manifest("Coordinate transformation completed")
+    
+    crystal.manifest("Graphics library test completed")
+}
+
+main()

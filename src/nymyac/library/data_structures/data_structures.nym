@@ -1,0 +1,587 @@
+// Data Structures Library for NymyaLang
+// Implements common data structures: binary trees, queues, heaps, lists, tuples
+
+import crystal
+import math
+
+namespace data_structures {
+
+    // Binary Tree node
+    class TreeNode[T] {
+        value: T
+        left: TreeNode[T]?
+        right: TreeNode[T]?
+        parent: TreeNode[T]?
+
+        init(val: T) {
+            this.value = val
+            this.left = null
+            this.right = null
+            this.parent = null
+        }
+    }
+
+    // Binary Search Tree
+    class BST[T] {
+        root: TreeNode[T]?
+        size: Int
+
+        init() {
+            this.root = null
+            this.size = 0
+        }
+
+        func insert(val: T) -> Void {
+            var new_node = TreeNode(val)
+            if this.root == null {
+                this.root = new_node
+                this.size = this.size + 1
+                return
+            }
+
+            var current = this.root
+            var inserted = false
+
+            while not inserted {
+                if val < current.value {
+                    if current.left == null {
+                        current.left = new_node
+                        new_node.parent = current
+                        inserted = true
+                        this.size = this.size + 1
+                    } else {
+                        current = current.left
+                    }
+                } else {
+                    if current.right == null {
+                        current.right = new_node
+                        new_node.parent = current
+                        inserted = true
+                        this.size = this.size + 1
+                    } else {
+                        current = current.right
+                    }
+                }
+            }
+        }
+
+        func search(val: T) -> Bool {
+            var current = this.root
+            while current != null {
+                if current.value == val {
+                    return true
+                } else if val < current.value {
+                    current = current.left
+                } else {
+                    current = current.right
+                }
+            }
+            return false
+        }
+
+        func inorder_traversal() -> List[T] {
+            var result = []
+            this.inorder_helper(this.root, result)
+            return result
+        }
+
+        func inorder_helper(node: TreeNode[T]?, result: List[T]) -> Void {
+            if node != null {
+                this.inorder_helper(node.left, result)
+                result.append(node.value)
+                this.inorder_helper(node.right, result)
+            }
+        }
+
+        func get_size() -> Int {
+            return this.size
+        }
+        
+        func is_empty() -> Bool {
+            return this.size == 0
+        }
+    }
+
+    // Queue implementation using internal array
+    class Queue[T] {
+        data: List[T]
+        front_index: Int
+        count: Int
+        capacity: Int
+
+        init(initial_capacity: Int) {
+            this.data = []
+            var cap = initial_capacity
+            if cap < 1 {
+                cap = 10  // Minimum capacity
+            }
+            this.capacity = cap
+            this.front_index = 0
+            this.count = 0
+        }
+        
+        func enqueue(item: T) -> Bool {
+            // Resize if needed to maintain capacity
+            if this.data.length <= (this.front_index + this.count) {
+                // Expand the data list
+                while this.data.length <= (this.front_index + this.count) {
+                    this.data.append(null.asInstanceOf[T])  // Add null placeholder (type-safe)
+                }
+            }
+            
+            this.data[this.front_index + this.count] = item
+            this.count = this.count + 1
+            return true
+        }
+        
+        func dequeue() -> T? {
+            if this.count == 0 {
+                return null  // Queue is empty
+            }
+            
+            var item = this.data[this.front_index]
+            this.front_index = this.front_index + 1
+            this.count = this.count - 1
+            
+            // If the queue is empty, reset to beginning
+            if this.count == 0 {
+                this.front_index = 0
+            }
+            
+            return item
+        }
+        
+        func peek() -> T? {
+            if this.count == 0 {
+                return null  // Queue is empty
+            }
+            return this.data[this.front_index]
+        }
+        
+        func get_size() -> Int {
+            return this.count
+        }
+        
+        func is_empty() -> Bool {
+            return this.count == 0
+        }
+    }
+
+    // Min-Heap implementation
+    class MinHeap[T] {
+        data: List[T]
+        size: Int
+
+        init() {
+            this.data = []
+            this.size = 0
+        }
+
+        func parent_index(i: Int) -> Int {
+            return (i - 1) / 2
+        }
+
+        func left_child_index(i: Int) -> Int {
+            return 2 * i + 1
+        }
+
+        func right_child_index(i: Int) -> Int {
+            return 2 * i + 2
+        }
+
+        func has_parent(i: Int) -> Bool {
+            return this.parent_index(i) >= 0
+        }
+
+        func has_left_child(i: Int) -> Bool {
+            return this.left_child_index(i) < this.size
+        }
+
+        func has_right_child(i: Int) -> Bool {
+            return this.right_child_index(i) < this.size
+        }
+
+        func swap(i: Int, j: Int) -> Void {
+            if i >= 0 and i < this.size and j >= 0 and j < this.size {
+                var temp = this.data[i]
+                this.data[i] = this.data[j]
+                this.data[j] = temp
+            }
+        }
+
+        func heapify_up(index: Int) -> Void {
+            var idx = index
+            while this.has_parent(idx) and this.data[idx] < this.data[this.parent_index(idx)] {
+                this.swap(idx, this.parent_index(idx))
+                idx = this.parent_index(idx)
+            }
+        }
+
+        func heapify_down(index: Int) -> Void {
+            var idx = index
+            while this.has_left_child(idx) {
+                var smaller_child_idx = this.left_child_index(idx)
+                
+                if this.has_right_child(idx) and 
+                   this.data[this.right_child_index(idx)] < this.data[smaller_child_idx] {
+                    smaller_child_idx = this.right_child_index(idx)
+                }
+                
+                if this.data[idx] < this.data[smaller_child_idx] {
+                    break
+                } else {
+                    this.swap(idx, smaller_child_idx)
+                }
+                
+                idx = smaller_child_idx
+            }
+        }
+
+        func insert(value: T) -> Void {
+            this.data.append(value)
+            this.heapify_up(this.size)
+            this.size = this.size + 1
+        }
+
+        func extract_min() -> T? {
+            if this.size == 0 {
+                return null
+            }
+            
+            var min_val = this.data[0]
+            this.data[0] = this.data[this.size - 1]
+            this.size = this.size - 1
+            
+            if this.size > 0 {
+                this.heapify_down(0)
+            }
+            
+            return min_val
+        }
+
+        func peek_min() -> T? {
+            if this.size > 0 {
+                return this.data[0]
+            }
+            return null
+        }
+
+        func get_size() -> Int {
+            return this.size
+        }
+
+        func is_empty() -> Bool {
+            return this.size == 0
+        }
+    }
+
+    // Doubly Linked List implementation
+    class ListNode[T] {
+        value: T
+        prev: ListNode[T]?
+        next: ListNode[T]?
+
+        init(val: T) {
+            this.value = val
+            this.prev = null
+            this.next = null
+        }
+    }
+
+    class LinkedList[T] {
+        head: ListNode[T]?
+        tail: ListNode[T]?
+        size: Int
+
+        init() {
+            this.head = null
+            this.tail = null
+            this.size = 0
+        }
+
+        func append(value: T) -> Void {
+            var new_node = ListNode(value)
+            
+            if this.head == null {
+                this.head = new_node
+                this.tail = new_node
+            } else {
+                this.tail.next = new_node
+                new_node.prev = this.tail
+                this.tail = new_node
+            }
+            
+            this.size = this.size + 1
+        }
+
+        func prepend(value: T) -> Void {
+            var new_node = ListNode(value)
+            
+            if this.head == null {
+                this.head = new_node
+                this.tail = new_node
+            } else {
+                new_node.next = this.head
+                this.head.prev = new_node
+                this.head = new_node
+            }
+            
+            this.size = this.size + 1
+        }
+
+        func remove(value: T) -> Bool {
+            var current = this.head
+            while current != null {
+                if current.value == value {
+                    // Remove this node
+                    if current.prev != null {
+                        current.prev.next = current.next
+                    } else {
+                        this.head = current.next
+                    }
+                    
+                    if current.next != null {
+                        current.next.prev = current.prev
+                    } else {
+                        this.tail = current.prev
+                    }
+                    
+                    this.size = this.size - 1
+                    return true
+                }
+                current = current.next
+            }
+            return false
+        }
+
+        func find(value: T) -> Bool {
+            var current = this.head
+            while current != null {
+                if current.value == value {
+                    return true
+                }
+                current = current.next
+            }
+            return false
+        }
+
+        func to_list() -> List[T] {
+            var result = []
+            var current = this.head
+            while current != null {
+                result.append(current.value)
+                current = current.next
+            }
+            return result
+        }
+
+        func get_size() -> Int {
+            return this.size
+        }
+
+        func is_empty() -> Bool {
+            return this.size == 0
+        }
+    }
+
+    // Tuple implementations
+    class Tuple2[A, B] {
+        first: A
+        second: B
+
+        init(a: A, b: B) {
+            this.first = a
+            this.second = b
+        }
+
+        func get_first() -> A {
+            return this.first
+        }
+
+        func get_second() -> B {
+            return this.second
+        }
+
+        func set_first(val: A) -> Void {
+            this.first = val
+        }
+
+        func set_second(val: B) -> Void {
+            this.second = val
+        }
+    }
+
+    class Tuple3[A, B, C] {
+        first: A
+        second: B
+        third: C
+
+        init(a: A, b: B, c: C) {
+            this.first = a
+            this.second = b
+            this.third = c
+        }
+
+        func get_first() -> A {
+            return this.first
+        }
+
+        func get_second() -> B {
+            return this.second
+        }
+
+        func get_third() -> C {
+            return this.third
+        }
+
+        func set_first(val: A) -> Void {
+            this.first = val
+        }
+
+        func set_second(val: B) -> Void {
+            this.second = val
+        }
+
+        func set_third(val: C) -> Void {
+            this.third = val
+        }
+    }
+
+    class Tuple4[A, B, C, D] {
+        first: A
+        second: B
+        third: C
+        fourth: D
+
+        init(a: A, b: B, c: C, d: D) {
+            this.first = a
+            this.second = b
+            this.third = c
+            this.fourth = d
+        }
+
+        func get_first() -> A {
+            return this.first
+        }
+
+        func get_second() -> B {
+            return this.second
+        }
+
+        func get_third() -> C {
+            return this.third
+        }
+
+        func get_fourth() -> D {
+            return this.fourth
+        }
+
+        func set_first(val: A) -> Void {
+            this.first = val
+        }
+
+        func set_second(val: B) -> Void {
+            this.second = val
+        }
+
+        func set_third(val: C) -> Void {
+            this.third = val
+        }
+
+        func set_fourth(val: D) -> Void {
+            this.fourth = val
+        }
+    }
+
+    // Stack implementation
+    class Stack[T] {
+        items: List[T]
+
+        init() {
+            this.items = []
+        }
+
+        func push(item: T) -> Void {
+            this.items.append(item)
+        }
+
+        func pop() -> T? {
+            if this.items.length == 0 {
+                return null
+            }
+            var item = this.items[this.items.length - 1]
+            this.items.remove(this.items.length - 1)  // Remove last element
+            return item
+        }
+
+        func peek() -> T? {
+            if this.items.length == 0 {
+                return null
+            }
+            return this.items[this.items.length - 1]
+        }
+
+        func get_size() -> Int {
+            return this.items.length
+        }
+
+        func is_empty() -> Bool {
+            return this.items.length == 0
+        }
+    }
+
+    // Assertions for testing
+    namespace testing {
+
+        func assert(condition: Bool, message: String) -> Void {
+            if not condition {
+                crystal.manifest("ASSERTION FAILED: " + message)
+                // In a real implementation, this would raise an exception
+                throw_assertion_failure(message)
+            } else {
+                crystal.manifest("Assertion passed: " + message)
+            }
+        }
+
+        func assert_equal[T](actual: T, expected: T, message: String) -> Void {
+            if actual == expected {
+                crystal.manifest("Equality assertion passed: " + message)
+            } else {
+                crystal.manifest("EQUALITY ASSERTION FAILED: " + message + " - Expected: " + expected + ", Actual: " + actual)
+                throw_assertion_failure("Values not equal: " + expected + " vs " + actual)
+            }
+        }
+
+        func assert_not_equal[T](actual: T, expected: T, message: String) -> Void {
+            if actual != expected {
+                crystal.manifest("Inequality assertion passed: " + message)
+            } else {
+                crystal.manifest("INEQUALITY ASSERTION FAILED: " + message + " - Values are equal: " + actual)
+                throw_assertion_failure("Values are unexpectedly equal: " + actual)
+            }
+        }
+
+        func assert_true(condition: Bool, message: String) -> Void {
+            if condition {
+                crystal.manifest("True assertion passed: " + message)
+            } else {
+                crystal.manifest("TRUE ASSERTION FAILED: " + message)
+                throw_assertion_failure("Condition was not true: " + message)
+            }
+        }
+
+        func assert_false(condition: Bool, message: String) -> Void {
+            if not condition {
+                crystal.manifest("False assertion passed: " + message)
+            } else {
+                crystal.manifest("FALSE ASSERTION FAILED: " + message) 
+                throw_assertion_failure("Condition was not false: " + message)
+            }
+        }
+
+        func throw_assertion_failure(message: String) -> Void {
+            crystal.manifest("TEST FAILURE: " + message)
+            // In a real implementation, this would exit with error
+        }
+    }
+}

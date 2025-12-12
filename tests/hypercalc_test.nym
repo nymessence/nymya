@@ -1,0 +1,91 @@
+// Hypercalc Function Tests
+// Testing the advanced mathematical functions ported from Hypercalc Perl implementation
+
+import math
+import crystal
+
+func test_basic_arithmetic() -> Void {
+    crystal.manifest("Testing basic arithmetic with special cases...")
+    
+    // Test basic operations
+    var result1 = math.hypercalc.add(5.0, 3.0)
+    crystal.manifest("5 + 3 = " + result1)
+    
+    var result2 = math.hypercalc.multiply(4.0, 6.0)
+    crystal.manifest("4 * 6 = " + result2)
+    
+    var result3 = math.hypercalc.divide(10.0, 2.0)
+    crystal.manifest("10 / 2 = " + result3)
+    
+    var result4 = math.hypercalc.subtract(10.0, 3.0)
+    crystal.manifest("10 - 3 = " + result4)
+}
+
+func test_exponential_functions() -> Void {
+    crystal.manifest("Testing exponential and logarithmic functions...")
+    
+    var result1 = math.hypercalc.exp(1.0)
+    crystal.manifest("e^1 = " + result1)
+    
+    var result2 = math.hypercalc.ln(math.E)
+    crystal.manifest("ln(e) = " + result2)
+    
+    var result3 = math.hypercalc.log10(100.0)
+    crystal.manifest("log10(100) = " + result3)
+    
+    var result4 = math.hypercalc.pow(2.0, 8.0)
+    crystal.manifest("2^8 = " + result4)
+}
+
+func test_trigonometric_functions() -> Void {
+    crystal.manifest("Testing trigonometric functions...")
+    
+    var result1 = math.hypercalc.sin(math.PI / 2.0)
+    crystal.manifest("sin(π/2) = " + result1)
+    
+    var result2 = math.hypercalc.cos(0.0)
+    crystal.manifest("cos(0) = " + result2)
+    
+    var result3 = math.hypercalc.tan(0.0)
+    crystal.manifest("tan(0) = " + result3)
+    
+    var result4 = math.hypercalc.arcsin(1.0)
+    crystal.manifest("arcsin(1) = " + result4)
+    
+    var result5 = math.hypercalc.arccos(1.0)
+    crystal.manifest("arccos(1) = " + result5)
+    
+    var result6 = math.hypercalc.arctan(0.0)
+    crystal.manifest("arctan(0) = " + result6)
+}
+
+func test_advanced_functions() -> Void {
+    crystal.manifest("Testing advanced mathematical functions...")
+    
+    var result1 = math.hypercalc.sqrt(16.0)
+    crystal.manifest("sqrt(16) = " + result1)
+    
+    var result2 = math.hypercalc.root(27.0, 3.0)
+    crystal.manifest("cube root of 27 = " + result2)
+    
+    var result3 = math.hypercalc.gamma(5.0)  // Should be 4! = 24
+    crystal.manifest("gamma(5) = " + result3)
+    
+    var result4 = math.hypercalc.factorial(4.0)  // Should be 4! = 24
+    crystal.manifest("4! = " + result4)
+    
+    var result5 = math.hypercalc.cosh(0.0)
+    crystal.manifest("cosh(0) = " + result5)
+    
+    var result6 = math.hypercalc.sinh(0.0)
+    crystal.manifest("sinh(0) = " + result6)
+}
+
+func main() -> Void {
+    test_basic_arithmetic()
+    test_exponential_functions()
+    test_trigonometric_functions()
+    test_advanced_functions()
+    
+    crystal.manifest("Hypercalc function tests completed!")
+}

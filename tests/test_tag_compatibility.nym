@@ -1,0 +1,9 @@
+// Test program to verify @-tag handling doesn't break compilation
+@shira
+@nora
+@rita
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing @-tag compatibility")
+}

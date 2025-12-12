@@ -1,0 +1,5 @@
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Basic test without tags")
+}

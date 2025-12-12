@@ -1,0 +1,22 @@
+// Test program with @-tags for various functions
+import crystal
+
+// @shira Connect with universal love
+// @nora Flow with emotional harmony
+func main() -> Void {
+    crystal.manifest("Testing @-tags functionality")
+}
+
+// @rita Cosmic order
+// @rupa Manifest form
+func add_numbers(a: Int, b: Int) -> Int {
+    return a + b
+}
+
+// @dalan Home dwelling place
+// @ora Sound vibration
+func print_message(msg: String) -> Void {
+    crystal.manifest(msg)
+}
+
+main()

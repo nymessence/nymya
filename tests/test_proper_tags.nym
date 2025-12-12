@@ -1,0 +1,20 @@
+// Test program with proper @-tag placement
+import crystal
+
+@shira
+@nora
+func main() -> Void {
+    crystal.manifest("Testing @-tags functionality")
+}
+
+@rita
+@rupa
+func add_numbers(a: Int, b: Int) -> Int {
+    return a + b
+}
+
+@dalan
+@ora
+func print_message(msg: String) -> Void {
+    crystal.manifest(msg)
+}

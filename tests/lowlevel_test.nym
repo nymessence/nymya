@@ -1,0 +1,181 @@
+// Test file for low-level bitshift, memory, and register operations
+
+import lowlevel
+import lowlevel.bitwise
+import lowlevel.memory
+import lowlevel.register
+import lowlevel.utils
+import crystal
+
+func test_bitwise_operations() -> Void {
+    crystal.manifest("Testing bitwise operations...")
+    
+    // Test basic bitwise operations
+    var a = 12  // Binary: 1100
+    var b = 10  // Binary: 1010
+    
+    var and_result = lowlevel.bitwise.and(a, b)  // 1100 & 1010 = 1000 = 8
+    crystal.manifest("AND: " + a + " & " + b + " = " + and_result)
+    
+    var or_result = lowlevel.bitwise.or(a, b)  // 1100 | 1010 = 1110 = 14
+    crystal.manifest("OR: " + a + " | " + b + " = " + or_result)
+    
+    var xor_result = lowlevel.bitwise.xor(a, b)  // 1100 ^ 1010 = 0110 = 6
+    crystal.manifest("XOR: " + a + " ^ " + b + " = " + xor_result)
+    
+    var not_result = lowlevel.bitwise.not(a)
+    crystal.manifest("NOT: ~" + a + " = " + not_result)
+    
+    // Test bit shifts
+    var left_shift_result = lowlevel.bitwise.left_shift(a, 2)  // 1100 << 2 = 110000 = 48
+    crystal.manifest("Left shift: " + a + " << 2 = " + left_shift_result)
+    
+    var right_shift_result = lowlevel.bitwise.right_shift(a, 1)  // 1100 >> 1 = 110 = 6
+    crystal.manifest("Right shift: " + a + " >> 1 = " + right_shift_result)
+    
+    // Test bit manipulation
+    var test_value = 15  // Binary: 1111
+    var bit_set = lowlevel.bitwise.set_bit(test_value, 4)  // Set bit 4: 10000 + 1111 = 11111 = 31
+    crystal.manifest("Set bit 4 of " + test_value + " = " + bit_set)
+    
+    var bit_cleared = lowlevel.bitwise.clear_bit(test_value, 2)  // Clear bit 2: 1111 -> 1011 = 11
+    crystal.manifest("Clear bit 2 of " + test_value + " = " + bit_cleared)
+    
+    var toggled = lowlevel.bitwise.toggle_bit(test_value, 1)  // Toggle bit 1: 1111 -> 1101 = 13
+    crystal.manifest("Toggle bit 1 of " + test_value + " = " + toggled)
+    
+    var is_set = lowlevel.bitwise.test_bit(test_value, 2)  // Check if bit 2 is set: true
+    crystal.manifest("Is bit 2 set in " + test_value + "? " + is_set)
+    
+    var pop_count = lowlevel.bitwise.pop_count(test_value)  // Count set bits in 1111 = 4
+    crystal.manifest("Population count of " + test_value + " = " + pop_count)
+    
+    crystal.manifest("Bitwise operations test completed!")
+}
+
+func test_register_operations() -> Void {
+    crystal.manifest("Testing register operations...")
+    
+    // Test general purpose register
+    var reg32 = lowlevel.register.GPRegister(32, 255)  // 8-bit value 11111111
+    crystal.manifest("Initial 32-bit register value: " + reg32.get_value())
+    
+    // Test bit operations on register
+    reg32.set_bit(8)
+    crystal.manifest("After setting bit 8: " + reg32.get_value())
+    
+    reg32.clear_bit(0)
+    crystal.manifest("After clearing bit 0: " + reg32.get_value())
+    
+    reg32.toggle_bit(1)
+    crystal.manifest("After toggling bit 1: " + reg32.get_value())
+    
+    var bit_test = reg32.test_bit(1)
+    crystal.manifest("Is bit 1 set? " + bit_test)
+    
+    // Test shifts on register
+    var shift_reg = lowlevel.register.GPRegister(32, 16)  // Binary: 10000
+    crystal.manifest("Before shift: " + shift_reg.get_value())
+    
+    shift_reg.shift_left(2)
+    crystal.manifest("After left shift by 2: " + shift_reg.get_value())
+    
+    shift_reg.shift_right(1)
+    crystal.manifest("After right shift by 1: " + shift_reg.get_value())
+    
+    // Test rotations
+    var rot_reg = lowlevel.register.GPRegister(8, 171)  // Binary: 10101011
+    crystal.manifest("Rotation test - initial: " + rot_reg.get_value())
+    
+    rot_reg.rotate_left(1)
+    crystal.manifest("After rotate left by 1: " + rot_reg.get_value())
+    
+    rot_reg.rotate_right(2)
+    crystal.manifest("After rotate right by 2: " + rot_reg.get_value())
+    
+    // Test flag register
+    var flag_reg = lowlevel.register.FlagRegister(16)
+    flag_reg.set_carry()
+    crystal.manifest("Carry flag set: " + flag_reg.is_carry())
+    flag_reg.clear_carry()
+    crystal.manifest("Carry flag cleared: " + flag_reg.is_carry())
+    
+    // Test register bank
+    var bank = lowlevel.register.RegisterBank(4, 32)
+    bank.set_register(0, 100)
+    bank.set_register(1, 200)
+    var reg0_val = bank.get_register(0).get_value()
+    var reg1_val = bank.get_register(1).get_value()
+    crystal.manifest("Register bank: R0=" + reg0_val + ", R1=" + reg1_val)
+    
+    // Perform ADD operation
+    bank.perform_operation("ADD", 0, 1)  // R0 = R0 + R1 = 100 + 200 = 300
+    var result = bank.get_register(0).get_value()
+    crystal.manifest("After R0 = R0 + R1, R0 = " + result)
+    
+    crystal.manifest("Register operations test completed!")
+}
+
+func test_memory_operations() -> Void {
+    crystal.manifest("Testing memory operations...")
+    
+    // Test memory block allocation
+    var mem_block = lowlevel.memory.MemBlock(256)  // 256-byte block
+    crystal.manifest("Allocated 256-byte memory block")
+    
+    // Test memory utilities
+    var ptr1 = lowlevel.memory.allocate(128)  // Allocate 128 bytes
+    crystal.manifest("Allocated 128 bytes at pointer")
+    
+    // Fill memory with a value
+    lowlevel.memory.set(ptr1, 65, 10)  // Set 10 bytes to value 65 ('A')
+    crystal.manifest("Set 10 bytes to value 65")
+    
+    // Clean up
+    lowlevel.memory.deallocate(ptr1)
+    crystal.manifest("Deallocated memory")
+    
+    // Dispose memory block
+    mem_block.dispose()
+    crystal.manifest("Disposed memory block")
+    
+    crystal.manifest("Memory operations test completed!")
+}
+
+func test_utility_functions() -> Void {
+    crystal.manifest("Testing utility functions...")
+    
+    // Test endian conversion
+    var original = 0x12345678
+    var swapped = lowlevel.utils.swap_endian_32(original)
+    crystal.manifest("Original: 0x" + original.to_string() + ", Swapped: 0x" + swapped.to_string())
+    
+    // Test alignment
+    var unaligned = 13
+    var aligned_up = lowlevel.utils.align_up(unaligned, 8)  // Align to 8-byte boundary
+    crystal.manifest("Align up " + unaligned + " to 8-byte boundary: " + aligned_up)
+    
+    var aligned_down = lowlevel.utils.align_down(20, 8)  // Align down to 8-byte boundary
+    crystal.manifest("Align down 20 to 8-byte boundary: " + aligned_down)
+    
+    // Test power of two
+    var is_power = lowlevel.utils.is_power_of_two(16)
+    crystal.manifest("Is 16 a power of two? " + is_power)
+    
+    var is_not_power = lowlevel.utils.is_power_of_two(15)
+    crystal.manifest("Is 15 a power of two? " + is_not_power)
+    
+    var next_power = lowlevel.utils.next_power_of_two(10)
+    crystal.manifest("Next power of two after 10: " + next_power)
+    
+    crystal.manifest("Utility functions test completed!")
+}
+
+func main() -> Void {
+    test_bitwise_operations()
+    test_register_operations()
+    test_memory_operations()
+    test_utility_functions()
+    
+    crystal.manifest("All low-level operation tests completed successfully!")
+}

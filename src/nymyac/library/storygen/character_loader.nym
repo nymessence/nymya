@@ -1,0 +1,402 @@
+// Character loading and voice analysis with support for any JSON format
+// character_loader.nym
+
+import storygen.api_client
+import storygen.config
+import lowlevel.os
+import datetime
+import lowlevel.string
+import lowlevel.json
+
+namespace storygen.character_loader
+
+// Ensure defaults are initialized at module load
+storygen.config.init_defaults()
+
+func analyze_character_voice(persona: String, character_name: String) -> Dict {
+    // Dynamically analyze character voice from persona text
+    try {
+        var prompt = "Analyze the voice and speaking style of " + character_name + " based on this persona description:\n\"" + persona[:500] + "\"\nProvide a concise analysis in this format:\n- Formality level: [very formal/formal/neutral/casual/very casual]\n- Speaking style: [direct/descriptive/poetic/humorous/philosophical/conversational]\n- Key characteristics: [2-3 specific traits like \"uses metaphors\", \"speaks in riddles\", \"direct and blunt\", etc.]"
+        
+        var analysis = storygen.api_client.make_api_call(prompt, 150, 0.3, [], False)
+        
+        // Parse the analysis
+        var formality = "neutral"
+        var style = "conversational"
+        var characteristics = []
+        
+        if "Formality level:" in analysis {
+            var formality_line = analysis.split("Formality level:")[1].split("\n")[0].strip()
+            formality = formality_line.split("/")[0].strip().lower()
+        }
+        
+        if "Speaking style:" in analysis {
+            var style_line = analysis.split("Speaking style:")[1].split("\n")[0].strip()
+            style = style_line.split("/")[0].strip().lower()
+        }
+        
+        if "Key characteristics:" in analysis {
+            var chars_line = analysis.split("Key characteristics:")[1].split("\n")[0].strip()
+            var temp_chars = chars_line.split(",")
+            for char in temp_chars {
+                characteristics.append(char.strip())
+            }
+        }
+        
+        return {
+            "formality": formality,
+            "style": style,
+            "characteristics": characteristics[:3]
+        }
+    } catch e {
+        crystal.manifest("⚠️  Voice analysis warning: " + e.to_string())
+        return {"formality": "neutral", "style": "conversational", "characteristics": []}
+    }
+}
+
+func generate_private_agenda(character_name: String, persona: String, voice_analysis: Dict) -> String {
+    // Generate dynamic private agenda based on character analysis
+    try {
+        var prompt = "Create a subtle private agenda for " + character_name + " based on their persona:\nPersona: \"" + persona[:400] + "\"\nVoice Analysis: " + voice_analysis.to_string() + "\nRequirements:\n- One sentence maximum\n- Must create internal tension or secret motivation\n- Must be specific to this character's nature\n- Should NOT be about \"trusting others\" or \"finding common ground\"\n- Should reflect their unique perspective and goals\n\nExample formats:\n\"If they're from the capital, I need to determine if they know about the assassination plot.\"\n\"As a wanderer who's seen too much, I'm searching for someone who understands what lies beyond the stars.\"\n\"A ruler must always test potential allies - I need to see if they break under pressure.\"\n"
+        var agenda = storygen.api_client.make_api_call(prompt, 75, 0.7, [], False)
+        return remove_quotes(agenda.strip())
+    } catch e {
+        crystal.manifest("⚠️  Agenda generation warning: " + e.to_string())
+        if "ruler" in persona.lower() or any_in_list(["queen", "empress", "king"], character_name.lower()) {
+            return "As a ruler, I must determine if this stranger poses any threat to my domain."
+        } else if any_in_list(["wanderer", "traveler", "rogue"], persona.lower()) {
+            return "I'm always on the lookout for useful information or opportunities."
+        } else {
+            return character_name + " has their own hidden motivations that they keep carefully guarded."
+        }
+    }
+}
+
+func generate_missing_scenario(character_data: Dict, character_name: String) -> String {
+    // Generate missing scenario context from character description
+    try {
+        var persona = character_data.get("persona", "")
+        if not persona or persona.length() < 50 {
+            return character_name + " exists in a dynamic world where their actions shape the narrative."
+        }
+        
+        var prompt = "Based on this character, generate a brief 2-sentence scenario context:\n\nCharacter: " + character_name + "\nDescription: \"" + persona[:600] + "\"\n\nRequirements:\n- 2 sentences maximum\n- Describe their current location and situation\n- Include 1-2 sensory details\n- Set up potential for interaction\n- Match the tone and themes of their character\n"
+        var scenario = storygen.api_client.make_api_call(prompt, 75, 0.7, [], False)
+        return scenario.strip()
+    } catch e {
+        crystal.manifest("⚠️  Scenario generation warning: " + e.to_string())
+        return character_name + " exists in their own world, shaped by their experiences and goals."
+    }
+}
+
+func extract_system_prompt(character_data: Dict) -> String {
+    // Extract system prompt from character data, trying multiple paths
+    var paths_to_check = [
+        ["system_prompt"],
+        ["data", "system_prompt"],
+        ["character", "system_prompt"],
+        ["prompt"],
+        ["data", "prompt"],
+        ["system", "prompt"],
+        ["system", "system_prompt"]
+    ]
+    
+    for path in paths_to_check {
+        var current = character_data
+        var found = True
+        for key in path {
+            if current is Dict and current.contains(key) {
+                current = current[key]
+            } else {
+                found = False
+                break
+            }
+        }
+        if found and current is String and current.strip().length() > 0 {
+            return current.strip()
+        }
+    }
+    
+    return ""
+}
+
+func load_character_generic(filepath: String) -> Dict {
+    // Load ANY character file format with robust features
+    try {
+        var file_content = lowlevel.os.read_file(filepath)
+        var character_data = lowlevel.json.parse_json(file_content)
+        
+        crystal.manifest("🔍 Analyzing character file: " + filepath)
+        
+        // Extract character name
+        var character_name = "Unknown Character"
+        var name_paths = [
+            ["name"], ["data", "name"], ["character", "name"],
+            ["personality", "name"], ["system_prompt"], ["description"]
+        ]
+        
+        for path in name_paths {
+            var current = character_data
+            var found = True
+            for key in path {
+                if current is Dict and current.contains(key) {
+                    current = current[key]
+                } else {
+                    found = False
+                    break
+                }
+            }
+            if found and current is String and current.strip().length() > 0 {
+                character_name = current.strip()
+                break
+            }
+        }
+        
+        if character_name == "Unknown Character" {
+            var base_name = filepath.split("/")[-1].replace(".json", "").replace("_", " ").to_title_case()
+            character_name = base_name
+            crystal.manifest("   ⚠️  Using filename as character name: " + character_name)
+        }
+        
+        crystal.manifest("   ✓ Character name: " + character_name)
+        
+        // Extract persona
+        var persona = ""
+        var persona_sources = [
+            ["description"], ["personality"], ["system_prompt"],
+            ["data", "description"], ["data", "personality"],
+            ["character", "description"], ["scenario"], ["raw_content"]
+        ]
+        
+        for path in persona_sources {
+            var current = character_data
+            var found = True
+            for key in path {
+                if current is Dict and current.contains(key) {
+                    current = current[key]
+                } else {
+                    found = False
+                    break
+                }
+            }
+            if found and current is String and current.length() > 20 {
+                persona = current.strip()
+                break
+            }
+        }
+        
+        if persona.length() == 0 {
+            persona = character_name + " is a character with their own motivations and personality."
+            crystal.manifest("   ⚠️  Creating minimal persona")
+        }
+        
+        crystal.manifest("   ✓ Persona length: " + persona.length() + " characters")
+        
+        // Generate scenario if missing
+        var scenario_context = None
+        var has_scenario = False
+        for key in ["scenario", "context", "setting", "world"] {
+            if character_data.contains(key) {
+                has_scenario = True
+                break
+            }
+        }
+        
+        if not has_scenario {
+            crystal.manifest("   🌍 Generating missing scenario context...")
+            scenario_context = generate_missing_scenario(character_data, character_name)
+            character_data["generated_scenario"] = scenario_context
+            crystal.manifest("   ✓ Generated scenario")
+        }
+        
+        // Extract greeting
+        var greeting = ""
+        var greeting_sources = [
+            ["first_mes"], ["greeting"], ["data", "first_mes"],
+            ["data", "greeting"], [0, "content"], ["conversation_start"]
+        ]
+        
+        for path in greeting_sources {
+            var current = character_data
+            var found = True
+            for key in path {
+                if current is Dict and current.contains(key) {
+                    current = current[key]
+                } else if current is List and key is Int and key < current.length() {
+                    current = current[key]
+                } else {
+                    found = False
+                    break
+                }
+            }
+            if found and current is String and current.length() > 5 {
+                greeting = current.strip()
+                greeting = lowlevel.string.replace_all(greeting, ["{{user}}", "{{char}}", "{{User}}", "{{Char}}", "<USER>", "<BOT>"], "you")
+                break
+            }
+        }
+        
+        if greeting.length() == 0 {
+            greeting = "*" + character_name + " looks up as you approach* Hello. I am " + character_name + "."
+            crystal.manifest("   ⚠️  Creating default greeting")
+        }
+        
+        crystal.manifest("   ✓ Greeting extracted")
+        
+        // Analyze character voice
+        crystal.manifest("   🎭 Analyzing character voice...")
+        var voice_analysis = analyze_character_voice(persona, character_name)
+        crystal.manifest("   ✓ Voice analysis: " + voice_analysis.to_string())
+        
+        // Generate private agenda
+        crystal.manifest("   🤖 Generating private agenda...")
+        var private_agenda = generate_private_agenda(character_name, persona, voice_analysis)
+        crystal.manifest("   ✓ Private agenda generated")
+        
+        // System prompt (will be built in context_builder)
+        var system_prompt = extract_system_prompt(character_data)
+        
+        return {
+            "name": character_name,
+            "persona": persona,
+            "greeting": greeting,
+            "private_agenda": private_agenda,
+            "voice_analysis": voice_analysis,
+            "system_prompt": system_prompt,
+            "scenario_context": scenario_context,
+            "raw_data": character_data
+        }
+    } catch e {
+        crystal.manifest("❌ Error loading " + filepath + ": " + e.to_string())
+        var base_name = filepath.split("/")[-1].replace(".json", "").replace("_", " ").to_title_case()
+        crystal.manifest("   ⚠️  Creating fallback character: " + base_name)
+        
+        return {
+            "name": base_name,
+            "persona": base_name + " is a character with their own unique personality.",
+            "greeting": "*" + base_name + " regards you with interest* Hello. I am " + base_name + ".",
+            "private_agenda": "I want to understand who you are and what you want.",
+            "voice_analysis": {"formality": "neutral", "style": "conversational", "characteristics": []},
+            "system_prompt": "",
+            "scenario_context": None,
+            "raw_data": {}
+        }
+    }
+}
+
+func extract_lorebook_entries(character_data: Dict, recent_messages: List, max_entries: Int = 3) -> List {
+    // Safely extract lorebook entries from ANY character format
+    try {
+        var lorebook_entries = []
+        var paths_to_check = [
+            ["character_book", "entries"], ["data", "character_book", "entries"],
+            ["lore", "entries"], ["book", "entries"], ["entries"],
+            ["data", "entries"], ["personality"], ["scenario"]
+        ]
+        
+        for path in paths_to_check {
+            var current = character_data
+            var found = True
+            for key in path {
+                if current is Dict and current.contains(key) {
+                    current = current[key]
+                } else {
+                    found = False
+                    break
+                }
+            }
+            
+            if found {
+                if current is List {
+                    for entry in current {
+                        if entry {
+                            lorebook_entries.append(entry.to_string())
+                        }
+                    }
+                } else if current is Dict and current.contains("entries") {
+                    var entries = current["entries"]
+                    if entries is List {
+                        for entry in entries {
+                            if entry {
+                                lorebook_entries.append(entry.to_string())
+                            }
+                        }
+                    }
+                } else if current is String and current.strip().length() > 0 {
+                    lorebook_entries.append(current)
+                } else if current is Dict {
+                    for key, value in current {
+                        if value is String and value.length() > 20 {
+                            lorebook_entries.append(key + ": " + value)
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Filter by relevance if we have recent messages
+        if lorebook_entries.length() > 0 and recent_messages.length() > 0 {
+            var recent_text = ""
+            for msg in recent_messages[-3:] {
+                if msg is Dict {
+                    recent_text = recent_text + " " + msg.get("content", "").to_string().lower()
+                }
+            }
+            
+            var scored_entries = []
+            for entry in lorebook_entries {
+                if not (entry is String) or entry.length() < 10 {
+                    continue
+                }
+                var relevance = 0
+                var words = recent_text.split(" ")
+                for word in words {
+                    if word.length() > 3 and word in entry.lower() {
+                        relevance = relevance + 1
+                    }
+                }
+                if relevance > 0 {
+                    scored_entries.append([relevance, entry])
+                }
+            }
+            
+            // Sort by relevance (descending)
+            scored_entries.sort(key=lambda x: x[0], reverse=True)
+            var relevant_entries = []
+            for _, entry in scored_entries[:max_entries] {
+                relevant_entries.append(entry)
+            }
+            
+            if relevant_entries.length() > 0 {
+                return relevant_entries
+            }
+        }
+        
+        return lorebook_entries[:max_entries] if lorebook_entries.length() > max_entries else lorebook_entries
+    } catch e {
+        crystal.manifest("⚠️  Lorebook extraction warning: " + e.to_string())
+        return []
+    }
+}
+
+// Helper function to check if any item in a list is in a string
+func any_in_list(items: List[String], text: String) -> Bool {
+    for item in items {
+        if item in text {
+            return True
+        }
+    }
+    return False
+}
+
+// Helper function to remove quotes
+func remove_quotes(text: String) -> String {
+    var result = text
+    if result.startswith("\"") and result.endswith("\"") {
+        result = result[1:-1]
+    }
+    if result.startswith("'") and result.endswith("'") {
+        result = result[1:-1]
+    }
+    return result.strip()
+}

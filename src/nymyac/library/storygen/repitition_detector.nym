@@ -1,0 +1,208 @@
+// Advanced repetition detection and pattern blocking
+// repitition_detector.nym
+
+import storygen.utils
+import storygen.config
+import lowlevel.string
+
+namespace storygen.repitition_detector
+
+// Ensure defaults are initialized at module load
+storygen.config.init_defaults()
+
+func detect_repetition_patterns(history: List[Dict], similarity_threshold: Float) -> Dict {
+    if history.length() < 4 {
+        return {'repetition_score': 0.0, 'issues': [], 'blocked_patterns': []}
+    }
+    
+    var issues = []
+    var blocked_patterns = []
+    var repetition_score = 0.0
+    
+    // Get last 8 messages for comprehensive analysis
+    var recent_count = min(8, history.length())
+    var recent_messages = history[-recent_count:] if history.length() >= 8 else history
+    var recent_contents = [str(msg.get('content', '')) for msg in recent_messages if isinstance(msg, dict)]
+    
+    if recent_contents.length() < 3 {
+        return {'repetition_score': 0.0, 'issues': [], 'blocked_patterns': []}
+    }
+    
+    // 1. AGGRESSIVE opening phrase detection
+    var opening_phrases = []
+    for i, content in enumerate(recent_contents) {
+        var words = content.split()
+        var opening = " ".join(words[:7]) if words.length() >= 7 else ""
+        if opening.length() == 0 {
+            // Use first sentence if words are insufficient
+            var sentences = [s.strip() for s in content.split('.') if s.strip().length() > 0]
+            opening = sentences[0] if sentences.length() > 0 else content[:30]
+        }
+        opening_phrases.append([i, opening.strip()])
+    }
+    
+    // Block repetitive openings
+    var opening_counter = {}
+    for _, opening in opening_phrases {
+        opening_counter[opening] = opening_counter.get(opening, 0) + 1
+    }
+    
+    for opening, count in opening_counter {
+        if count >= 2 and recent_messages.length() >= 5 {
+            issues.append("CRITICAL: repetitive opening pattern: '" + opening[:25] + "...'")
+            blocked_patterns.append("*" + opening + "*")
+            repetition_score = repetition_score + min(count * 0.25, 0.6)
+        }
+    }
+    
+    // 2. BLOCK copied content between consecutive messages
+    for i in range(1, recent_contents.length()) {
+        var similarity = storygen.utils.calculate_similarity(recent_contents[i-1], recent_contents[i])
+        if similarity > 0.7 {
+            issues.append("CRITICAL: content copying between messages " + (i) + " and " + (i+1) + ": " + similarity.to_string()[:4])
+            var common_words = set(recent_contents[i-1].split()).intersection(set(recent_contents[i].split()))
+            if common_words.length() > 0 {
+                var common_list = []
+                for word in common_words {
+                    common_list.append(word)
+                }
+                blocked_patterns.append(" ".join(common_list[:10]))
+            }
+            repetition_score = repetition_score + min(similarity * 0.9, 0.8)
+        }
+    }
+    
+    // 3. DETECT character voice contamination
+    if set([h.get('name', '') for h in recent_messages]).length() > 1 {
+        var char_contents = {}
+        for msg in recent_messages {
+            if msg is Dict and msg.contains('name') and msg.contains('content') {
+                var char_name = msg['name']
+                if not char_contents.contains(char_name) {
+                    char_contents[char_name] = []
+                }
+                char_contents[char_name].append(msg['content'].to_lower())
+            }
+        }
+        
+        for char1, contents1 in char_contents {
+            for char2, contents2 in char_contents {
+                if char1 == char2 {
+                    continue
+                }
+                for c1 in contents1 {
+                    for c2 in contents2 {
+                        var similarity = storygen.utils.calculate_similarity(c1, c2)
+                        if similarity > 0.65 {
+                            issues.append("CRITICAL: characters " + char1 + " and " + char2 + " copying speech patterns")
+                            blocked_patterns.append("*" + c1[:30] + "*")
+                            repetition_score = repetition_score + 0.3
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // 4. ACTION DESCRIPTION OVERUSE DETECTION
+    var action_count = 0
+    var total_messages = 0
+    var action_pattern = lowlevel.string.regex_match("*[^*]+*")  // simplified regex check
+    
+    for content in recent_contents {
+        if "*" in content and "*" in content.split("*")[1:] {  // Check if content has action descriptions
+            action_count = action_count + 1
+        }
+        total_messages = total_messages + 1
+    }
+    
+    if total_messages > 0 {
+        var action_ratio = action_count as Float / total_messages as Float
+        var max_actions = storygen.config.MAX_ACTION_DESCRIPTIONS or 1
+        if action_ratio > (max_actions as Float / 2.0) {
+            issues.append("CRITICAL: overused action descriptions (" + action_ratio.to_string()[:4] + ")")
+            blocked_patterns.append("*action description*")
+            repetition_score = repetition_score + min(action_ratio * 0.7, 0.5)
+        }
+    }
+    
+    // 5. INCOMPLETE SENTENCE DETECTION
+    var incomplete_count = 0
+    for content in recent_contents {
+        if content.strip().ends_with((',', '-', ':', ';', '...')) or content.split().length() < 3 {
+            incomplete_count = incomplete_count + 1
+        }
+    }
+    
+    if incomplete_count as Float / recent_contents.length() as Float > 0.3 {
+        issues.append("CRITICAL: incomplete sentences (" + incomplete_count + "/" + recent_contents.length() + ")")
+        blocked_patterns.append("incomplete sentence")
+        repetition_score = repetition_score + 0.3
+    }
+    
+    // CAP and normalize score
+    repetition_score = min(repetition_score, 1.0)
+    
+    return {
+        'repetition_score': repetition_score,
+        'issues': issues[:5],  // Return only first 5 issues
+        'blocked_patterns': list(set(blocked_patterns))  // Remove duplicates
+    }
+}
+
+func generate_anti_repetition_guidance(repetition_data: Dict, character_name: String, 
+                                     other_character_name: String) -> String {
+    var rep_score = repetition_data.get('repetition_score', 0.0)
+    if rep_score < 0.3 {
+        return ""
+    }
+    
+    var guidance = "\n\n### 🔥 EMERGENCY ANTI-REPETITION PROTOCOLS ACTIVATED ###\n"
+    
+    // BLOCK specific patterns
+    var blocked_patterns = repetition_data.get('blocked_patterns', [])
+    if blocked_patterns.length() > 0 {
+        guidance = guidance + "🚨 ABSOLUTE CONTENT BLOCKING:\n"
+        for pattern in blocked_patterns[:3] {  // Limit to first 3 patterns
+            guidance = guidance + "- NEVER use: \"" + pattern + "\"\n"
+        }
+        guidance = guidance + "- Replace blocked patterns with completely original content\n\n"
+    }
+    
+    // Address critical issues
+    for issue in repetition_data.get('issues', []) {
+        if 'opening pattern' in issue.to_lower() {
+            guidance = guidance + "🔄 OPENING PHRASE PROHIBITION:\n"
+            guidance = guidance + "- ABSOLUTELY NO repetitive openings like 'I lean back', 'I chuckle softly'\n"
+            guidance = guidance + "- Start with: [Question], [Unexpected statement], [Environmental reaction], or [Memory flashback]\n\n"
+        
+        } else if 'content copying' in issue.to_lower() {
+            guidance = guidance + "❌ CONTENT COPY PROHIBITION:\n"
+            guidance = guidance + "- NEVER copy or closely paraphrase " + other_character_name + "'s words\n"
+            guidance = guidance + "- If you find yourself repeating, STOP and introduce a completely new topic\n\n"
+        
+        } else if 'speech patterns' in issue.to_lower() {
+            guidance = guidance + "🎭 CHARACTER VOICE CONTAMINATION:\n"
+            guidance = guidance + "- You are " + character_name + ", NOT " + other_character_name + "\n"
+            guidance = guidance + "- Your speech patterns must be distinct and consistent\n\n"
+        
+        } else if 'action descriptions' in issue.to_lower() {
+            var max_actions = storygen.config.MAX_ACTION_DESCRIPTIONS or 1
+            guidance = guidance + "⚔️ ACTION DESCRIPTION LIMIT:\n"
+            guidance = guidance + "- MAXIMUM " + max_actions + " action/emotional description per response\n\n"
+        
+        } else if 'incomplete sentences' in issue.to_lower() {
+            guidance = guidance + "✍️ COMPLETE SENTENCE REQUIREMENT:\n"
+            guidance = guidance + "- EVERY response must contain complete, grammatically correct sentences\n\n"
+        }
+    }
+    
+    guidance = guidance + "### 🚨 EMERGENCY RESPONSE PROTOCOLS ###\n"
+    guidance = guidance + "If repetition detected:\n"
+    guidance = guidance + "- IMMEDIATELY introduce a memory from your past\n"
+    guidance = guidance + "- Ask a direct question about the other character's motivations\n"
+    guidance = guidance + "- Reference a specific detail from earlier in the conversation\n"
+    guidance = guidance + "- Change the subject to something completely unrelated\n\n"
+    
+    return guidance
+}

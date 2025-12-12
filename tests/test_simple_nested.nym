@@ -1,0 +1,14 @@
+// Simple test for nested namespace functionality 
+import graphics.stl_basic
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing basic nested namespace functionality")
+    
+    // Test basic function call (this should work)
+    var model = graphics.stl_basic.STLModel()
+    
+    crystal.manifest("Simple nested namespace test completed")
+}
+
+main()

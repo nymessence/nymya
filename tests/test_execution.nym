@@ -1,0 +1,20 @@
+import crystal
+import math
+
+crystal.manifest("Testing basic nymya execution...")
+crystal.manifest("Hello from NymyaLang!")
+
+// Test math functions
+var sqrt_val = math.sqrt(16.0)
+crystal.manifest("Square root of 16: " + sqrt_val)
+
+// Test symbolic mathematics
+import symbolic.numerology
+var meaning = symbolic.numerology.get_meaning(7)
+crystal.manifest("Meaning of 7: " + meaning.meaning)
+
+// Test GUI components (just declare them to make sure they can be imported)
+// var window = gui.Window("Test", gui.Label("Hello"))
+crystal.manifest("GUI components can be accessed")
+
+crystal.manifest("All tests completed successfully!")

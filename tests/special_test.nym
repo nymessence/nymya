@@ -1,0 +1,104 @@
+// Symbolic Subsystem Tests - Special Numbers
+// Tests for the special numbers subsystem
+
+import symbolic
+import crystal
+
+namespace test_special {
+
+    func test_special_numbers() -> Void {
+        crystal.manifest("Testing special numbers...")
+        
+        var test_cases = [
+            [0, "void, potential, quantum baseline", "symbolic"],
+            [10, "cycle closure", "symbolic"], 
+            [12, "order", "symbolic"],
+            [13, "integration of opposites", "symbolic"],
+            [23, "chaotic attractor significance", "mathematical"],
+            [27, "cubic resonance", "mathematical"],
+            [33, "sacred harmonic", "spiritual"],
+            [37, "recursion seed", "mathematical"],
+            [42, "answer archetype", "cultural"],
+            [69, "dual-polar inversion", "symbolic"],
+            [108, "spiritual harmonic", "spiritual"],
+            [111, "initiation signature", "symbolic"],
+            [144, "structural harmonics", "mathematical"],
+            [216, "cubic octave", "mathematical"],
+            [369, "vortex key pattern", "symbolic"],
+            [420, "cultural harmonic", "cultural"],
+            [432, "harmonic resonance", "mathematical"],
+            [512, "power sequence", "mathematical"],
+            [777, "high-order pattern", "symbolic"],
+            [888, "infinite generation", "symbolic"],
+            [999, "finality burst", "symbolic"],
+            [1001, "mirrored symmetry", "symbolic"],
+            [1729, "Ramanujan-Hardy number", "mathematical"]
+        ]
+        
+        for test_case in test_cases {
+            var n = test_case[0]
+            var expected_meaning = test_case[1]
+            var expected_category = test_case[2]
+            
+            var result = symbolic.get_special_meaning(n)
+            crystal.manifest("Number " + n + " (" + result.category + "): " + result.meaning)
+            
+            if result.meaning.contains(expected_meaning) and result.category == expected_category {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected meaning containing: " + expected_meaning + 
+                               ", category: " + expected_category)
+            }
+        }
+    }
+
+    func test_large_special_numbers() -> Void {
+        crystal.manifest("\nTesting large special numbers...")
+        
+        var large_test_cases = [
+            [7777, "deep recursion"],
+            [8888, "infinite lattice"]
+        ]
+        
+        for test_case in large_test_cases {
+            var n = test_case[0]
+            var expected_meaning = test_case[1]
+            
+            var result = symbolic.get_special_meaning(n)
+            crystal.manifest("Number " + n + ": " + result.meaning)
+            
+            if result.meaning.contains(expected_meaning) {
+                crystal.manifest("  ✓ PASS")
+            } else {
+                crystal.manifest("  ✗ FAIL - Expected meaning containing: " + expected_meaning)
+            }
+        }
+    }
+
+    func test_standard_numbers() -> Void {
+        crystal.manifest("\nTesting standard (non-special) numbers...")
+        
+        var test_cases = [14, 25, 38, 50, 67, 84, 92]
+        
+        for n in test_cases {
+            var result = symbolic.get_special_meaning(n)
+            crystal.manifest("Number " + n + " is special: " + symbolic.is_special_number(n))
+            
+            if not symbolic.is_special_number(n) and result.category == "standard" {
+                crystal.manifest("  ✓ PASS - Correctly identified as standard")
+            } else {
+                crystal.manifest("  ✗ FAIL - Should be standard")
+            }
+        }
+    }
+
+    func run_tests() -> Void {
+        crystal.manifest("=== SPECIAL NUMBERS SUBSYSTEM TESTS ===")
+        test_special_numbers()
+        test_large_special_numbers()
+        test_standard_numbers()
+        crystal.manifest("=== SPECIAL NUMBERS TESTS COMPLETE ===\n")
+    }
+}
+
+test_special.run_tests()

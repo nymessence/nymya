@@ -1,0 +1,16 @@
+// Test to isolate the file function issue
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Testing...")
+    
+    // Direct call without assignment
+    crystal.file.dalan_aya("test.txt")
+    
+    // Call with assignment
+    var exists = crystal.file.dalan_aya("test.txt")
+    
+    crystal.manifest("Done")
+}
+
+main()

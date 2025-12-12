@@ -1,0 +1,30 @@
+import crystal
+import math
+
+crystal.manifest("Turing completeness test: Conditionals and loops")
+
+// Test conditional
+var x = 10
+if x > 5 {
+    crystal.manifest("Conditional branching works")
+} else {
+    crystal.manifest("Conditional failed")
+}
+
+// Test loop
+var count = 0
+while count < 5 {
+    crystal.manifest("Loop iteration: " + count)
+    count = count + 1
+}
+
+// Test recursion
+func factorial(n: Int) -> Int {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+var fact5 = factorial(5)
+crystal.manifest("Factorial of 5: " + fact5)

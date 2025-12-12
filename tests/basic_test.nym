@@ -1,0 +1,21 @@
+import crystal
+
+func main() -> Void {
+    // Basic test to verify List functionality
+    var test_list: List[Int] = []
+    test_list.append(1)
+    test_list.append(0)
+    test_list.append(1)
+    
+    crystal.manifest("List length: " + test_list.length.to_string())
+    
+    var i = 0
+    while (i < test_list.length) {
+        crystal.manifest("Element at " + i.to_string() + ": " + test_list[i].to_string())
+        i = i + 1
+    }
+    
+    // Test string access
+    var test_string = "0123456789ABCDEF"
+    crystal.manifest("Character at index 5: " + test_string[5])
+}
