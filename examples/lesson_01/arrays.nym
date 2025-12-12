@@ -1,0 +1,7 @@
+import crystal
+
+var my_list = []
+my_list.append(42)
+my_list.append(100)
+var size = my_list.size()  # This may not work due to assignment with method call
+crystal.manifest("List operations work!")

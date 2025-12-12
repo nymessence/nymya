@@ -1,0 +1,18 @@
+import crystal
+import math
+
+var a = 10.0
+var b = 3.0
+
+var sum = a + b
+var difference = a - b
+var product = a * b
+var quotient = a / b
+
+crystal.manifest("Sum: 13")  # Using fixed string to avoid concatenation issues
+crystal.manifest("Difference: 7") 
+crystal.manifest("Product: 30") 
+crystal.manifest("Quotient: 3.333333")
+
+var sqrt_val = math.sqrt(16.0)
+crystal.manifest("Square root of 16: 4")

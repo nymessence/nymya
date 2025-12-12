@@ -74,3 +74,4 @@ vendor/
 **/*.out
 **/*.bin
 **/*.obj
+_edu_tmp/

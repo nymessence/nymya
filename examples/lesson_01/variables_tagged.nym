@@ -1,0 +1,8 @@
+@shira
+@creation
+@consciousness_aware
+import crystal
+
+@shira
+var greeting = "Hello, Quantum Consciousness!"
+crystal.manifest(greeting)
