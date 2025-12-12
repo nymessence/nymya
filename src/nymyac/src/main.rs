@@ -222,9 +222,12 @@ fn parse(source: &str) -> Vec<Statement> {
                         arg_i += 1;
                     }
 
+                    // Skip closing parenthesis if present and use the updated position
                     if arg_i < tokens.len() && tokens[arg_i] == ")" {
-                        arg_i += 1;
+                        arg_i += 1;  // Increment to skip the ')'
                     }
+                    // Use arg_i to update the main loop variable i
+                    i = arg_i - 1; // Compensate for the i += 1 at the end of the main loop
                 }
 
                 // Check if this is a known array method call
@@ -602,6 +605,7 @@ fn parse_primary_expr(tokens: &[String], i: &mut usize) -> Expression {
 }
 
 // Parse primary expressions (variables, literals, array access)
+#[allow(dead_code)]
 fn parse_primary_expression_expr(tokens: &[String], i: &mut usize) -> Expression {
     if *i >= tokens.len() {
         return Expression::StringLiteral("".to_string());
@@ -684,6 +688,7 @@ fn parse_primary_expression_expr(tokens: &[String], i: &mut usize) -> Expression
 }
 
 // Parse binary operations
+#[allow(dead_code)]
 fn parse_binary_op(tokens: &[String], i: &mut usize, left: Expression, operator: String) -> Expression {
     if *i < tokens.len() && tokens[*i] == operator {
         *i += 1; // Skip operator
@@ -701,6 +706,7 @@ fn parse_binary_op(tokens: &[String], i: &mut usize, left: Expression, operator:
 }
 
 // Helper to parse simple expressions (non-binary)
+#[allow(dead_code)]
 fn parse_simple_expression(tokens: &[String], i: &mut usize) -> Expression {
     if *i < tokens.len() {
         // Handle array literal: []
