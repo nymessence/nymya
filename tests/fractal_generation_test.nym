@@ -1,0 +1,217 @@
+#!/usr/bin/env nymyac
+// Stress test for generating fractal images: Mandelbrot and Burning Ship
+// fractal_generation_test.nym
+
+import image.image_basic
+import image.extended
+import crystal
+
+func main() -> Void {
+    crystal.manifest("🌀 Starting Fractal Generation Stress Test")
+    crystal.manifest("=" * 60)
+
+    // Generate Mandelbrot Set
+    crystal.manifest("\n✅ Generating Mandelbrot Set...")
+    var mandelbrot_img = generate_mandelbrot(800, 600, -2.0, 1.0, -1.5, 1.5, 255)
+    image.image_basic.save_image(mandelbrot_img, "mandelbrot_set.png")
+    
+    // Generate detailed Mandelbrot (zoomed in)
+    crystal.manifest("\n✅ Generating Detailed Mandelbrot Set (Zoomed)...")
+    var detailed_mandelbrot_img = generate_mandelbrot(800, 600, -0.8, -0.7, 0.1, 0.2, 500)
+    image.image_basic.save_image(detailed_mandelbrot_img, "detailed_mandelbrot.png")
+    
+    // Generate Burning Ship Fractal
+    crystal.manifest("\n✅ Generating Burning Ship Fractal...")
+    var burning_ship_img = generate_burning_ship(800, 600, -2.5, 1.5, -2.0, 2.0, 255)
+    image.image_basic.save_image(burning_ship_img, "burning_ship_fractal.png")
+    
+    // Generate another view of Burning Ship
+    crystal.manifest("\n✅ Generating Alternative Burning Ship View...")
+    var burning_ship_alt_img = generate_burning_ship(800, 600, -1.8, -1.7, -0.05, 0.05, 500)
+    image.image_basic.save_image(burning_ship_alt_img, "burning_ship_zoom.png")
+
+    // Generate Julia Set (for comparison with Mandelbrot)
+    crystal.manifest("\n✅ Generating Julia Set...")
+    var julia_img = generate_julia(800, 600, -0.7, 0.27015, 255)
+    image.image_basic.save_image(julia_img, "julia_set.png")
+
+    crystal.manifest("\n🎉 All fractal generation completed!")
+    crystal.manifest("=" * 60)
+    crystal.manifest("Generated PNG files:")
+    crystal.manifest("  - mandelbrot_set.png")
+    crystal.manifest("  - detailed_mandelbrot.png")
+    crystal.manifest("  - burning_ship_fractal.png")
+    crystal.manifest("  - burning_ship_zoom.png")
+    crystal.manifest("  - julia_set.png")
+}
+
+// Floating-point helper functions (since they might not be in standard library)
+func abs_float(val: Float) -> Float {
+    return if val < 0.0 { -val } else { val }
+}
+
+func sqrt_float(val: Float) -> Float {
+    if val <= 0.0 {
+        return 0.0
+    }
+    
+    // Newton's method for square root approximation
+    var x = val
+    for i in range(0, 20) {
+        x = (x + val / x) / 2.0
+    }
+    return x
+}
+
+// Generate Mandelbrot Set
+func generate_mandelbrot(width: Int, height: Int, min_re: Float, max_re: Float, min_im: Float, max_im: Float, max_iterations: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+    
+    var scale_x = (max_re - min_re) / width as Float
+    var scale_y = (max_im - min_im) / height as Float
+    
+    for y in range(0, height) {
+        for x in range(0, width) {
+            var c_real = min_re + x as Float * scale_x
+            var c_imag = min_im + y as Float * scale_y
+            
+            var z_real = 0.0
+            var z_imag = 0.0
+            var iteration = 0
+            
+            // Mandelbrot iteration: z = z^2 + c
+            while iteration < max_iterations {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+                
+                // Check if |z| > 2 (diverges to infinity)
+                if z_real2 + z_imag2 > 4.0 {
+                    break
+                }
+                
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * z_real * z_imag + c_imag
+                
+                z_real = new_z_real
+                z_imag = new_z_imag
+                iteration = iteration + 1
+            }
+            
+            // Set pixel color based on iteration count
+            var color = calculate_color(iteration, max_iterations)
+            img.set_pixel(x, y, color["r"], color["g"], color["b"])
+        }
+    }
+    
+    return img
+}
+
+// Generate Burning Ship Fractal
+func generate_burning_ship(width: Int, height: Int, min_re: Float, max_re: Float, min_im: Float, max_im: Float, max_iterations: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+    
+    var scale_x = (max_re - min_re) / width as Float
+    var scale_y = (max_im - min_im) / height as Float
+    
+    for y in range(0, height) {
+        for x in range(0, width) {
+            var c_real = min_re + x as Float * scale_x
+            var c_imag = min_im + y as Float * scale_y
+            
+            var z_real = 0.0
+            var z_imag = 0.0
+            var iteration = 0
+            
+            // Burning Ship iteration: z = (|Re(z)| + i*|Im(z)|)^2 + c
+            while iteration < max_iterations {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+                
+                // Check if |z| > 2 (diverges to infinity)
+                if z_real2 + z_imag2 > 4.0 {
+                    break
+                }
+                
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * abs_float(z_real) * abs_float(z_imag) + c_imag
+                
+                z_real = new_z_real
+                z_imag = new_z_imag
+                iteration = iteration + 1
+            }
+            
+            // Set pixel color based on iteration count
+            var color = calculate_color(iteration, max_iterations)
+            img.set_pixel(x, y, color["r"], color["g"], color["b"])
+        }
+    }
+    
+    return img
+}
+
+// Generate Julia Set
+func generate_julia(width: Int, height: Int, c_real: Float, c_imag: Float, max_iterations: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+    
+    var scale_x = 4.0 / width as Float
+    var scale_y = 4.0 / height as Float
+    
+    for y in range(0, height) {
+        for x in range(0, width) {
+            var z_real = -2.0 + x as Float * scale_x
+            var z_imag = -2.0 + y as Float * scale_y
+            
+            var iteration = 0
+            
+            // Julia iteration: z = z^2 + c (constant c)
+            while iteration < max_iterations {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+                
+                // Check if |z| > 2 (diverges to infinity)
+                if z_real2 + z_imag2 > 4.0 {
+                    break
+                }
+                
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * z_real * z_imag + c_imag
+                
+                z_real = new_z_real
+                z_imag = new_z_imag
+                iteration = iteration + 1
+            }
+            
+            // Set pixel color based on iteration count
+            var color = calculate_color(iteration, max_iterations)
+            img.set_pixel(x, y, color["r"], color["g"], color["b"])
+        }
+    }
+    
+    return img
+}
+
+// Calculate color based on iteration count
+func calculate_color(iteration: Int, max_iterations: Int) -> Dict {
+    if iteration == max_iterations {
+        // Inside the set - black
+        return {"r": 0, "g": 0, "b": 0}
+    }
+    
+    // Color based on iteration count using a gradient scheme
+    var t = iteration as Float / max_iterations as Float
+    var r = (9 * (1 - t) * t * t * t * 255) as Int
+    var g = (15 * (1 - t) * (1 - t) * t * t * 255) as Int
+    var b = (8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255) as Int
+    
+    // Clamp to [0, 255]
+    r = max(0, min(255, r))
+    g = max(0, min(255, g))
+    b = max(0, min(255, b))
+    
+    return {"r": r, "g": g, "b": b}
+}
+
+// If this is run as the main script
+if lowlevel.os.script_name() == "fractal_generation_test.nym" {
+    main()
+}

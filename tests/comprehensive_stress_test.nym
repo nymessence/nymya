@@ -1,0 +1,227 @@
+#!/usr/bin/env nymyac
+// Comprehensive stress test for generating cellular automata and fractal images
+// comprehensive_stress_test.nym
+
+import image.image_basic
+import image.extended
+import crystal
+
+func main() -> Void {
+    crystal.manifest("🚀 Starting Comprehensive Stress Test")
+    crystal.manifest("=" * 70)
+    crystal.manifest("🧪 Generating cellular automata and fractal images...")
+    
+    // Generate various cellular automata rules
+    generate_cellular_automata_tests()
+    
+    // Generate various fractal images
+    generate_fractal_tests()
+    
+    crystal.manifest("\n🎉 All stress tests completed successfully!")
+    crystal.manifest("=" * 70)
+    crystal.manifest("Generated images can be found in the working directory.")
+}
+
+// Generate various cellular automata tests
+func generate_cellular_automata_tests() -> Void {
+    crystal.manifest("\n🔬 Testing Cellular Automata Generation...")
+    
+    // Generate Rule 2 Cellular Automaton
+    crystal.manifest("  ✅ Generating Rule 2 Cellular Automaton...")
+    var rule2_img = generate_elementary_cellular_automaton(500, 500, 2)
+    image.image_basic.save_image(rule2_img, "stress_test_rule2.png")
+    
+    // Generate Rule 3 Cellular Automaton
+    crystal.manifest("  ✅ Generating Rule 3 Cellular Automaton...")
+    var rule3_img = generate_elementary_cellular_automaton(500, 500, 3)
+    image.image_basic.save_image(rule3_img, "stress_test_rule3.png")
+    
+    // Generate Rule 4 Cellular Automaton
+    crystal.manifest("  ✅ Generating Rule 4 Cellular Automaton...")
+    var rule4_img = generate_elementary_cellular_automaton(500, 500, 4)
+    image.image_basic.save_image(rule4_img, "stress_test_rule4.png")
+    
+    // Generate Rule 5 Cellular Automaton
+    crystal.manifest("  ✅ Generating Rule 5 Cellular Automaton...")
+    var rule5_img = generate_elementary_cellular_automaton(500, 500, 5)
+    image.image_basic.save_image(rule5_img, "stress_test_rule5.png")
+    
+    crystal.manifest("  📸 Cellular automata images generated successfully!")
+}
+
+// Generate various fractal tests
+func generate_fractal_tests() -> Void {
+    crystal.manifest("\n🌀 Testing Fractal Generation...")
+    
+    // Generate Mandelbrot Set
+    crystal.manifest("  ✅ Generating Mandelbrot Set...")
+    var mandelbrot_img = generate_mandelbrot(800, 600, -2.0, 1.0, -1.5, 1.5, 255)
+    image.image_basic.save_image(mandelbrot_img, "stress_test_mandelbrot.png")
+    
+    // Generate detailed Mandelbrot (zoomed in)
+    crystal.manifest("  ✅ Generating Detailed Mandelbrot Set (Zoomed)...")
+    var detailed_mandelbrot_img = generate_mandelbrot(800, 600, -0.8, -0.7, 0.1, 0.2, 500)
+    image.image_basic.save_image(detailed_mandelbrot_img, "stress_test_detailed_mandelbrot.png")
+    
+    // Generate Burning Ship Fractal
+    crystal.manifest("  ✅ Generating Burning Ship Fractal...")
+    var burning_ship_img = generate_burning_ship(800, 600, -2.5, 1.5, -2.0, 2.0, 255)
+    image.image_basic.save_image(burning_ship_img, "stress_test_burning_ship.png")
+    
+    crystal.manifest("  📸 Fractal images generated successfully!")
+}
+
+// Generate elementary cellular automaton (1D automaton expanded to 2D for visualization)
+func generate_elementary_cellular_automaton(width: Int, height: Int, rule_num: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 1)  // Grayscale
+    
+    // Initialize first row with a single active cell in the center
+    img.set_pixel(width / 2, 0, 255, 255, 255)
+    
+    // Generate subsequent rows based on elementary CA rules
+    for y in range(1, height) {
+        for x in range(0, width) {
+            // Get the three neighbors from the previous row (left, center, right)
+            var left = if x == 0 { 0 } else { img.get_pixel(x - 1, y - 1)["r"] }
+            var center = img.get_pixel(x, y - 1)["r"]
+            var right = if x == width - 1 { 0 } else { img.get_pixel(x + 1, y - 1)["r"] }
+            
+            // Map the neighborhood to the rule table
+            var next_state = next_cell_state(left, center, right, rule_num)
+            var color = if next_state { 255 } else { 0 }
+            img.set_pixel(x, y, color, color, color)
+        }
+    }
+    
+    return img
+}
+
+// Determine next cell state based on elementary cellular automaton rules
+func next_cell_state(left: Int, center: Int, right: Int, rule: Int) -> Bool {
+    // Convert the three-bit neighborhood to an index (0-7)
+    var pattern_index = (if left > 0 { 4 } else { 0 }) + 
+                        (if center > 0 { 2 } else { 0 }) + 
+                        (if right > 0 { 1 } else { 0 })
+    
+    // Extract bit corresponding to this pattern in the rule number
+    var bit_position = rule & (1 << pattern_index)
+    
+    return bit_position != 0
+}
+
+// Floating-point helper functions
+func abs_float(val: Float) -> Float {
+    return if val < 0.0 { -val } else { val }
+}
+
+// Generate Mandelbrot Set
+func generate_mandelbrot(width: Int, height: Int, min_re: Float, max_re: Float, min_im: Float, max_im: Float, max_iterations: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+    
+    var scale_x = (max_re - min_re) / width as Float
+    var scale_y = (max_im - min_im) / height as Float
+    
+    for y in range(0, height) {
+        for x in range(0, width) {
+            var c_real = min_re + x as Float * scale_x
+            var c_imag = min_im + y as Float * scale_y
+            
+            var z_real = 0.0
+            var z_imag = 0.0
+            var iteration = 0
+            
+            // Mandelbrot iteration: z = z^2 + c
+            while iteration < max_iterations {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+                
+                // Check if |z| > 2 (diverges to infinity)
+                if z_real2 + z_imag2 > 4.0 {
+                    break
+                }
+                
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * z_real * z_imag + c_imag
+                
+                z_real = new_z_real
+                z_imag = new_z_imag
+                iteration = iteration + 1
+            }
+            
+            // Set pixel color based on iteration count
+            var color = calculate_color(iteration, max_iterations)
+            img.set_pixel(x, y, color["r"], color["g"], color["b"])
+        }
+    }
+    
+    return img
+}
+
+// Generate Burning Ship Fractal
+func generate_burning_ship(width: Int, height: Int, min_re: Float, max_re: Float, min_im: Float, max_im: Float, max_iterations: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+    
+    var scale_x = (max_re - min_re) / width as Float
+    var scale_y = (max_im - min_im) / height as Float
+    
+    for y in range(0, height) {
+        for x in range(0, width) {
+            var c_real = min_re + x as Float * scale_x
+            var c_imag = min_im + y as Float * scale_y
+            
+            var z_real = 0.0
+            var z_imag = 0.0
+            var iteration = 0
+            
+            // Burning Ship iteration: z = (|Re(z)| + i*|Im(z)|)^2 + c
+            while iteration < max_iterations {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+                
+                // Check if |z| > 2 (diverges to infinity)
+                if z_real2 + z_imag2 > 4.0 {
+                    break
+                }
+                
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * abs_float(z_real) * abs_float(z_imag) + c_imag
+                
+                z_real = new_z_real
+                z_imag = new_z_imag
+                iteration = iteration + 1
+            }
+            
+            // Set pixel color based on iteration count
+            var color = calculate_color(iteration, max_iterations)
+            img.set_pixel(x, y, color["r"], color["g"], color["b"])
+        }
+    }
+    
+    return img
+}
+
+// Calculate color based on iteration count
+func calculate_color(iteration: Int, max_iterations: Int) -> Dict {
+    if iteration == max_iterations {
+        // Inside the set - black
+        return {"r": 0, "g": 0, "b": 0}
+    }
+    
+    // Color based on iteration count using a gradient scheme
+    var t = iteration as Float / max_iterations as Float
+    var r = (9 * (1 - t) * t * t * t * 255) as Int
+    var g = (15 * (1 - t) * (1 - t) * t * t * 255) as Int
+    var b = (8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255) as Int
+    
+    // Clamp to [0, 255]
+    r = max(0, min(255, r))
+    g = max(0, min(255, g))
+    b = max(0, min(255, b))
+    
+    return {"r": r, "g": g, "b": b}
+}
+
+// If this is run as the main script
+if lowlevel.os.script_name() == "comprehensive_stress_test.nym" {
+    main()
+}
