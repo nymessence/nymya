@@ -52,22 +52,27 @@ func generate_cellular_automata_tests() -> Void {
 // Generate various fractal tests
 func generate_fractal_tests() -> Void {
     crystal.manifest("\n🌀 Testing Fractal Generation...")
-    
+
     // Generate Mandelbrot Set
     crystal.manifest("  ✅ Generating Mandelbrot Set...")
     var mandelbrot_img = generate_mandelbrot(800, 600, -2.0, 1.0, -1.5, 1.5, 255)
     image.image_basic.save_image(mandelbrot_img, "stress_test_mandelbrot.png")
-    
+
     // Generate detailed Mandelbrot (zoomed in)
     crystal.manifest("  ✅ Generating Detailed Mandelbrot Set (Zoomed)...")
     var detailed_mandelbrot_img = generate_mandelbrot(800, 600, -0.8, -0.7, 0.1, 0.2, 500)
     image.image_basic.save_image(detailed_mandelbrot_img, "stress_test_detailed_mandelbrot.png")
-    
+
     // Generate Burning Ship Fractal
     crystal.manifest("  ✅ Generating Burning Ship Fractal...")
     var burning_ship_img = generate_burning_ship(800, 600, -2.5, 1.5, -2.0, 2.0, 255)
     image.image_basic.save_image(burning_ship_img, "stress_test_burning_ship.png")
-    
+
+    // Generate Buddhabrot fractal
+    crystal.manifest("  ✅ Generating Buddhabrot Fractal...")
+    var buddhabrot_img = generate_buddhabrot(800, 600, -2.0, 1.0, -1.5, 1.5, 255, 100000)
+    image.image_basic.save_image(buddhabrot_img, "stress_test_buddhabrot.png")
+
     crystal.manifest("  📸 Fractal images generated successfully!")
 }
 
@@ -206,19 +211,130 @@ func calculate_color(iteration: Int, max_iterations: Int) -> Dict {
         // Inside the set - black
         return {"r": 0, "g": 0, "b": 0}
     }
-    
+
     // Color based on iteration count using a gradient scheme
     var t = iteration as Float / max_iterations as Float
     var r = (9 * (1 - t) * t * t * t * 255) as Int
     var g = (15 * (1 - t) * (1 - t) * t * t * 255) as Int
     var b = (8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255) as Int
-    
+
     // Clamp to [0, 255]
     r = max(0, min(255, r))
     g = max(0, min(255, g))
     b = max(0, min(255, b))
-    
+
     return {"r": r, "g": g, "b": b}
+}
+
+// Generate Buddhabrot fractal
+func generate_buddhabrot(width: Int, height: Int, min_re: Float, max_re: Float, min_im: Float, max_im: Float, max_iterations: Int, sample_points: Int) -> image.Image {
+    var img = image.image_basic.create_image(width, height, 3)
+
+    // Create an array to store trajectory points
+    var histogram = []
+    for y in range(0, height) {
+        var row = []
+        for x in range(0, width) {
+            row.append(0)  // Initialize with zero count
+        }
+        histogram.append(row)
+    }
+
+    var scale_x = (max_re - min_re) / width as Float
+    var scale_y = (max_im - min_im) / height as Float
+
+    // Sample many points in the complex plane
+    for sample in range(0, sample_points) {
+        // Generate a random point in the region
+        var c_real = min_re + (sample % width) as Float * scale_x
+        var c_imag = min_im + (sample % height) as Float * scale_y
+
+        // Perform Mandelbrot iteration to see if this point escapes
+        var z_real = 0.0
+        var z_imag = 0.0
+        var iteration = 0
+        var escaped = False
+
+        // Check if the point escapes (similar to Mandelbrot)
+        while iteration < max_iterations {
+            var z_real2 = z_real * z_real
+            var z_imag2 = z_imag * z_imag
+
+            if z_real2 + z_imag2 > 4.0 {
+                escaped = True
+                break
+            }
+
+            var new_z_real = z_real2 - z_imag2 + c_real
+            var new_z_imag = 2.0 * z_real * z_imag + c_imag
+
+            z_real = new_z_real
+            z_imag = new_z_imag
+            iteration = iteration + 1
+        }
+
+        // If the point escapes, trace its path and add to histogram
+        if escaped {
+            // Reset z for path tracing
+            z_real = 0.0
+            z_imag = 0.0
+
+            // Record the trajectory
+            for iter in range(0, max_iterations) {
+                var z_real2 = z_real * z_real
+                var z_imag2 = z_imag * z_imag
+
+                if z_real2 + z_imag2 > 4.0 {
+                    break  // Escaped
+                }
+
+                // Calculate pixel coordinates for this point in the trajectory
+                var pixel_x = ((z_real - min_re) / scale_x) as Int
+                var pixel_y = ((z_imag - min_im) / scale_y) as Int
+
+                if pixel_x >= 0 and pixel_x < width and pixel_y >= 0 and pixel_y < height {
+                    // Add to histogram
+                    histogram[pixel_y][pixel_x] = histogram[pixel_y][pixel_x] + 1
+                }
+
+                // Compute next point in trajectory
+                var new_z_real = z_real2 - z_imag2 + c_real
+                var new_z_imag = 2.0 * z_real * z_imag + c_imag
+
+                z_real = new_z_real
+                z_imag = new_z_imag
+            }
+        }
+    }
+
+    // Convert histogram to image
+    var max_count = 0
+    // Find the maximum count for normalization
+    for y in range(0, height) {
+        for x in range(0, width) {
+            if histogram[y][x] > max_count {
+                max_count = histogram[y][x]
+            }
+        }
+    }
+
+    // Set pixel values based on histogram
+    for y in range(0, height) {
+        for x in range(0, width) {
+            if max_count > 0 {
+                var intensity = (histogram[y][x] as Float / max_count as Float * 255) as Int
+                // Use a blue-white color scheme for the Buddhabrot (resembling star trails)
+                var color_r = min(255, intensity)
+                var color_g = min(255, intensity)
+                var color_b = min(255, intensity * 2)  // Boost blue component
+                img.set_pixel(x, y, color_r, color_g, color_b)
+            } else {
+                img.set_pixel(x, y, 0, 0, 0)  // Black background
+            }
+        }
+    }
+
+    return img
 }
 
 // If this is run as the main script
