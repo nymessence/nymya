@@ -1,0 +1,38 @@
+[
+  {
+    "input_size": 8,
+    "execution_time": 1.3667158782482147e-05,
+    "memory_used": 0,
+    "result": "[8, -8]",
+    "problem_class": "NP",
+    "problem_type": "subset_sum",
+    "test_name": "subset_sum"
+  },
+  {
+    "input_size": 10,
+    "execution_time": 6.8712979555130005e-06,
+    "memory_used": 0,
+    "result": "[4, -4]",
+    "problem_class": "NP",
+    "problem_type": "subset_sum",
+    "test_name": "subset_sum"
+  },
+  {
+    "input_size": 12,
+    "execution_time": 2.1906569600105286e-05,
+    "memory_used": 0,
+    "result": "[2, 3, -5]",
+    "problem_class": "NP",
+    "problem_type": "subset_sum",
+    "test_name": "subset_sum"
+  },
+  {
+    "input_size": 14,
+    "execution_time": 4.740431904792786e-06,
+    "memory_used": 0,
+    "result": "[9, -9]",
+    "problem_class": "NP",
+    "problem_type": "subset_sum",
+    "test_name": "subset_sum"
+  }
+]

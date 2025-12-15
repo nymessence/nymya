@@ -1,0 +1,38 @@
+[
+  {
+    "input_size": 4,
+    "execution_time": 2.1962448954582214e-05,
+    "memory_used": 0,
+    "result": "([0, 2, 1, 3], 99)",
+    "problem_class": "NP-hard",
+    "problem_type": "tsp_optimization",
+    "test_name": "tsp_optimization"
+  },
+  {
+    "input_size": 5,
+    "execution_time": 3.375951200723648e-05,
+    "memory_used": 0,
+    "result": "([0, 3, 1, 2, 4], 128)",
+    "problem_class": "NP-hard",
+    "problem_type": "tsp_optimization",
+    "test_name": "tsp_optimization"
+  },
+  {
+    "input_size": 6,
+    "execution_time": 0.000126667320728302,
+    "memory_used": 0,
+    "result": "([0, 1, 5, 2, 3, 4], 231)",
+    "problem_class": "NP-hard",
+    "problem_type": "tsp_optimization",
+    "test_name": "tsp_optimization"
+  },
+  {
+    "input_size": 7,
+    "execution_time": 0.0007480746135115623,
+    "memory_used": 0,
+    "result": "([0, 3, 6, 2, 1, 5, 4], 114)",
+    "problem_class": "NP-hard",
+    "problem_type": "tsp_optimization",
+    "test_name": "tsp_optimization"
+  }
+]

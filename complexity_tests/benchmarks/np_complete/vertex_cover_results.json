@@ -1,0 +1,29 @@
+[
+  {
+    "input_size": 6,
+    "execution_time": 0.00010568555444478989,
+    "memory_used": 0,
+    "result": "[0, 4, 5]",
+    "problem_class": "NP-complete",
+    "problem_type": "vertex_cover",
+    "test_name": "vertex_cover"
+  },
+  {
+    "input_size": 8,
+    "execution_time": 0.0002986295148730278,
+    "memory_used": 0,
+    "result": "[1, 2, 3, 7]",
+    "problem_class": "NP-complete",
+    "problem_type": "vertex_cover",
+    "test_name": "vertex_cover"
+  },
+  {
+    "input_size": 10,
+    "execution_time": 0.0004664445295929909,
+    "memory_used": 0,
+    "result": "[0, 2, 3, 6, 9]",
+    "problem_class": "NP-complete",
+    "problem_type": "vertex_cover",
+    "test_name": "vertex_cover"
+  }
+]

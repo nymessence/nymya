@@ -58,6 +58,7 @@ To develop and enhance the NymyaLang programming language compiler and ecosystem
 18. [DONE] Implemented STL file format support for 3D printing
 19. [DONE] Added file I/O functionality to compiler
 20. [DONE] Enhanced compiler with @-tag system following Taygetan linguistic principles
+21. [DONE] Implemented comprehensive P vs NP complexity theory experiment suite
 
 ---
 

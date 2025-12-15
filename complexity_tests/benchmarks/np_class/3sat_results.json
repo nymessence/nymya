@@ -1,0 +1,38 @@
+[
+  {
+    "input_size": 5,
+    "execution_time": 5.796551704406738e-06,
+    "memory_used": 0,
+    "result": "{'x2': False, 'x5': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "3sat",
+    "test_name": "3sat"
+  },
+  {
+    "input_size": 6,
+    "execution_time": 5.4817646741867065e-06,
+    "memory_used": 0,
+    "result": "{'x2': False, 'x5': False, 'x6': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "3sat",
+    "test_name": "3sat"
+  },
+  {
+    "input_size": 7,
+    "execution_time": 8.221715688705444e-06,
+    "memory_used": 0,
+    "result": "{'x2': True, 'x7': False, 'x5': False, 'x6': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "3sat",
+    "test_name": "3sat"
+  },
+  {
+    "input_size": 8,
+    "execution_time": 8.38935375213623e-06,
+    "memory_used": 0,
+    "result": "{'x8': True, 'x2': False, 'x7': False, 'x5': False, 'x6': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "3sat",
+    "test_name": "3sat"
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "input_size": 10000,
+    "execution_time": 9.777955710887909e-06,
+    "memory_used": 0,
+    "result": "210",
+    "problem_class": "P",
+    "problem_type": "linear_search",
+    "test_name": "linear_search"
+  },
+  {
+    "input_size": 50000,
+    "execution_time": 0.0025184284895658493,
+    "memory_used": 0,
+    "result": "48676",
+    "problem_class": "P",
+    "problem_type": "linear_search",
+    "test_name": "linear_search"
+  },
+  {
+    "input_size": 100000,
+    "execution_time": 0.00011324137449264526,
+    "memory_used": 0,
+    "result": "2107",
+    "problem_class": "P",
+    "problem_type": "linear_search",
+    "test_name": "linear_search"
+  },
+  {
+    "input_size": 200000,
+    "execution_time": 0.0004785927012562752,
+    "memory_used": 0,
+    "result": "9061",
+    "problem_class": "P",
+    "problem_type": "linear_search",
+    "test_name": "linear_search"
+  },
+  {
+    "input_size": 500000,
+    "execution_time": 0.02110735885798931,
+    "memory_used": 0,
+    "result": "379412",
+    "problem_class": "P",
+    "problem_type": "linear_search",
+    "test_name": "linear_search"
+  }
+]

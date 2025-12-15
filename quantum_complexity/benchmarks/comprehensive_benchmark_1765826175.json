@@ -1,0 +1,152 @@
+{
+  "unstructured_search": [
+    {
+      "problem_type": "unstructured_search",
+      "input_size": 4,
+      "classical_time": 2.86102294921875e-06,
+      "quantum_time": 0.3804287910461426,
+      "classical_result": 2,
+      "quantum_result": 1,
+      "classical_complexity": "O(4)",
+      "quantum_complexity": "O(\u221a4) \u2248 O(2)",
+      "theoretical_quantum_speedup": 2.0,
+      "actual_speedup": 7.520521623379797e-06,
+      "quantum_iterations": 1,
+      "circuit_depth": 10,
+      "complexity_classes": {
+        "classical_class": "O(N)",
+        "quantum_class": "O(\u221aN) - Grover's algorithm"
+      }
+    },
+    {
+      "problem_type": "unstructured_search",
+      "input_size": 8,
+      "classical_time": 3.814697265625e-06,
+      "quantum_time": 0.3211085796356201,
+      "classical_result": 4,
+      "quantum_result": 1,
+      "classical_complexity": "O(8)",
+      "quantum_complexity": "O(\u221a8) \u2248 O(2)",
+      "theoretical_quantum_speedup": 2.8284271247461903,
+      "actual_speedup": 1.1879773720010068e-05,
+      "quantum_iterations": 2,
+      "circuit_depth": 26,
+      "complexity_classes": {
+        "classical_class": "O(N)",
+        "quantum_class": "O(\u221aN) - Grover's algorithm"
+      }
+    },
+    {
+      "problem_type": "unstructured_search",
+      "input_size": 16,
+      "classical_time": 3.5762786865234375e-06,
+      "quantum_time": 0.44901061058044434,
+      "classical_result": 8,
+      "quantum_result": 1,
+      "classical_complexity": "O(16)",
+      "quantum_complexity": "O(\u221a16) \u2248 O(4)",
+      "theoretical_quantum_speedup": 4.0,
+      "actual_speedup": 7.964797718032356e-06,
+      "quantum_iterations": 3,
+      "circuit_depth": 38,
+      "complexity_classes": {
+        "classical_class": "O(N)",
+        "quantum_class": "O(\u221aN) - Grover's algorithm"
+      }
+    },
+    {
+      "problem_type": "unstructured_search",
+      "input_size": 32,
+      "classical_time": 1.9073486328125e-06,
+      "quantum_time": 0.30957603454589844,
+      "classical_result": 16,
+      "quantum_result": 1,
+      "classical_complexity": "O(32)",
+      "quantum_complexity": "O(\u221a32) \u2248 O(5)",
+      "theoretical_quantum_speedup": 5.656854249492381,
+      "actual_speedup": 6.1611637206035475e-06,
+      "quantum_iterations": 4,
+      "circuit_depth": 50,
+      "complexity_classes": {
+        "classical_class": "O(N)",
+        "quantum_class": "O(\u221aN) - Grover's algorithm"
+      }
+    }
+  ],
+  "sat_solving": [
+    {
+      "problem_type": "sat_solving",
+      "n_variables": 2,
+      "n_clauses": 2,
+      "classical_time": 2.193450927734375e-05,
+      "quantum_time": 0.30628037452697754,
+      "classical_result_found": true,
+      "quantum_result_found": false,
+      "classical_complexity": "O(2^2) = O(4)",
+      "quantum_complexity": "O(\u221a2^2) \u2248 O(2)",
+      "theoretical_quantum_speedup": 2.0,
+      "actual_speedup": 7.16157844302614e-05,
+      "search_space_size": 4,
+      "quantum_iterations": 1,
+      "circuit_depth": 16,
+      "complexity_classes": {
+        "classical_class": "NP-complete (exponential brute force)",
+        "quantum_class": "unknown (not known to be in BQP, Grover gives quadratic speedup)"
+      }
+    },
+    {
+      "problem_type": "sat_solving",
+      "n_variables": 3,
+      "n_clauses": 2,
+      "classical_time": 2.288818359375e-05,
+      "quantum_time": 0.33197927474975586,
+      "classical_result_found": true,
+      "quantum_result_found": true,
+      "classical_complexity": "O(2^3) = O(8)",
+      "quantum_complexity": "O(\u221a2^3) \u2248 O(2)",
+      "theoretical_quantum_speedup": 2.8284271247461903,
+      "actual_speedup": 6.894461592821717e-05,
+      "search_space_size": 8,
+      "quantum_iterations": 2,
+      "circuit_depth": 35,
+      "complexity_classes": {
+        "classical_class": "NP-complete (exponential brute force)",
+        "quantum_class": "unknown (not known to be in BQP, Grover gives quadratic speedup)"
+      }
+    }
+  ],
+  "qma_verification": [
+    {
+      "problem_type": "qma_verification",
+      "n_variables": 2,
+      "n_clauses": 2,
+      "classical_verdict": true,
+      "quantum_verdict": true,
+      "classical_time": 6.198883056640625e-06,
+      "quantum_time": 0.3170621395111084,
+      "acceptance_probability": 0.509,
+      "circuit_depth": 13,
+      "problem_satisfiability": "satisfiable",
+      "complexity_classes": {
+        "classical_verification": "P (polynomial time)",
+        "quantum_verification": "QMA (quantum polynomial time with quantum proof)"
+      }
+    },
+    {
+      "problem_type": "qma_verification",
+      "n_variables": 1,
+      "n_clauses": 2,
+      "classical_verdict": false,
+      "quantum_verdict": false,
+      "classical_time": 4.5299530029296875e-06,
+      "quantum_time": 0.3266878128051758,
+      "acceptance_probability": 0.0,
+      "circuit_depth": 7,
+      "problem_satisfiability": "unsatisfiable",
+      "complexity_classes": {
+        "classical_verification": "P (polynomial time)",
+        "quantum_verification": "QMA (quantum polynomial time with quantum proof)"
+      }
+    }
+  ]
+}

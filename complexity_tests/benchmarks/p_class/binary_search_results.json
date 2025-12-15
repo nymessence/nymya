@@ -1,0 +1,47 @@
+[
+  {
+    "input_size": 10000,
+    "execution_time": 1.164805144071579e-05,
+    "memory_used": 0,
+    "result": "2625",
+    "problem_class": "P",
+    "problem_type": "binary_search",
+    "test_name": "binary_search"
+  },
+  {
+    "input_size": 50000,
+    "execution_time": 9.5367431640625e-06,
+    "memory_used": 0,
+    "result": "16170",
+    "problem_class": "P",
+    "problem_type": "binary_search",
+    "test_name": "binary_search"
+  },
+  {
+    "input_size": 100000,
+    "execution_time": 1.146271824836731e-05,
+    "memory_used": 0,
+    "result": "6308",
+    "problem_class": "P",
+    "problem_type": "binary_search",
+    "test_name": "binary_search"
+  },
+  {
+    "input_size": 200000,
+    "execution_time": 1.3167038559913635e-05,
+    "memory_used": 0,
+    "result": "111169",
+    "problem_class": "P",
+    "problem_type": "binary_search",
+    "test_name": "binary_search"
+  },
+  {
+    "input_size": 500000,
+    "execution_time": 1.2852251529693604e-05,
+    "memory_used": 0,
+    "result": "111303",
+    "problem_class": "P",
+    "problem_type": "binary_search",
+    "test_name": "binary_search"
+  }
+]

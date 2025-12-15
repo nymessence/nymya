@@ -1,0 +1,38 @@
+[
+  {
+    "input_size": 5,
+    "execution_time": 1.616682857275009e-05,
+    "memory_used": 0,
+    "result": "{'x2': False, 'x5': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "sat",
+    "test_name": "sat_general"
+  },
+  {
+    "input_size": 6,
+    "execution_time": 7.554888725280762e-06,
+    "memory_used": 0,
+    "result": "{'x2': False, 'x5': False, 'x6': False, 'x1': False, 'x4': False}",
+    "problem_class": "NP",
+    "problem_type": "sat",
+    "test_name": "sat_general"
+  },
+  {
+    "input_size": 7,
+    "execution_time": 6.926245987415314e-06,
+    "memory_used": 0,
+    "result": "{'x2': False, 'x7': False, 'x5': False, 'x6': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "sat",
+    "test_name": "sat_general"
+  },
+  {
+    "input_size": 8,
+    "execution_time": 1.1686235666275024e-05,
+    "memory_used": 0,
+    "result": "{'x8': True, 'x2': False, 'x7': False, 'x5': False, 'x6': False, 'x1': False, 'x4': False, 'x3': False}",
+    "problem_class": "NP",
+    "problem_type": "sat",
+    "test_name": "sat_general"
+  }
+]

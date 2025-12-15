@@ -1,0 +1,38 @@
+[
+  {
+    "input_size": 4,
+    "execution_time": 2.3611821234226227e-05,
+    "memory_used": 0,
+    "result": "None",
+    "problem_class": "NP-complete",
+    "problem_type": "tsp_decision",
+    "test_name": "tsp_decision"
+  },
+  {
+    "input_size": 5,
+    "execution_time": 3.1869858503341675e-05,
+    "memory_used": 0,
+    "result": "None",
+    "problem_class": "NP-complete",
+    "problem_type": "tsp_decision",
+    "test_name": "tsp_decision"
+  },
+  {
+    "input_size": 6,
+    "execution_time": 0.00012400001287460327,
+    "memory_used": 0,
+    "result": "None",
+    "problem_class": "NP-complete",
+    "problem_type": "tsp_decision",
+    "test_name": "tsp_decision"
+  },
+  {
+    "input_size": 7,
+    "execution_time": 0.000787222757935524,
+    "memory_used": 0,
+    "result": "None",
+    "problem_class": "NP-complete",
+    "problem_type": "tsp_decision",
+    "test_name": "tsp_decision"
+  }
+]

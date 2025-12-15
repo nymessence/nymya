@@ -1,0 +1,29 @@
+[
+  {
+    "input_size": 6,
+    "execution_time": 2.8221867978572845e-05,
+    "memory_used": 0,
+    "result": "[0, 2]",
+    "problem_class": "NP-complete",
+    "problem_type": "clique",
+    "test_name": "clique"
+  },
+  {
+    "input_size": 8,
+    "execution_time": 1.1074356734752655e-05,
+    "memory_used": 0,
+    "result": "[0, 2]",
+    "problem_class": "NP-complete",
+    "problem_type": "clique",
+    "test_name": "clique"
+  },
+  {
+    "input_size": 10,
+    "execution_time": 0.00010292604565620422,
+    "memory_used": 0,
+    "result": "[4, 5, 9]",
+    "problem_class": "NP-complete",
+    "problem_type": "clique",
+    "test_name": "clique"
+  }
+]
