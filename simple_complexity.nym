@@ -1,0 +1,9 @@
+// Simple complexity concepts in NymyaLang
+import crystal
+
+func main() -> Void {
+    crystal.manifest("Basic Complexity Concepts Demonstration")
+    crystal.manifest("For full P vs NP and quantum complexity research, see Python implementations")
+}
+
+main()
