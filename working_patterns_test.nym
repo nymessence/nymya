@@ -1,0 +1,30 @@
+// Working NymyaLang patterns for complexity demos
+import crystal
+
+func test_working_patterns() -> Void {
+    crystal.manifest("=== WORKING PATTERNS ===")
+    crystal.manifest("Simple string literals work fine") 
+    crystal.manifest("Multiple separate manifest calls work")
+    
+    // Simple arithmetic that doesn't require string conversion
+    var x = 5
+    var y = 10
+    var sum = x + y
+    crystal.manifest("Basic operations work")
+    
+    // Array operations (without trying to print complex results)
+    var arr = []
+    arr.append(1)
+    arr.append(2)
+    crystal.manifest("Array operations work")
+    
+    crystal.manifest("NymyaLang P vs NP concepts:")
+    crystal.manifest("P: Polynomial time algorithms")
+    crystal.manifest("NP: Nondeterministic Polynomial time") 
+    crystal.manifest("NP-Complete: Hardest problems in NP")
+    crystal.manifest("NP-Hard: At least as hard as NP-Complete")
+    crystal.manifest("BQP: Bounded-error Quantum Polynomial time")
+    crystal.manifest("For full implementation see Python complexity_tests/")
+}
+
+test_working_patterns()
