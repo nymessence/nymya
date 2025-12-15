@@ -1,0 +1,38 @@
+// Basic Complexity Concepts in NymyaLang
+import crystal
+
+func demonstrate_complexity_concepts() -> Void {
+    crystal.manifest("=== Complexity Theory Concepts ===")
+    crystal.manifest("Big O Notation describes algorithm performance")
+    crystal.manifest("O(1) = Constant time - same regardless of input size")
+    crystal.manifest("O(log n) = Logarithmic - halves problem size each step")
+    crystal.manifest("O(n) = Linear - time grows with input size")
+    crystal.manifest("O(n log n) = Linearithmic - common in efficient sorting")
+    crystal.manifest("O(n^2) = Quadratic - nested loops")
+    crystal.manifest("O(2^n) = Exponential - doubles with each element")
+    
+    crystal.manifest("=== Complexity Classes ===")
+    crystal.manifest("P = Problems solvable in polynomial time")
+    crystal.manifest("NP = Problems verifiable in polynomial time")
+    crystal.manifest("NP-Complete = Hardest problems in NP")
+    crystal.manifest("NP-Hard = At least as hard as NP-Complete")
+    crystal.manifest("P vs NP = Major unsolved problem: P = NP ?")
+    
+    crystal.manifest("=== Algorithm Examples ===")
+    crystal.manifest("Binary Search: O(log n) on sorted data")
+    crystal.manifest("Linear Search: O(n) worst case")
+    crystal.manifest("Bubble Sort: O(n^2)")
+    crystal.manifest("Merge Sort: O(n log n)")
+    crystal.manifest("Traveling Salesman: O(n!) - NP-Hard")
+    crystal.manifest("Subset Sum: O(2^n) - NP-Complete")
+    
+    crystal.manifest("=== Quantum vs Classical ===")
+    crystal.manifest("Grover's Algorithm: O(√n) for unstructured search")
+    crystal.manifest("Shor's Algorithm: O((log n)^3) for factoring")
+    crystal.manifest("Quantum provides speedup for specific problems")
+    crystal.manifest("But does not solve P vs NP question")
+    
+    crystal.manifest("For detailed implementation and benchmarks, see Python complexity_tests/")
+}
+
+demonstrate_complexity_concepts()
